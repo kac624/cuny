@@ -1,0 +1,84 @@
+---
+title: "CUNY SPS MSDS - DATA607 - Week 2 Homework"
+author: "Keith Colella"
+date: "`r Sys.Date()`"
+output: html_document
+knit: (function(input, ...) {
+    rmarkdown::render(
+      input,
+      output_dir = "../D607/output"
+    )
+  })
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(getPass)
+suppressMessages(library(RMySQL))
+suppressMessages(library(recommenderlab))
+```
+
+The getPass package is used to provide a masked user prompt. The entry is then saved for usage in authenticating the DB connection.
+
+```{r}
+pwd <- getPass(msg = "Please enter MySQL root password: ",
+               noblank = TRUE,
+               forcemask = TRUE)
+```
+
+The RMySQL package is used to connect directly to the DB I created in MySQL.
+
+```{r}
+dBconnection <- dbConnect(RMySQL::MySQL(),
+                        dbname = 'movie_ratings',
+                        host = 'localhost',
+                        port = 3306,
+                        user = 'root',
+                        password = pwd)
+```
+
+With the connection established, we can now query the DB directly.
+
+```{r}
+ratings <- dbGetQuery(dBconnection, "select * from ratings")
+print(ratings)   
+```
+
+I'm using these ratings to create a rudimentary prediction model, such as one that might be used in a recommender system. The prediction uses singular value decomposition (SVD), specifically the stochastic gradient descent optimization popularized by Simon Funk. The approach aims to minimize the error in decomposition of matrices with missing values, and it is implemented in the funkSVD function in the recommenderlab package.
+
+https://search.r-project.org/CRAN/refmans/recommenderlab/html/funkSVD.html
+
+First, decomposition is performed. 
+
+```{r}
+fsvd <- funkSVD(ratings[,3:7], k = 5)
+```
+
+The function returns an object of class "funkSVD", which can be used two ways. First, we can simply reconstruct the original matrix and focus on previously missing values to highlight the approximated value (understood as a predicted rating).
+
+```{r}
+predictions <- tcrossprod(fsvd$U, fsvd$V)
+user2whale <- predictions[2,1]
+print(predictions)
+print(paste0("Vincent C's predicted rating for The Whale is ",round(user2whale,3),"."))
+```
+
+Alternatively, we can use the package's "predict" function, which treats each user a "new" case and predicts values accordingly.
+
+```{r}
+ratingPredict <- function(userID,movie) {
+  predict(fsvd, 
+          ratings[ratings$ID == userID, 3:7]
+          )[which(colnames(ratings) == movie)]
+}
+```
+```{r}
+ratingPredict(userID = 2, movie = 'Whale')
+```
+
+We can see different results from each treatment.
+
+Comparing predicted to known ratings, the overall performance of the predictions appears weak. In the future, I hope to conduct more reading on better treatment of missing values, normalizing the data, and using cosine similarity as a means of identifying similarity and creating recommendations.

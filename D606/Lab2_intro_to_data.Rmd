@@ -1,18 +1,13 @@
 ---
 title: "Introduction to data"
 author: ""
-output:
-  html_document:
-    includes:
-      in_header: header.html
-    css: ./lab.css
-    highlight: pygments
-    theme: cerulean
-    toc: true
-    toc_float: true
-  pdf_document: default
-editor_options: 
-  chunk_output_type: console
+output: openintro::lab_report
+knit: (function(input, ...) {
+    rmarkdown::render(
+      input,
+      output_dir = "../D606/output"
+    )
+  })
 ---
 
 ```{r global-options, include=FALSE}
@@ -120,7 +115,7 @@ ggplot(data = nycflights, aes(x = dep_delay)) +
 
 1.  Look carefully at these three histograms. How do they compare? Are features revealed in one that are obscured in another?
  
-#### Start Response 1
+### Response 1
 
 The plot with the narrowest bin widths provides a more granular view of the distribution, as expected. This granularity reveals some unique insights. Specifically, we see a significant number of observations to the left of the median bin, and these observations are "hidden" (or subsumed by the median bin) in the other two plots. Similarly the first bins in the first and third plots span negative and positive numbers, so we're unable to distinguish between flights that left early/on-time and those with minor delays.
 
@@ -133,7 +128,9 @@ ggplot(data = nycflights, aes(x = dep_delay)) +
   geom_histogram(binwidth = 1)
 ```
 
-#### End Response 1
+
+----------------
+
 
 If you want to visualize only on delays of flights headed to Los Angeles, you need to first `filter` the data for flights with that destination (`dest == "LAX"`) and then make a histogram of the departure delays of only those flights.
 
@@ -198,7 +195,7 @@ Note that you can separate the conditions using commas if you want flights that 
     and save this data frame as `sfo_feb_flights`. How many flights 
     meet these criteria?
     
-#### Start Response 2
+### Response 2
 ```{r Response-2}
 sfo_feb_flights <- nycflights %>%
   filter(dest == "SFO", month == 2)
@@ -207,13 +204,15 @@ summarize(sfo_feb_flights, n = n())
 ```
 There are 68 flights in the dataset that went to SFO in February.
 
-#### End Response 2
+
+-----------------
     
+
 3.  Describe the distribution of the **arrival** delays of these flights using a 
     histogram and appropriate summary statistics. **Hint:** The summary 
     statistics you use should depend on the shape of the distribution.
 
-#### Start Response 3
+### Response 3
 ```{r Response-3}
 ggplot(sfo_feb_flights, aes(x = arr_delay)) +
   geom_histogram(aes(y = ..density..), binwidth = 10) +
@@ -233,8 +232,10 @@ Both the mean and median indicate that most February flights to SFO arrived earl
 
 Plotting a normal shows a pretty weak fit to the distribution. Again, the outliers appear to skew the summary stats, giving the indication of greater spread / heavier tails.
 
-#### End Response 3
+
+-----------------
     
+ 
 Another useful technique is quickly calculating summary statistics for various groups in your data frame. For example, we can modify the above command using the `group_by` function to get the same summary stats for each origin airport:
 
 ```{r summary-custom-list-origin}
@@ -249,7 +250,7 @@ Here, we first grouped the data by `origin` and then calculated the summary stat
     in the `sfo_feb_flights` data frame, grouped by carrier. Which carrier
     has the most variable arrival delays?
     
-#### Start Response 4
+### Response 4
 ```{r Response-4}
 sfo_feb_flights %>%
   group_by(carrier) %>%
@@ -260,7 +261,9 @@ sfo_feb_flights %>%
 ```
 Based on IQR, Delta and United appear tied in terms of variability. Introducing standard deviation, however, indicates that United actually has greater variability in arrival times. Virgin also appears to have a higher SD than Delta, although its IQR is narrower.
 
-#### End Response 4
+
+-----------------
+    
 
 ### Departure delays by month
 
@@ -286,7 +289,7 @@ nycflights %>%
     Another option is to choose the month with the lowest median departure delay. 
     What are the pros and cons of these two choices?
 
-#### Start Response 5
+### Response 5
 ```{r Response-5}
 nycflights %>%
   group_by(month) %>%
@@ -322,7 +325,10 @@ nycflights %>%
             ) %>%
   arrange(delay_prop)
 ```
-#### End Response 5
+
+
+-----------------
+    
 
 ### On time departure rate for NYC airports
 
@@ -357,7 +363,7 @@ nycflights %>%
 
 6.  If you were selecting an airport simply based on on time departure percentage, which NYC airport would you choose to fly out of?
 
-#### Start Response 6
+### Response 6
 LGA has the highest percentage of on time departures (including the 5min allowance), so if I would chooese LGA. The graph below helps to directly compare on-time rate across the three airports.
 ```{r Response-6}
 nycflights %>%
@@ -367,7 +373,11 @@ nycflights %>%
   ggplot(aes(x = origin, y = ot_dep_rate, fill = dep_type)) +
     geom_bar(position = "fill", stat='identity')
 ```
-#### End Response 6
+
+
+-----------------
+    
+
 
 You can also visualize the distribution of on on time departure rate across the three airports using a segmented bar plot.
 
@@ -385,7 +395,7 @@ ggplot(data = nycflights, aes(x = origin, fill = dep_type)) +
     **Hint:** Average speed can be calculated as distance divided by
     number of hours of travel, and note that `air_time` is given in minutes.
 
-#### Start Response 7
+### Response 7
 TBD
 ```{r Response-7}
 nycflights <- nycflights %>%
@@ -395,19 +405,25 @@ nycflights[1:10,] %>%
   select('carrier', 'tailnum', 'flight', 'dest', 'air_time', 'distance', 'avg_speed') %>%
   arrange(desc(avg_speed))
 ```
-#### End Response 7
+
+
+-----------------
+
 
 8.  Make a scatterplot of `avg_speed` vs. `distance`. Describe the relationship
     between average speed and distance.
     **Hint:** Use `geom_point()`.
 
-#### Start Response 9
+### Response 9
 TBD
 ```{r Response-8}
 ggplot(nycflights, aes(x = avg_speed, y = distance, color = dep_type)) +
   geom_point()
 ```
-#### End Response 8
+
+
+-----------------
+
 
 9.  Replicate the following plot. **Hint:** The data frame plotted only
     contains flights from American Airlines, Delta Airlines, and United
@@ -422,7 +438,7 @@ ggplot(data = dl_aa_ua, aes(x = dep_delay, y = arr_delay, color = carrier)) +
   geom_point()
 ```
 
-#### Start Response 9
+### Response 9
 TBD
 ```{r Response-9}
 dl_aa_ua <- nycflights %>%
@@ -439,5 +455,3 @@ dl_aa_ua %>%
   ggplot(aes(x = dep_delay, y = arr_delay, color = carrier)) +
   geom_point()
 ```
-
-#### End Response 9

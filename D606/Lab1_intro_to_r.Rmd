@@ -1,0 +1,129 @@
+---
+title: "Lab 1: Intro to R"
+author: "Keith Colella"
+date: "`r Sys.Date()`"
+output: openintro::lab_report
+knit: (function(input, ...) {
+    rmarkdown::render(
+      input,
+      output_dir = "../D606/output"
+    )
+  })
+---
+
+```{r load-packages, message=FALSE}
+library(tidyverse)
+library(openintro)
+```
+
+### Exercise 1
+
+What command would you use to extract just the counts of girls baptized?
+```{r view-girls-counts}
+arbuthnot$girls
+```
+
+### Exercise 2
+
+Is there an apparent trend in the number of girls baptized over the years? How would you describe it?
+```{r trend-girls}
+ggplot(arbuthnot, aes(x = year, y = girls)) +
+  geom_point() + 
+  geom_smooth(method = 'loess', formula = 'y ~ x', color = 'blue') + 
+  geom_smooth(method = 'lm', formula = 'y ~ x', color = 'red')
+```
+
+I plotted two trend functions over the scatterplot to get a sense of the trend.
+
+First, the LEOSS function was used to closely follow the trend over time. It reveals declining numbers of girls baptized from the beginning of the series through ~1650, at which point the numbers begin to increase. The rate of increase continues before leveling off in ~1690.
+
+Second, a linear regression function was used to get a sense of the broader trend, which is clearly positive. Despite the minor dips in the beginning of the series, generally, over time, the number of girls baptized increased.
+
+### Exercise 3
+
+Generate a plot of the proportion of boys born over time. What do you see?
+```{r plot-prop-boys-arbuthnot}
+arbuthnot <- arbuthnot %>%
+  mutate(total = boys + girls,
+         boy_ratio = boys / total)
+
+ggplot(arbuthnot, aes(x = year, y = boy_ratio)) +
+  geom_point() + 
+  geom_smooth(method = 'loess', formula = 'y ~ x', color = 'blue') + 
+  geom_smooth(method = 'lm', formula = 'y ~ x', color = 'red')
+```
+
+As before, we view two plots to get (i) a more granular view and (ii) a broader view.
+
+The LEOSS function shows the proportion of boy baptisms increasing through ~1660, followed by a period of decline through ~1690, followed by another period of slower increase.
+
+The LM function shows a slow decline in the proportion of boy to girl baptisms.
+
+Both of these functions, however, do not appear to show a great fit to the data, which appears quite noisy. In fact, it is unclear that there is any real trend to pull from this series. However, we can see that in ALL years, the proportion remained above 50%.
+
+### Exercise 4
+
+What years are included in this data set? What are the dimensions of the data frame? What are the
+variable (column) names?
+```{r dim-present}
+data('present', package='openintro')
+glimpse(present)
+tail(present, 1)
+```
+
+The data shows birthrates from 1940 to 2002. The dimensions comprise 63 observations (rows) of 3 variables (columns). These three variables are year, boys born and girls born.
+
+### Exercise 5
+
+How do these counts compare to Arbuthnot’s? Are they of a similar magnitude?
+```{r count-compare}
+present %>%
+  mutate(decade = year %/% 10 * 10,
+         total = boys + girls
+         ) %>%
+  group_by(decade) %>%
+  summarize(sum(total))
+
+arbuthnot %>%
+  mutate(decade = year %/% 10 * 10,
+         total = boys + girls
+         ) %>%
+  group_by(decade) %>%
+  summarize(sum(total))
+```
+
+The present dataset contains birth counts several orders of magnitude higher than those in the Arbuthnot dataset. This difference is expected, given the lower general population during Arbuthnot's time versus recent history, the smaller geographic scope of his survey (London versus the entire US), and the fact that Arbuthnot's survey focused on a proxy measure of birth rates (baptism rates).
+
+### Exercise 6
+
+Make a plot that displays the proportion of boys born over time. What do you see? Does Arbuthnot’s observation about boys being born in greater proportion than girls hold up in the U.S.? Include the plot in your response.
+```{r plot-prop-boys-present}
+present <- present %>%
+  mutate(total = boys + girls,
+         boy_ratio = boys / total)
+
+ggplot(present, aes(x = year, y = boy_ratio)) +
+  geom_point() + 
+  geom_smooth(method = 'loess', formula = 'y ~ x', color = 'blue') + 
+  geom_smooth(method = 'lm', formula = 'y ~ x', color = 'red')
+```
+
+Arbuthnot’s observation appears to hold true in the modern US, as all years show a proportion above 50%. That proportion, however, also shows a clear downward trend, despite being relatively noisy.
+
+### Exercise 7
+
+In what year did we see the most total number of births in the U.S.?
+```{r find-max-total}
+# Approach from Lab
+present %>%
+  arrange(desc(total))
+
+# Alternate Approach using Subsetting
+present[present$total == max(present$total),]
+
+# Alternate Approach using Filter
+present %>%
+  filter(present$total == max(present$total))
+```
+
+The year with the most births in the US was 1961.

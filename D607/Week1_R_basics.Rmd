@@ -1,0 +1,137 @@
+---
+title: "CUNY MSDS SPS DATA607 Week1"
+author: "Keith Colella"
+date: "`r Sys.Date()`"
+output: html_document
+knit: (function(input, ...) {
+    rmarkdown::render(
+      input,
+      output_dir = "../D607/output"
+    )
+  })
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Overview
+
+This exercise explores the 'primary-project-2022' dataset from https://data.fivethirtyeight.com/. The data relates to four articles covering trends in the primary elections leading up to the 2022 mid-terms. Topics include the makeup of primary candidates, with a focus on race and gender.
+
+I'll aim to focus on one article: *People Of Color Make Up 41 Percent Of The U.S. But Only 28 Percent Of General-Election Candidates* (https://fivethirtyeight.com/features/2022-candidates-race-data/).
+
+# Data Wrangling
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(stringr)
+```
+
+## Reading in data
+
+The original data set is split by party (Democrat / Republican). The data is stored on my github repository.
+
+```{r}
+dems <- read.csv('https://raw.githubusercontent.com/kac624/notebooks/main/CUNY/DATA607/dem_candidates.csv')
+reps <- read.csv('https://raw.githubusercontent.com/kac624/notebooks/main/CUNY/DATA607/rep_candidates.csv')
+```
+
+## Cleaning Data
+
+A subset of each dataframe is taken to choose only columns that are common to both. A column is added to retain a marker of party affiliation.
+
+```{r}
+dems_sub <- subset(dems, select = c(Candidate, Gender, Race.1, Race.2,
+                                    Race.3, State, Office, District,
+                                    Primary.., Primary.Outcome
+                                    )
+                   )
+
+reps_sub <- subset(reps, select = c(Candidate, Gender, Race.1, Race.2,
+                                    Race.3, State, Office, District,
+                                    Primary.., Primary.Outcome
+                                    )
+                   )
+
+dems_sub['Party'] = 'Democrat'
+reps_sub['Party'] = 'Republican'
+```
+
+## Combining Data
+
+The two data sets are combined and previewed.
+
+```{r}
+candidates <- rbind(dems_sub, reps_sub)
+head(candidates,5)
+```
+
+## Renaming Columns
+
+Columns are renamed to use a consistent CamelCase convention, and unintuitive column names are clarified. 
+
+```{r}
+candidates <- rename(candidates, c('Race1' = 'Race.1',
+                                   'Race2' = 'Race.2',
+                                   'Race3' = 'Race.3',
+                                   'PercentOfVotes' = 'Primary..',
+                                   'PrimaryOutcome' = 'Primary.Outcome'
+                                   )
+                     )
+```
+
+## Cleaning Levels in Race Columns
+
+The labels for Race contain granular detail in many cases, which complicates any grouping that might be needed. A new Race column is created by removing these additional details. The field is then converted to a factor, with levels placed in reverse alphabetical order (to support alphabetical ordering in visualizations where coordinates are flipped, as done below).
+
+```{r}
+for (i in 1:nrow(candidates)) {
+  if(grepl('\\(' , candidates$Race1[i])) {
+    value <- substr(candidates$Race1[i],1,
+                              str_locate(candidates$Race1[i],'\\(')[1,1]-2)
+  } else{
+    value <- candidates$Race1[i]
+  }
+  candidates$Race[i] <- str_trim(value)
+}
+
+candidates$Race <- as.factor(candidates$Race)
+
+candidates$Race <- factor(candidates$Race, 
+                          levels=c('Unknown',
+                                   'White',
+                                   'Pacific Islander',
+                                   'Native American',
+                                   'Middle Eastern',
+                                   'Latino',
+                                   'Black',
+                                   'Asian'))
+```
+
+
+# Visualization
+
+A summary visualization is provided to show representation of various racial / ethnic groups in the slate of candidates running under each party. The visual is slightly skewed as there were more Republican candidates overall than Democrats (~1.5x). Still, candidates of color appear to be better represented among Democratic candidates as compared to Republican candidates, who were predominantly white.
+
+```{r}
+candidates %>%  
+  group_by(Party, Race) %>%  
+  summarize(Count = n()) %>% 
+  ggplot(aes(x=Race, y=Count, fill=Party)) + 
+  geom_bar(stat='identity', position= 'dodge') +
+  scale_fill_manual(values=c('blue','red')) +
+  coord_flip() +
+  labs(y  = 'No. of Candidates')
+```
+
+# Future Considerations
+
+Future analysis of this data might focus on three things.
+
+First, more nuanced treaetment of race / ethnicity could be applied. The visualization above considers only the primary racial identifier for each candidate, but many candidates identify with more than one racial group.
+
+Second, I would like to consider the geographic element. Plotting winning candidates on a map of the US (based on the legislative district tagging) might prove an insightful visualization. Comparing the racial / ethnic representation of candidates to the racial composition of constituent communities would also prove insightful.
+
+Finally, analysis might consider the intersection of key indicators (race, gender, geography, party) for winning an electoral contest.
