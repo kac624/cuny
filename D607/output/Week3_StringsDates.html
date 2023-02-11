@@ -11,7 +11,7 @@
 
 <meta name="author" content="Keith Colella" />
 
-<meta name="date" content="2023-02-09" />
+<meta name="date" content="2023-02-11" />
 
 <title>CUNY SPS MSDS - DATA607 - Week 3</title>
 
@@ -352,7 +352,7 @@ display: none;
 
 <h1 class="title toc-ignore">CUNY SPS MSDS - DATA607 - Week 3</h1>
 <h4 class="author">Keith Colella</h4>
-<h4 class="date">2023-02-09</h4>
+<h4 class="date">2023-02-11</h4>
 
 </div>
 
@@ -362,11 +362,13 @@ display: none;
 <p>Using the 173 majors listed in fivethirtyeight.com’s College Majors
 dataset [<a href="https://fivethirtyeight.com/features/the-economic-guide-to-picking-a-college-major/" class="uri">https://fivethirtyeight.com/features/the-economic-guide-to-picking-a-college-major/</a>],
 provide code that identifies the majors that contain either “DATA” or
-“STATISTICS”</p>
-<pre class="r"><code>majors &lt;- read.csv(paste(&#39;https://raw.githubusercontent.com/fivethirtyeight/&#39;,
-                         &#39;data/master/college-majors/majors-list.csv&#39;,
-                         sep = &#39;&#39;))
+“STATISTICS”.</p>
+<pre class="r"><code>## Read in dataset from 538&#39;s git
+majors &lt;- read.csv(paste0(&#39;https://raw.githubusercontent.com/fivethirtyeight/&#39;,
+                          &#39;data/master/college-majors/majors-list.csv&#39;))
 
+## Loop on each row and check majors column for either &#39;DATA&#39; or &#39;STATISTICS&#39;, 
+## then print all matches
 for (i in 1:nrow(majors)) {
   if(grepl(&#39;DATA&#39;,majors[i,&#39;Major&#39;]) | 
      grepl(&#39;STATISTICS&#39;,majors[i,&#39;Major&#39;])) {
@@ -380,26 +382,159 @@ for (i in 1:nrow(majors)) {
 <div id="task-2" class="section level2">
 <h2>Task 2</h2>
 <p>Write code that transforms the data below:</p>
-<p>[1] “bell pepper” “bilberry” “blackberry” “blood orange” [5]
-“blueberry” “cantaloupe” “chili pepper” “cloudberry”<br />
+<p>[1] “bell pepper” “bilberry” “blackberry” “blood orange”<br />
+[5] “blueberry” “cantaloupe” “chili pepper” “cloudberry”<br />
 [9] “elderberry” “lime” “lychee” “mulberry”<br />
 [13] “olive” “salal berry”</p>
 <p>Into a format like this:</p>
 <p>c(“bell pepper”, “bilberry”, “blackberry”, “blood orange”,
 “blueberry”, “cantaloupe”, “chili pepper”, “cloudberry”, “elderberry”,
 “lime”, “lychee”, “mulberry”, “olive”, “salal berry”)</p>
+<pre class="r"><code>## Create input string that needs to be converted
+input &lt;- (
+&#39;
+[1] &quot;bell pepper&quot;  &quot;bilberry&quot;     &quot;blackberry&quot;   &quot;blood orange&quot;
+[5] &quot;blueberry&quot;    &quot;cantaloupe&quot;   &quot;chili pepper&quot; &quot;cloudberry&quot;  
+[9] &quot;elderberry&quot;   &quot;lime&quot;         &quot;lychee&quot;       &quot;mulberry&quot;    
+[13] &quot;olive&quot;        &quot;salal berry&quot;
+&#39;
+)
+
+## Locate all quotes, to be used for parsing out substrings
+locations &lt;- str_locate_all(input, &#39;&quot;&#39;)[[1]]
+
+## Initialize variables for loop
+i = 1
+str &lt;- &#39;c(&#39;
+
+## Loop on input string to extract string between 
+## 1st and 2nd quote, then 3rd and 4th...then (n-1)th and nth
+while (i &lt; length(locations[,1])) {
+  result &lt;- str_sub(input, locations[i]+1, locations[i+1]-1)
+  str &lt;- str_c(str, &#39; &quot;&#39;, result, &#39;&quot;,&#39;)
+  i &lt;- i + 2
+}
+
+## Remove final space and add closing parenthesis
+str &lt;- str_sub(str, 1, str_length(str)-1)
+str &lt;- str_c(str, &#39;)&#39;)
+
+## Print to confirm. Note the string appears with backslashes to escape the quotes 
+print(str)</code></pre>
+<pre><code>## [1] &quot;c( \&quot;bell pepper\&quot;, \&quot;bilberry\&quot;, \&quot;blackberry\&quot;, \&quot;blood orange\&quot;, \&quot;blueberry\&quot;, \&quot;cantaloupe\&quot;, \&quot;chili pepper\&quot;, \&quot;cloudberry\&quot;, \&quot;elderberry\&quot;, \&quot;lime\&quot;, \&quot;lychee\&quot;, \&quot;mulberry\&quot;, \&quot;olive\&quot;, \&quot;salal berry\&quot;)&quot;</code></pre>
+<pre class="r"><code>## Double check final string by evaluating
+eval(parse(text = str))</code></pre>
+<pre><code>##  [1] &quot;bell pepper&quot;  &quot;bilberry&quot;     &quot;blackberry&quot;   &quot;blood orange&quot; &quot;blueberry&quot;   
+##  [6] &quot;cantaloupe&quot;   &quot;chili pepper&quot; &quot;cloudberry&quot;   &quot;elderberry&quot;   &quot;lime&quot;        
+## [11] &quot;lychee&quot;       &quot;mulberry&quot;     &quot;olive&quot;        &quot;salal berry&quot;</code></pre>
 </div>
 <div id="task-3" class="section level2">
 <h2>Task 3</h2>
-<p>Describe, in words, what these expressions will match: (.)\1\1
-(.)(.)\2\1 (..)\1 (.).\1.\1 (.)(.)(.).*\3\2\1</p>
+<p>Describe, in words, what these expressions will match:</p>
+<ol style="list-style-type: decimal">
+<li>(.)\1\1</li>
+<li>“(.)(.)\2\1”</li>
+<li>(..)\1</li>
+<li>“(.).\1.\1”</li>
+<li>“(.)(.)(.).*\3\2\1”</li>
+</ol>
+<div id="expression-1" class="section level3">
+<h3>Expression 1</h3>
+<pre class="r"><code>## This expression will find any set of three repeated characters.z
+## However, we must escape the backslash when using it in a string.
+str1 &lt;- &quot;Hellooo good friend.&quot; 
+str_view(str1, &quot;(.)\\1\\1&quot;)</code></pre>
+<pre><code>## [1] │ Hell&lt;ooo&gt; good friend.</code></pre>
+</div>
+<div id="expression-2" class="section level3">
+<h3>Expression 2</h3>
+<pre class="r"><code>## This regex will match an &quot;abba&quot; type sequence, in which
+## a string contains a character, then two repeat characters,
+## then the first character again.
+str2 &lt;- &quot;I like ABBA&#39;s music.&quot; 
+str_view(str2, &quot;(.)(.)\\2\\1&quot;)</code></pre>
+<pre><code>## [1] │ I like &lt;ABBA&gt;&#39;s music.</code></pre>
+</div>
+<div id="expression-3" class="section level3">
+<h3>Expression 3</h3>
+<pre class="r"><code>## This regex will match any four repeat characters. Again, we
+## must escape the backslash to use it in a string.
+str3 &lt;- &quot;But I reeeeally like their costumes.&quot; 
+str_view(str3, &quot;(..)\\1&quot;)</code></pre>
+<pre><code>## [1] │ But I r&lt;eeee&gt;ally like their costumes.</code></pre>
+</div>
+<div id="expression-4" class="section level3">
+<h3>Expression 4</h3>
+<pre class="r"><code>## This regex will match a series start any character, then any other
+## character, followed by the first character again, then any other
+## character, followed by the first character once again.
+str4a &lt;- &quot;I use different vowels when I chuckle haheh.&quot; 
+str_view(str4a, &quot;(.).\\1.\\1&quot;)</code></pre>
+<pre><code>## [1] │ I use different vowels when I chuckle &lt;haheh&gt;.</code></pre>
+<pre class="r"><code>## This also works when the repeat characters are spaces.
+str4b &lt;- &quot;a b c d e f g h i j&quot;
+str_view(str4b, &quot;(.).\\1.\\1&quot;)</code></pre>
+<pre><code>## [1] │ a&lt; b c &gt;d&lt; e f &gt;g&lt; h i &gt;j</code></pre>
+</div>
+<div id="expression-5" class="section level3">
+<h3>Expression 5</h3>
+<pre class="r"><code>## This regex will find any three unique characters, followed by
+## any amount of other characters, following by those same first
+## three characters in reverse order.
+str5a &lt;- &quot;abc cba&quot; 
+str_view(str5a, &quot;(.)(.)(.).*\\3\\2\\1&quot;)</code></pre>
+<pre><code>## [1] │ &lt;abc cba&gt;</code></pre>
+<pre class="r"><code>str5b &lt;- &quot;abc                         cba&quot; 
+str_view(str5b, &quot;(.)(.)(.).*\\3\\2\\1&quot;)</code></pre>
+<pre><code>## [1] │ &lt;abc                         cba&gt;</code></pre>
+<pre class="r"><code>str5c &lt;- &quot;abc otherstuff cba&quot; 
+str_view(str5c, &quot;(.)(.)(.).*\\3\\2\\1&quot;)</code></pre>
+<pre><code>## [1] │ &lt;abc otherstuff cba&gt;</code></pre>
+</div>
 </div>
 <div id="task-4" class="section level2">
 <h2>Task 4</h2>
-<p>Construct regular expressions to match words that: Start and end with
-the same character. Contain a repeated pair of letters (e.g. “church”
-contains “ch” repeated twice.) Contain one letter repeated in at least
-three places (e.g. “eleven” contains three “e”s.)</p>
+<p>Construct regular expressions to match words that:</p>
+<ol start="6" style="list-style-type: decimal">
+<li>Start and end with the same character.</li>
+<li>Contain a repeated pair of letters (e.g. “church” contains “ch”
+repeated twice.)</li>
+<li>Contain one letter repeated in at least three places (e.g. “eleven”
+contains three “e”s.)</li>
+</ol>
+<div id="expression-6" class="section level3">
+<h3>Expression 6</h3>
+<pre class="r"><code>str6 &lt;- c(&quot;tacos&quot;, &quot;emote&quot;, &quot;helicopter&quot;)
+str_view(str6, &quot;(.).*\\1&quot;)</code></pre>
+<pre><code>## [2] │ &lt;emote&gt;
+## [3] │ h&lt;elicopte&gt;r</code></pre>
+<pre class="r"><code>## This gives strange matches of partial words that
+## fit the pattern, so we can add word boundaries to
+## focus only on whole words.
+str_view(str6, &quot;\\b(.).*\\1\\b&quot;)</code></pre>
+<pre><code>## [2] │ &lt;emote&gt;</code></pre>
+</div>
+<div id="expression-7" class="section level3">
+<h3>Expression 7</h3>
+<pre class="r"><code>str7 &lt;- c(&quot;church&quot;, &quot;banana&quot;, &quot;helicopter&quot;)
+str_view(str7, &quot;(..).*\\1&quot;)</code></pre>
+<pre><code>## [1] │ &lt;church&gt;
+## [2] │ b&lt;anan&gt;a</code></pre>
+<pre class="r"><code>## Again, this gives strange partial word matches. So, we
+## can add word boundaries and wildcards to grab full words
+## with any repeated pairs of letters, rather than partial words.
+str_view(str7, &quot;\\b.*(..).*\\1.*\\b&quot;)</code></pre>
+<pre><code>## [1] │ &lt;church&gt;
+## [2] │ &lt;banana&gt;</code></pre>
+</div>
+<div id="expression-8" class="section level3">
+<h3>Expression 8</h3>
+<pre class="r"><code>str8 &lt;- c(&quot;eleven&quot;, &quot;banana&quot;, &quot;amazinga&quot;, &quot;helicopter&quot;)
+str_view(str8, &quot;\\b.*(.).*\\1.*\\1.*\\b&quot;)</code></pre>
+<pre><code>## [1] │ &lt;eleven&gt;
+## [2] │ &lt;banana&gt;
+## [3] │ &lt;amazinga&gt;</code></pre>
+</div>
 </div>
 
 

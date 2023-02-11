@@ -18,13 +18,16 @@ library(stringr)
 
 ## Task 1
 
-Using the 173 majors listed in fivethirtyeight.com’s College Majors dataset [https://fivethirtyeight.com/features/the-economic-guide-to-picking-a-college-major/], provide code that identifies the majors that contain either "DATA" or "STATISTICS"
+Using the 173 majors listed in fivethirtyeight.com’s College Majors dataset [https://fivethirtyeight.com/features/the-economic-guide-to-picking-a-college-major/], 
+provide code that identifies the majors that contain either "DATA" or "STATISTICS".
 
 ```{r task1}
-majors <- read.csv(paste('https://raw.githubusercontent.com/fivethirtyeight/',
-                         'data/master/college-majors/majors-list.csv',
-                         sep = ''))
+## Read in dataset from 538's git
+majors <- read.csv(paste0('https://raw.githubusercontent.com/fivethirtyeight/',
+                          'data/master/college-majors/majors-list.csv'))
 
+## Loop on each row and check majors column for either 'DATA' or 'STATISTICS', 
+## then print all matches
 for (i in 1:nrow(majors)) {
   if(grepl('DATA',majors[i,'Major']) | 
      grepl('STATISTICS',majors[i,'Major'])) {
@@ -37,39 +40,145 @@ for (i in 1:nrow(majors)) {
 
 Write code that transforms the data below:
 
-[1] "bell pepper"  "bilberry"     "blackberry"   "blood orange"
+[1] "bell pepper"  "bilberry"     "blackberry"   "blood orange"  
 [5] "blueberry"    "cantaloupe"   "chili pepper" "cloudberry"  
-[9] "elderberry"   "lime"         "lychee"       "mulberry"    
+[9] "elderberry"   "lime"         "lychee"       "mulberry"  
 [13] "olive"        "salal berry"
 
 Into a format like this:
 
-c("bell pepper", "bilberry", "blackberry", "blood orange", "blueberry", "cantaloupe", "chili pepper", "cloudberry", "elderberry", "lime", "lychee", "mulberry", "olive", "salal berry")
+c("bell pepper", "bilberry", "blackberry", "blood orange", "blueberry", "cantaloupe", 
+"chili pepper", "cloudberry", "elderberry", "lime", "lychee", "mulberry", "olive", "salal berry")
 
 ```{r task2}
 
+## Create input string that needs to be converted
+input <- (
+'
+[1] "bell pepper"  "bilberry"     "blackberry"   "blood orange"
+[5] "blueberry"    "cantaloupe"   "chili pepper" "cloudberry"  
+[9] "elderberry"   "lime"         "lychee"       "mulberry"    
+[13] "olive"        "salal berry"
+'
+)
+
+## Locate all quotes, to be used for parsing out substrings
+locations <- str_locate_all(input, '"')[[1]]
+
+## Initialize variables for loop
+i = 1
+str <- 'c('
+
+## Loop on input string to extract string between 
+## 1st and 2nd quote, then 3rd and 4th...then (n-1)th and nth
+while (i < length(locations[,1])) {
+  result <- str_sub(input, locations[i]+1, locations[i+1]-1)
+  str <- str_c(str, ' "', result, '",')
+  i <- i + 2
+}
+
+## Remove final space and add closing parenthesis
+str <- str_sub(str, 1, str_length(str)-1)
+str <- str_c(str, ')')
+
+## Print to confirm. Note the string appears with backslashes to escape the quotes 
+print(str)
+
+## Double check final string by evaluating
+eval(parse(text = str))
 ```
 
 ## Task 3
 
 Describe, in words, what these expressions will match:
-(.)\1\1
-(.)(.)\\2\\1
-(..)\1
-(.).\\1.\\1
-(.)(.)(.).*\\3\\2\\1
 
-```{r task3}
+1. (.)\1\1
+2. "(.)(.)\\2\\1"
+3. (..)\1
+4. "(.).\\1.\\1"
+5. "(.)(.)(.).*\\3\\2\\1"
 
+### Expression 1
+```{r task3.1}
+## This expression will find any set of three repeated characters.z
+## However, we must escape the backslash when using it in a string.
+str1 <- "Hellooo good friend." 
+str_view(str1, "(.)\\1\\1")
+```
+
+### Expression 2
+```{r task3.2}
+## This regex will match an "abba" type sequence, in which
+## a string contains a character, then two repeat characters,
+## then the first character again.
+str2 <- "I like ABBA's music." 
+str_view(str2, "(.)(.)\\2\\1")
+```
+
+### Expression 3
+```{r task3.3}
+## This regex will match any four repeat characters. Again, we
+## must escape the backslash to use it in a string.
+str3 <- "But I reeeeally like their costumes." 
+str_view(str3, "(..)\\1")
+```
+
+### Expression 4
+```{r task3.4}
+## This regex will match a series start any character, then any other
+## character, followed by the first character again, then any other
+## character, followed by the first character once again.
+str4a <- "I use different vowels when I chuckle haheh." 
+str_view(str4a, "(.).\\1.\\1")
+## This also works when the repeat characters are spaces.
+str4b <- "a b c d e f g h i j"
+str_view(str4b, "(.).\\1.\\1")
+```
+
+### Expression 5
+```{r task3.5}
+## This regex will find any three unique characters, followed by
+## any amount of other characters, following by those same first
+## three characters in reverse order.
+str5a <- "abc cba" 
+str_view(str5a, "(.)(.)(.).*\\3\\2\\1")
+str5b <- "abc                         cba" 
+str_view(str5b, "(.)(.)(.).*\\3\\2\\1")
+str5c <- "abc otherstuff cba" 
+str_view(str5c, "(.)(.)(.).*\\3\\2\\1")
 ```
 
 ## Task 4
 
 Construct regular expressions to match words that:
-Start and end with the same character.
-Contain a repeated pair of letters (e.g. "church" contains "ch" repeated twice.)
-Contain one letter repeated in at least three places (e.g. "eleven" contains three "e"s.)
 
-```{r task4}
+6. Start and end with the same character.
+7. Contain a repeated pair of letters (e.g. "church" contains "ch" repeated twice.)
+8. Contain one letter repeated in at least three places (e.g. "eleven" contains three "e"s.)
 
+
+### Expression 6
+```{r task4.6}
+str6 <- c("tacos", "emote", "helicopter")
+str_view(str6, "(.).*\\1")
+## This gives strange matches of partial words that
+## fit the pattern, so we can add word boundaries to
+## focus only on whole words.
+str_view(str6, "\\b(.).*\\1\\b")
+```
+
+### Expression 7
+```{r task4.7}
+str7 <- c("church", "banana", "helicopter")
+str_view(str7, "(..).*\\1")
+## Again, this gives strange partial word matches. So, we
+## can add word boundaries and wildcards to grab full words
+## with any repeated pairs of letters, rather than partial words.
+str_view(str7, "\\b.*(..).*\\1.*\\b")
+```
+
+### Expression 8
+```{r task4.8}
+str8 <- c("eleven", "banana", "amazinga", "helicopter")
+str_view(str8, "\\b.*(.).*\\1.*\\1.*\\b")
 ```
