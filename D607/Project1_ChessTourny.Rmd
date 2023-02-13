@@ -14,17 +14,36 @@ knit: (function(input, ...) {
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(readr)
+library(curl)
 library(stringr)
+library(ggplot2)
 ```
 
-## Title
+## Task
+
+In this project, you’re given a text file with chess tournament results where the information has some structure. Your job is to create an R Markdown file that generates a .CSV file (that could for example be imported into a SQL database) with the following information for all of the players:
+
+Player’s Name, Player’s State, Total Number of Points, Player’s Pre-Rating, and Average Pre Chess Rating of Opponents
+
+A sample of the .txt format is provided below.
+
+```{r}
+# ----------------------------------------------------------------------------------------- #
+#     1 | GARY HUA                        |6.0  |W  39|W  21|W  18|W  14|W   7|D  12|D   4| #
+#    ON | 15445895 / R: 1794   ->1817     |N:2  |W    |B    |W    |B    |W    |B    |W    | #
+# ----------------------------------------------------------------------------------------- #
+```
+  
+## Constructing a .CSV
+
+First, we read in the data. The .txt file is captured as a single character string.
 
 ```{r}
 txt <- read_file(paste0('https://raw.githubusercontent.com/kac624/',
                         'cuny/main/D607/data/tournamentinfo.txt'))
 ```
 
-## TBD
+Next, we perform set-up before parsing the .txt file. This includes (i) removing line breaks from the character string, (ii) capturing the locations of long strings of dashes ("-") that separate entries for different players, and (iii) setting up an empty dataframe that will hold our target variables.
 
 ```{r}
 txt2 <- str_replace_all(txt, c('\n'=''))
@@ -33,20 +52,76 @@ locations <- str_locate_all(txt2, paste(replicate(89, "-"),
                                        collapse = "")
                             )[[1]]
 
-df <- data.frame(matrix(ncol = 4, nrow = 0))
-x <- c('name', 'state', 'total_pts', 'pre_rating')
+df <- data.frame(matrix(ncol = 11, nrow = 0))
+x <- c('name', 'state', 'total_pts', 'pre_rating', 'oppnt1',
+       'oppnt2', 'oppnt3', 'oppnt4', 'oppnt5', 'oppnt6', 'oppnt7')
 colnames(df) <- x
 ```
 
-## TBD
+The following loop parses the data using the str_match function and regular expressions. The loop iterates on every "row" in the .txt file (based on previously identified locations), skipping the first row (which is a header).
+
+1. All details for a single player are captured as a string, using the location of the long strings of dashes as start / end points.  
+2. The Player Name is extracted using an integer and "|" to identify the start, and another "|" and integer to signify the end.  
+3. The State is captured by matching a pattern of one space, two capital letters, a "|" and an integer.  
+4. Total Points are captured by looking for "|" following by an integer, a ".", another integer and a closing "|".   
+5. Pre-Rating is captured by matching intgers after "R:" and a "|". The expression must account for the "R:" being following by either one or two spaces.  
+6. Finally, each Player's list of opponents is captured by another loop that matches a "|", followed by a capital letter, followed by spaces, followed by integers. The expression must account for blanks (two spaces). The loop looks for incrementally increasing numbers of matches to account for the seven rounds for each Player.
+
+Finally, all these variables are moved into the previously created dataframe.
 
 ```{r}
-for (i in 1:nrow(locations) - 1) {
+for (i in 2:(nrow(locations) - 1)) {
   row <- str_sub(txt2, locations[i,2] + 1, locations[i+1,1] - 1)
   name <- trimws(str_match(row, '[0-9] \\| (.*?) \\|[0-9]')[,2])
   state <- str_match(row, ' ([A-Z]{2}) \\| [0-9]')[,2]
   total_pts <- str_match(row, '\\|([0-9]\\.[0-9])  \\|')[,2]
   pre_rating <- str_match(row, 'R:( |  )([0-9]+|[0-9]+P[0-9])')[,3]
-  df[i, ] <- c(name, state, total_pts, pre_rating)
+  for (j in 1:7) {
+    assign(paste0('oppnt', j),
+           str_match(row, paste0('(\\|[A-Z]\\s+(  |[0-9]+)){',j,'}'))[,3])
+  }
+  df[i-1, ] <- c(name, state, total_pts, pre_rating, oppnt1,
+                 oppnt2, oppnt3, oppnt4, oppnt5, oppnt6, oppnt7)
 }
 ```
+
+We still have one final variable to capture: Average Pre-Rating of Opponents. First, we convert the opponent player IDs to integers, so they can be used for indexing. Next, we loop through each row to calculate the average of all opponent player ratings, using the following steps.
+
+1. The opponent IDs are captured in a single vector.  
+2. An empty ratings vector is created.  
+3. We use a second loop to iterate through each opponent player ID, using that ID as an index to grab the opponent player's pre-rating from the previously created dataframe, and placing that rating into the ratings vector. The loop uses a conditional to skip rounds where a Player had no opponent.  
+4. The populated ratings vector is then averaged, and that value is added to a new column in the dataframe.
+
+```{r}
+for (i in colnames(df)[4:11]) {
+  df[,i] <- as.integer(df[,i])
+}
+
+for (i in 1:nrow(df)) {
+  oppnts <- df[i,5:11]
+  ratings <- c()
+  for (j in 1:length(oppnts)) {
+    if (!is.na(oppnts[[j]])) {
+      ratings <- c(ratings, df[oppnts[[j]], 'pre_rating'])
+    }
+  }
+  avg_oppnt_rtg <- mean(ratings)
+  df[i, 'avg_oppnt_rtg'] <- avg_oppnt_rtg
+}
+```
+
+The resulting dataframe is previewed below, and exported to .CSV.
+
+```{r}
+head(df)
+write_csv(df, 'output/proj1_chessRatings.csv')
+```
+
+## Analysis
+
+```{r}
+ggplot(df, aes(x = pre_rating, y = total_pts)) +
+  geom_point()
+```
+
+
