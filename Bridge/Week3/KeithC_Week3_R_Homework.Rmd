@@ -1,0 +1,126 @@
+---
+title: "CUNY SPS MSDS Bridge Week 3"
+author: "Keith Colella"
+date: "`r Sys.Date()`"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+# Research Question: Have corporate profits increased as a share of overall economic production?
+
+As inflation has kicked up in recent years, reporting has often focused on "price gouging" and "hoarding" by US corporates as a potential driver of rising prices. This analysis will assess corporate profits as compared to overall economic production to determine whether corporates have taken home a greater share of the pie in recent years, as compared to historical averages.
+
+## Data Exploration
+
+Data from the Federal Reserve Economic Data (FRED) service will be used. Accessing that data requires creating an account with FRED and obtaining a unique API key.
+
+```{r}
+library('fredr')
+fredr_set_key('36c37937923a552f29698345022ea734')
+```
+
+Two series are queried: Corporate Profits and GPD. Both are quarterly, nominal series (i.e. they are not adjusted for inflation).
+```{r}
+profits <- fredr(series_id = "CP",
+                 observation_start = as.Date("1950-01-01"),
+                 observation_end = as.Date("2022-07-01")
+                )
+profits <- data.frame(profits)
+
+gdp <- fredr(series_id = "GDP",
+             observation_start = as.Date("1950-01-01"),
+             observation_end = as.Date("2022-07-01")
+             )
+gdp <- data.frame(gdp)
+```
+
+As these series are non-stationary, the mean / median values offer little insight. However, we can note one observation: the significant difference between mean and median indicates that these series are non-linear.
+```{r}
+# Summary of Corporate Profits
+summary(profits$value)
+# Summary of GDP
+summary(gdp$value)
+```
+
+
+## Data Wrangling
+
+To support the analysis, the two series are combined into a single dataframe and clearly labelled. Extraneous columns are removed.
+```{r}
+merged <- merge(profits, gdp, by.x = 'date', by.y = 'date')
+merged <- subset(merged, select = c('date','value.x','value.y'))
+names(merged)[names(merged) == 'value.x'] <- 'profits'
+names(merged)[names(merged) == 'value.y'] <- 'gdp'
+```
+
+The data is currently captured in levels, but growth of profits and gdp will also be analyzed. So, two columns showing quarterly growth percentage are added.
+```{r}
+suppressPackageStartupMessages(library('dplyr'))
+merged <- merged %>% mutate(profits_growth = (profits/lag(profits) - 1)) 
+merged <- merged %>% mutate(gdp_growth = (gdp/lag(gdp) - 1)) 
+```
+
+We also create columns showing the ratio of profits to GDP, in levels.
+```{r}
+merged$ratio <- merged$profits / merged$gdp
+```
+
+Finally, we remove NAs.
+```{r}
+merged <- na.omit(merged)
+```
+
+## Visualizations
+
+While GDP seems to increase at a relatively constant growth rate since 1950, growth in Corporate Profits exhibits distinct regimes of growth. From 1950 to 1980, there appears a relatively constant growth rate that mirrors GDP growth. From 1980 to 2000, that growth slowed considerably. Growth in profits then increased drastically from 2000 to 2010 (despite the large dip during the global financial crisis), before slowing again from 2010 to 2020. Since 2020, however, and most relevant for our analysis, profits appear to have grown very quickly, outpacing even the robust growth in GDP.
+```{r}
+library('ggplot2')
+ggplot(data = merged) + 
+  geom_line(mapping = aes(x = date, y = profits, color = 'red')) + 
+  geom_line(mapping = aes(x = date, y = gdp/10, color = 'blue')) +
+  scale_y_continuous(name = 'Profits',
+                     sec.axis = sec_axis(~./10, name='GDP')) +
+  theme(legend.position = 'bottom') +
+  scale_color_identity(guide = 'legend',
+                       name = '',
+                       labels = c('Profits','GDP'))
+```
+
+Plotting the ratio of Profits to GDP over time reveals a similar trend. Corporate Profits represented a relatively stable proportion of GDP through 1980, after which they slowed considerable until 2000. Since then, Corporate Profits have grown significantly as a percentage of overall GDP.
+```{r}
+ggplot(data = merged) + 
+  geom_line(mapping = aes(x = date, y = ratio), color = 'black')
+```
+
+Plotting GDP growth against Profits growth shows a clear positive relationship, as expected. A best fit line reveals a clear difference as time moves on. In more recent years (i.e. where GDP levels are higher), Profits appear above the best fit line, where as Profits appear below the line further back in time (i.e. where GDP levels are lower). This trend comports with the plot above, which shows Corporate Profits as a bigger proportion of overall GDP in recent years.
+```{r}
+ggplot(data = merged, aes(x = gdp, y = profits)) +
+    geom_point() +
+    geom_smooth(method=lm, se=FALSE)
+```
+
+Moving to the distribution of quarterly growth rates, the below box plots reveal similar long-term means for growth in Profits and GDP. The distribution of Profits growth, however, is much more disperesed, with a greater number of outliers and wider interquartile range. This view comports with the plots above, showing a greater degree in volatiliy for Profits, as compared with the more constant growth rate for GDP.
+```{r}
+ggplot(data = stack(subset(merged,
+                           select = c(profits_growth,
+                                      gdp_growth,
+                                      ratio)
+                           )
+                    ), 
+       aes(x = ind, y = values)) + 
+  geom_boxplot()
+```
+
+The histograms of growth rates reveals similar insights. Again, we see slightly more dispersion in the distribution of Profits growth, with both data sets largely centered on rates slightly above 0. The distribution of the ratio of Profits to GDP (in levels) appears multi-modal, which again comports with the observations above indicating a regime shift in the Profits-GDP relationship, with Profits representing a greater proportion of overall economic output in recent years.
+```{r}
+ggplot(data = merged, aes(x = profits_growth)) + 
+  geom_histogram(bins = 30, color = 'black', fill = 'white')
+ggplot(data = merged, aes(x = gdp_growth)) + 
+  geom_histogram(bins = 30, color = 'black', fill = 'white')
+ggplot(data = merged, aes(x = ratio)) + 
+  geom_histogram(bins = 30, color = 'black', fill = 'white')
+```
+
+## Conclusion
+This analysis has demonstrated that the relationship between Corporate Profits and total GDP in the US has changed over time. In recent years, it appears that a Corporate Earnings represent a greater proportion of overall economic production. It is unclear, however, what exactly is driving this change. Such questions will need to be explored in subsequent analyses.

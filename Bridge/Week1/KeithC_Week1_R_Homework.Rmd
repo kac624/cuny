@@ -1,0 +1,57 @@
+---
+title: "CUNY SPS MSDS Bridge Program - R - Week 1 Homework"
+author: "Keith Colella"
+date: "2022-12-23"
+output: html_document
+---
+
+# Question #1 - Loop to calculate 12!
+
+Define function
+```{r}
+factorial <- function(input){
+  product <- 1
+  list <- (1:input)
+  for (val in list){
+    n <- list[length(list)-val+1]
+    product <- product * n
+  }
+  return(product)
+}
+```
+
+Use function to calculate 12!
+```{r}
+factorial(12)
+```
+
+
+# Question #2 - Numeric Vector with sequence 20 to 50 by 5
+
+```{r}
+v <- seq(from = 20, to = 50, by = 5)
+print(v)
+```
+
+
+# Question #3 - Quadratic Function
+
+Define function
+```{r}
+quadratic <- function(a,b,c){
+  x_1 <- (-b + sqrt(b**2 - 4*a*c)) / (2*a)
+  x_2 <- (-b - sqrt(b**2 - 4*a*c)) / (2*a)
+  print(x_1)
+  print(x_2)
+}
+```
+
+Example #1
+```{r}
+quadratic(2,-5,-3)
+```
+
+Example #1
+```{r}
+quadratic(2, 9, -5)
+```

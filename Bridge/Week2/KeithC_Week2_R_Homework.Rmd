@@ -1,0 +1,113 @@
+---
+title: "CUNY SPS MSDS Bridge Program - R - Week 2 Homework"
+author: "Keith Colella"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Setup
+
+I'll use the carData package, focusing on the Arrests dataset, which details arrests in Toronto for simple possession of small quantities of marijuana.
+
+```{r}
+# install.packages("carData")
+library(carData)
+ head(Arrests,5)
+```
+
+
+# Question #1 - Summary of Data
+
+```{r}
+summary(Arrests)
+cat('Mean Age:', mean(Arrests$`age`),'\n',
+    'Median Age:', median(Arrests$`age`), '\n')
+cat('Mean Checks:', mean(Arrests$`checks`),'\n',
+    'Median Checks:', median(Arrests$`checks`), '\n')
+```
+
+# Question #2 - Subset of dataset
+
+```{r}
+male_post2000 <- subset(Arrests,
+                        sex = 'Male',
+                        year >= 2000,
+                        select = c(released,colour,year,age,sex,employed,checks)
+                        )
+head(male_post2000,5)
+```
+
+# Question #3 - New column names
+
+```{r}
+library(plyr)
+male_post2000 <- rename(male_post2000, c('released' = 'Release (Y/N)', 
+                                         'colour' = 'Race', 
+                                         'checks' = 'No. of Checks'
+                                         )
+                        )
+
+head(male_post2000,5)
+```
+
+# Question #4 - Summary of new dataframe / Comparison to original dataset
+
+```{r}
+summary(male_post2000)
+```
+First, we compare the mean / median Age between the original and subset datasets.
+```{r}
+cat('Original Mean:', mean(Arrests$age),'\n',
+    'Subset Mean:', mean(male_post2000$age), '\n')
+cat('Original Median:',median(Arrests$age),'\n',
+    'Subset Median:',median(male_post2000$age),'\n')
+```
+
+Next, we compare the mean / median No. of checks between each dataset.
+```{r}
+cat('Original Mean:', mean(Arrests$checks),'\n',
+    'Subset Mean:', mean(male_post2000$`No. of Checks`), '\n')
+cat('Original Median:',median(Arrests$checks),'\n',
+    'Subset Median:',median(male_post2000$`No. of Checks`),'\n')
+```
+
+The subsets have only minimally different means, and the same medians. This indicates that the subset largely resembles the original data set.
+
+# Question #5 - Adjusting / Renaming Values for Three Columns
+
+For a column with factors, we can change the levels.
+```{r}
+levels(male_post2000$employed)
+levels(male_post2000$employed) <- c('Y','N')
+```
+
+For a column with numerical data, we can perform an operation.
+```{r}
+male_post2000$age <- male_post2000$age + 5
+```
+
+As this dataset has no character datatypes (only factors), I first changed the datatype to character. Then we can rename the values.
+```{r}
+male_post2000$`Release (Y/N)` = as.character(male_post2000$`Release (Y/N)`)
+male_post2000['Release (Y/N)'][male_post2000['Release (Y/N)'] == 'Yes'] <- 'Y'
+male_post2000['Release (Y/N)'][male_post2000['Release (Y/N)'] == 'No'] <- 'N'
+```
+
+# Question #6 - View Changes
+
+```{r}
+head(male_post2000,10)
+```
+
+# BONUS
+
+I downloaded the original Arrests dataset, then uploaded to my github repository, from which the code below then reads in the file.
+```{r}
+Arrests2 <- read.csv('https://raw.githubusercontent.com/kac624/notebooks/main/CUNY/Bridge/Arrests.csv')
+head(Arrests2,5)
+```
+
