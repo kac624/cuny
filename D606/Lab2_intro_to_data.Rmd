@@ -12,8 +12,6 @@ knit: (function(input, ...) {
 
 ```{r global-options, include=FALSE}
 knitr::opts_chunk$set(eval = TRUE, message = FALSE, warning = FALSE)
-library(tidyverse)
-library(openintro)
 ```
 
 Some define statistics as the field that focuses on turning information into knowledge. The first step in that process is to summarize and describe the raw information -- the data. In this lab we explore flights, specifically a random sample of domestic flights that departed from the three major New York City airports in 2013. We will generate simple graphical and numerical summaries of data on these flights and explore delay times. Since this is a large data set, along the way you'll also learn the indispensable skills of data processing and subsetting.
@@ -256,10 +254,10 @@ sfo_feb_flights %>%
   group_by(carrier) %>%
   summarize(median_ad = median(arr_delay),
             iqr_ad = IQR(arr_delay),
-            sq_ad = sd(arr_delay)
+            sd_ad = sd(arr_delay)
             )
 ```
-Based on IQR, Delta and United appear tied in terms of variability. Introducing standard deviation, however, indicates that United actually has greater variability in arrival times. Virgin also appears to have a higher SD than Delta, although its IQR is narrower.
+Based on IQR, Delta and United appear tied in terms of variability. Introducing standard deviation, however, indicates that United actually has greater variability in arrival times. Virgin also appears to have a higher SD than Delta, although its IQR is narrower. This observation indicates the precense of more outliers in the arrival delays for United and Verizon. Conversely, the near-match between IQR and SD for Delta indicates the very few outliers.
 
 
 -----------------
@@ -307,11 +305,12 @@ nycflights %>%
 ggplot(nycflights, aes(x = dep_delay, group = month, color = month)) +
   geom_density()
 ```
+
 The skewed distribution of departure delays again drives significant differences between mean and median measures. The mean appears higher in all cases because of the large number of very long delays. This concentration of observations in the right tail can be seen in the density plot, as well as the disparity between min and max values (despite the data being largely centered on zero).
 
 In terms of the best month to travel, both measures point to October. The pro of choosing the median is that we eliminate some of the "noise" introduced by flights with very long delays. The con, however, is the essentially the same. By eliminating the impact of those mega delays, we might also be eliminating real "signal" in the data. So, by using the median, we provide the best chance of an early departure, but we ignore the potential of an idiosyncratic mega delay.
 
-Finally, I'll propose an alterantive measure. Rather than identifying the month with the lowest mean/median delay, we can search for the month with the volume of delays overall, measured as a proportion of total flights. Ultimately, however, the answer is quite similar (as one might expect). September has the lowest proportion of delayed flights, followed closely by October.
+Finally, I'll propose an alterantive measure. Rather than identifying the month with the lowest mean/median delay, we can search for the month with the lowest volume of delays overall, measured as a proportion of total flights. Ultimately, however, the answer is quite similar (as one might expect). September has the lowest proportion of delayed flights, followed closely by October.
 ```{r}
 nycflights %>%
   group_by(month) %>%
@@ -396,7 +395,6 @@ ggplot(data = nycflights, aes(x = origin, fill = dep_type)) +
     number of hours of travel, and note that `air_time` is given in minutes.
 
 ### Response 7
-TBD
 ```{r Response-7}
 nycflights <- nycflights %>%
   mutate(avg_speed = distance / air_time * 60)
@@ -414,13 +412,13 @@ nycflights[1:10,] %>%
     between average speed and distance.
     **Hint:** Use `geom_point()`.
 
-### Response 9
-TBD
+### Response 8
 ```{r Response-8}
 ggplot(nycflights, aes(x = avg_speed, y = distance, color = dep_type)) +
   geom_point()
 ```
 
+There appears to be a rough positive correlation between average speed and distance. In other words, as the distance of a flight increases, so does the average speed. Presumably, the relationship results from the fact that longer flights spend a greater proportion of time at top cruising speed. Shorter flights, on the other hand, spend a greater proportion of time in take off and landing phases, during which speed is lower.
 
 -----------------
 
@@ -439,8 +437,7 @@ ggplot(data = dl_aa_ua, aes(x = dep_delay, y = arr_delay, color = carrier)) +
 ```
 
 ### Response 9
-TBD
-```{r Response-9}
+```{r Response-9a}
 dl_aa_ua <- nycflights %>%
   filter(carrier == "AA" | carrier == "DL" | carrier == "UA")
 
@@ -448,10 +445,14 @@ ggplot(data = dl_aa_ua, aes(x = dep_delay, y = arr_delay, color = carrier)) +
   geom_point()
 ```
 
-~63 minutes
-```{r}
+Using the American/Delta/United setset, we can filter for flights where no arrival delays (i.e. flights that arrived on time). While the max delay for an on-time flight was 63 minutes, the vast majority of on-time flights had delays less than 50 minutes.
+```{r Response-9b}
 dl_aa_ua %>%
   filter(arr_delay <= 0) %>%
   ggplot(aes(x = dep_delay, y = arr_delay, color = carrier)) +
   geom_point()
+
+dl_aa_ua %>%
+  filter(arr_delay <= 0) %>%
+  summarize(max_dep_delay = max(dep_delay))
 ```

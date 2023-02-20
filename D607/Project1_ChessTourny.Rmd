@@ -17,6 +17,7 @@ library(readr)
 library(curl)
 library(stringr)
 library(ggplot2)
+library(dplyr)
 ```
 
 ## Task
@@ -119,9 +120,41 @@ write_csv(df, 'output/proj1_chessRatings.csv')
 
 ## Analysis
 
+I've constructed four plots below to assess the relationship between players' ratings and their performance. Performance is measured in all cases by 'Total Points' they obtained during the tournament. The plots compare Total Points to (i) pre-rating, (ii) the difference between pre-rating and average opponent pre-rating, (iii) the sum of differences between pre-rating and each opponent's pre-rating, and (iv) the number of matches in which they had a higher pre-rating than their opponent.
+
+Unfortunately, none of these views provide evidence of a very clear relationship. All tend to point to a positive relationship between pre-rating and performance, as one might expect. But there appears to be a lot of noise in each plot, indicating that these relationships are not very strong. 
+
 ```{r}
 ggplot(df, aes(x = pre_rating, y = total_pts)) +
   geom_point()
 ```
 
+``` {r}
+df <- df %>%
+  mutate(avg_rating_diff = pre_rating - avg_oppnt_rtg)
+
+ggplot(df, aes(x = avg_rating_diff, y = total_pts)) +
+  geom_point()
+```
+
+``` {r}
+for (i in 1:nrow(df)) {
+  oppnts <- df[i,5:11]
+  ratings <- c()
+  for (j in 1:length(oppnts)) {
+    if (!is.na(oppnts[[j]])) {
+      ratings <- c(ratings, df[oppnts[[j]], 'pre_rating'])
+    }
+  }
+  ratings_compare <- df[i,'pre_rating'] - ratings
+  df[i, 'ratings_advantage'] <- sum(ratings_compare)
+  df[i, 'advantaged_matches'] <- length(ratings_compare[ratings_compare>0])
+}
+
+ggplot(df, aes(x = ratings_advantage, y = total_pts)) +
+  geom_point()
+
+ggplot(df, aes(x = advantaged_matches, y = total_pts)) +
+  geom_point()
+```
 
