@@ -100,7 +100,7 @@ Describe, in words, what these expressions will match:
 
 ### Expression 1
 ```{r task3.1}
-## This expression will find any set of three repeated characters.z
+## This expression will find any set of three repeated characters.
 ## However, we must escape the backslash when using it in a string.
 str1 <- "Hellooo good friend." 
 str_view(str1, "(.)\\1\\1")

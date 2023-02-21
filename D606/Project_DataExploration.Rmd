@@ -1,0 +1,104 @@
+---
+title: "Project DataExploration Candidates"
+author: "Keith Colella"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup}
+library(dplyr)
+library(readr)
+library(ggplot2)
+library(stringr)
+```
+
+## Representative Ideology Data
+
+https://www.govtrack.us/about/analysis#ideology
+https://www.govtrack.us/data/analysis/by-congress/
+
+116th Congress was elected in 2018 mid-terms
+117th Congress was elected in 2020 presidentials
+118th Congress was elected in 2022 mid-terms
+
+Additional info on sources, including mapping of Congressional Districts
+https://www.govtrack.us/about-our-data
+
+Other Congress Bio Info
+https://bioguide.congress.gov/
+https://data.world/govtrack/us-congress-legislators
+
+```{r rep-data}
+house_2018 <- read_delim('https://www.govtrack.us/data/analysis/by-congress/116/sponsorshipanalysis_h.txt',
+                         delim = ',', col_names = TRUE)
+
+glimpse(house_2018)
+
+ggplot(data, aes(x = ideology, y = leadership, color = party)) +
+  geom_point() + 
+  scale_color_manual(values = c('Democrat' = 'blue',
+                                'Republican' = 'red',
+                                'Libertarian' = 'pink',
+                                'Independent' = 'purple'))
+```
+
+## Election Results Data
+
+MIT Election Lab
+https://electionlab.mit.edu/data
+
+U.S. House 1976–2020
+https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/IG0UN2
+
+```{r election-data}
+election_results <- read_csv('data/1976-2020-house.csv')
+
+glimpse(election_results)
+```
+
+```{r member-data}
+members_current <- read_csv('https://theunitedstates.io/congress-legislators/legislators-current.csv')
+members_history <- read_csv('https://theunitedstates.io/congress-legislators/legislators-historical.csv')
+
+members <- rbind(members_history, members_current)
+```
+
+
+
+
+```{r compare}
+election_results %>%
+  filter(year == 2018,
+         state == 'ALABAMA',
+         district == '001')
+
+house_2018 %>%
+  filter(name == 'Byrne')
+```
+
+
+```{r}
+house_2018_TEST <- left_join(house_2018, members[, c('govtrack_id', 'state', 'district')], by = c('ID' = 'govtrack_id'))
+
+head(house_2018_TEST)
+```
+
+```{r}
+house_2018_TEST <- left_join(mutate(house_2018_TEST, party = tolower(party)),
+                             election_results %>%
+                               filter(year == 2018) %>%
+                               mutate(state = state_po, district = as.integer(district), party = tolower(party)) %>%
+                               select(state, district, party, candidatevotes, totalvotes),
+                             by = c('state', 'district', 'party'))
+
+house_2018_TEST <- mutate(house_2018_TEST, percent_vote = candidatevotes / totalvotes)
+```
+
+
+```{r}
+ggplot(house_2018_TEST, aes(x = ideology, y = percent_vote, color = party)) + 
+  geom_point()
+
+# filter(house_2018_TEST, percent_vote < 0.10)
+```
+
