@@ -5,12 +5,70 @@ date: "`r Sys.Date()`"
 output: html_document
 ---
 
-```{r setup}
+```{r setup, message=FALSE}
 library(dplyr)
 library(readr)
 library(ggplot2)
 library(stringr)
+library(scales)
 ```
+
+## Election Results Data
+
+MIT Election Lab
+https://electionlab.mit.edu/data
+
+U.S. House 1976–2020
+https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/IG0UN2
+
+```{r election-data}
+elections <- read_csv('data/1976-2020-house.csv')
+
+glimpse(elections)
+
+elections <- filter(elections, stage == 'GEN')
+```
+
+Calculate wasted votes per candidate
+```{r}
+elections <- mutate(elections, yearStateDist = paste0(year, state_po, district))
+
+elections <- elections %>% 
+  group_by(yearStateDist) %>% 
+  mutate(result = case_when(candidatevotes == max(candidatevotes) ~ 'winner',
+                            candidatevotes != max(candidatevotes) ~ 'loser')) %>%
+  ungroup()
+
+
+elections <- elections %>%
+  mutate(wastedVotes = case_when(result == 'winner' ~ (candidatevotes - (totalvotes %/% 2)),
+                                 result == 'loser' ~ candidatevotes),
+         wastedVotes = case_when(party == 'DEMOCRAT' ~ -wastedVotes,
+                                 party == 'REPUBLICAN' ~ wastedVotes,
+                                 TRUE ~ 0)
+         )
+
+elections %>%
+  select(year, state_po, district, candidate, party, 
+         candidatevotes, totalvotes, result, wastedVotes) %>%
+  head(9)
+```
+
+Calculate efficiency gap per state per year
+```{r}
+eff_gap <- elections %>%
+  group_by(year, state_po) %>%
+  summarize(netWastedVotes = sum(wastedVotes),
+            totalVotes = sum(totalvotes),
+            eff_gap = abs(netWastedVotes / totalVotes)
+            ) %>%
+  arrange(year, desc(eff_gap))
+
+eff_gap %>% 
+  mutate(eff_gap = percent(eff_gap, 0.01)) %>%
+  filter(year == 2018)
+```
+
 
 ## Representative Ideology Data
 
@@ -29,12 +87,12 @@ https://bioguide.congress.gov/
 https://data.world/govtrack/us-congress-legislators
 
 ```{r rep-data}
-house_2018 <- read_delim('https://www.govtrack.us/data/analysis/by-congress/116/sponsorshipanalysis_h.txt',
+house2018 <- read_delim('https://www.govtrack.us/data/analysis/by-congress/116/sponsorshipanalysis_h.txt',
                          delim = ',', col_names = TRUE)
 
-glimpse(house_2018)
+glimpse(house2018)
 
-ggplot(data, aes(x = ideology, y = leadership, color = party)) +
+ggplot(house2018, aes(x = ideology, y = leadership, color = party)) +
   geom_point() + 
   scale_color_manual(values = c('Democrat' = 'blue',
                                 'Republican' = 'red',
@@ -42,63 +100,89 @@ ggplot(data, aes(x = ideology, y = leadership, color = party)) +
                                 'Independent' = 'purple'))
 ```
 
-## Election Results Data
+```{r, message=FALSE}
+house <- data.frame(matrix(ncol = 12, nrow = 0))
+colnames(house) <- c('ID', 'ideology', 'leadership', 'name', 'party', 
+                     'description', 'introduced_bills', 'cosponsored_bills', 
+                     'unique_cosponsors', 'total_cosponsors', 'year', 'congress')
+year <- 1976
+congress <- 95
 
-MIT Election Lab
-https://electionlab.mit.edu/data
-
-U.S. House 1976–2020
-https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/IG0UN2
-
-```{r election-data}
-election_results <- read_csv('data/1976-2020-house.csv')
-
-glimpse(election_results)
+for (i in 95:117) {
+  link <- paste0('https://www.govtrack.us/data/analysis/by-congress/',
+                 i,'/sponsorshipanalysis_h.txt')
+  # delim <- if_else(i < 115, ', ', ',') 
+  # ith_house <- read_delim(link, delim = delim, col_names = TRUE)
+  ith_house <- read_delim(link, delim = ',', trim_ws = TRUE)
+  ith_house['year'] = year
+  ith_house['congress'] = congress
+  colnames(ith_house) <- colnames(house)
+  house <- rbind(house, ith_house)
+  year <- year + 2
+  congress <- congress + 1
+}
 ```
 
-```{r member-data}
+
+## Members of Congress data
+
+Primarily to link the two datasets.
+https://theunitedstates.io/
+
+```{r member-data, message=FALSE}
 members_current <- read_csv('https://theunitedstates.io/congress-legislators/legislators-current.csv')
 members_history <- read_csv('https://theunitedstates.io/congress-legislators/legislators-historical.csv')
 
 members <- rbind(members_history, members_current)
 ```
 
+## Combining datasets
 
+```{r}
+combo <- left_join(house, members[, c('govtrack_id', 'state', 'district')], 
+                   by = c('ID' = 'govtrack_id'))
 
+combo <- left_join(mutate(combo, party = tolower(party)),
+                   elections  %>%
+                     mutate(state = state_po, 
+                            district = as.integer(district), 
+                            party = tolower(party)) %>%
+                     select(year, state, district, party, candidatevotes, totalvotes),
+                   by = c('year', 'state', 'district', 'party'))
 
-```{r compare}
-election_results %>%
-  filter(year == 2018,
-         state == 'ALABAMA',
-         district == '001')
+combo <- left_join(combo, 
+                   eff_gap[, c('year', 'state_po', 'eff_gap')], 
+                   by = c('year', 'state' = 'state_po'))
 
-house_2018 %>%
-  filter(name == 'Byrne')
+combo <- mutate(combo, percent_vote = candidatevotes / totalvotes)
+
+head(combo,10)
 ```
 
 
 ```{r}
-house_2018_TEST <- left_join(house_2018, members[, c('govtrack_id', 'state', 'district')], by = c('ID' = 'govtrack_id'))
-
-head(house_2018_TEST)
+combo %>%
+  filter(year == 2000) %>%
+  ggplot(aes(x = ideology, y = percent_vote, color = party)) + 
+  geom_point() + 
+  scale_color_manual(values = c('democrat' = 'blue',
+                                'republican' = 'red',
+                                'libertarian' = 'pink',
+                                'independent' = 'purple'))
 ```
 
 ```{r}
-house_2018_TEST <- left_join(mutate(house_2018_TEST, party = tolower(party)),
-                             election_results %>%
-                               filter(year == 2018) %>%
-                               mutate(state = state_po, district = as.integer(district), party = tolower(party)) %>%
-                               select(state, district, party, candidatevotes, totalvotes),
-                             by = c('state', 'district', 'party'))
-
-house_2018_TEST <- mutate(house_2018_TEST, percent_vote = candidatevotes / totalvotes)
+combo %>%
+  filter(year == 1980) %>%
+  ggplot(aes(x = ideology, y = eff_gap, color = party)) +
+  geom_point() + 
+  scale_color_manual(values = c('democrat' = 'blue',
+                                'republican' = 'red',
+                                'libertarian' = 'pink',
+                                'independent' = 'purple'))
 ```
 
 
-```{r}
-ggplot(house_2018_TEST, aes(x = ideology, y = percent_vote, color = party)) + 
-  geom_point()
 
-# filter(house_2018_TEST, percent_vote < 0.10)
-```
+
 
