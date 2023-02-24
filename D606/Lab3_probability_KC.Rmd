@@ -2,15 +2,18 @@
 title: "Lab3_probability_KC"
 author: "Keith Colella"
 date: "`r Sys.Date()`"
-output: html_document
+knit: (function(input, ...) {
+    rmarkdown::render(
+      input,
+      output_dir = "../D606/output"
+    )
+  })
 ---
 
-```{r setup, include=FALSE}
+```{r setup}
 library(tidyverse)
 library(openintro)
-```
 
-```{r setup}
 kobe_streak <- calc_streak(kobe_basket$shot)
 ```
 
@@ -49,6 +52,8 @@ as.data.frame(table(sim_unfair_coin))
 ```
 Tails is sampled 85 times, while heads is sampled 15. This roughly conforms to expectations, given the unfair 20/80 probability provided for the simulation. The simulation does not, however, produce results the precisely conform to the provided probabilities, as the sample size is relatively small. If we increase the number of samples, however, see results converge to the provided probabilities.
 ```{r exercise3b}
+set.seed(1234)
+
 sim_unfair_coin10k <- sample(coin_outcomes, size = 10000,
                              replace = TRUE, 
                              prob = unfair_coin)
@@ -62,24 +67,135 @@ With 10,000 samples, we observe much clearer convergence to our expected values 
 ## Exercise 4
 What change needs to be made to the sample function so that it reflects a shooting percentage of 45%? Make this adjustment, then run a simulation to sample 133 shots. Assign the output of this simulation to a new object called sim_basket.
 ```{r exercise4}
+set.seed(4567)
+
 shot_outcomes <- c("H", "M")
 sim_basket <- sample(shot_outcomes, size = 133, replace = TRUE)
+
 as.data.frame(table(sim_basket))
 ```
 Without assigning any probability, the sample function defaults to assign equal (or uniform) probabilities to each potential outcome. So, here we see roughly equal numbers of hits and misses. To account for Kobe's shooting percentage of 45%, we add the `prob` argument as follows.
 ```{r}
+set.seed(4567)
+
 shooting_percentage <- c(0.45,0.65)
 
-sim_basket2 <- sample(shot_outcomes, 
+sim_basket <- sample(shot_outcomes, 
                       size = 133,
                       replace = TRUE,
                       prob = shooting_percentage)
 
-results <- as.data.frame(table(sim_basket2)) %>%
+results <- as.data.frame(table(sim_basket)) %>%
   mutate(Proportion = Freq / sum(Freq))
 
 results
 ```
+By specifying the `prob` parameter, the simulation more closely reflects the 45% shooting percentage.
+
+-----------------------
+
+## Exercise 5
+Using calc_streak, compute the streak lengths of sim_basket, and save the results in a data frame called sim_streak.
+```{r exercise5}
+sim_streak <- calc_streak(sim_basket)
+```
+
+-----------------------
+
+## Exercise 6
+Describe the distribution of streak lengths. What is the typical streak length for this simulated independent shooter with a 45% shooting percentage? How long is the player’s longest streak of baskets in 133 shots? Make sure to include a plot in your answer.
+```{r exercise6}
+ggplot(data = sim_streak, aes(x = length)) +
+  geom_bar()
+
+as.data.frame(table(sim_streak))
+```
+As with Kobe, our simulated player mostly shoots 0 length streaks (that is, he has multiple sequential misses). Interestingly, our player has a greater number of longer streaks. He even beat the longest streak from the Kobe sample (4) two times.
+
+-----------------------
+
+## Exercise 7
+If you were to run the simulation of the independent shooter a second time, how would you expect its streak distribution to compare to the distribution from the question above? Exactly the same? Somewhat similar? Totally different? Explain your reasoning.
+```{r exercise7a}
+set.seed (2345)
+
+sim_basket2 <- sample(shot_outcomes,
+                      size = 133,
+                      replace = TRUE,
+                      prob = shooting_percentage)
+
+as.data.frame(table(sim_basket2)) %>%
+  mutate(Proportion = Freq / sum(Freq))
+
+sim_streak2 <- calc_streak(sim_basket2)
+
+as.data.frame(table(sim_streak2))
+```
+Our second simulation produces a roughly similar streak distribution. The sample size is sufficiently large that we would expect a degree of consistency across simulations. Of course, I would expect greater sample sizes to exhibit greater consistency across simulations. But why guess? Let's put it to the test!
+```{r exercise7b}
+repeat_sims <- function (samples, iterations) {
+  results <- data.frame()
+  for (i in 1:iterations) {
+    sim_basket <- sample(shot_outcomes,
+                               size = samples,
+                               replace = TRUE,
+                               prob = shooting_percentage)
+    sim_streak <- calc_streak(sim_basket)
+    sim_streak <- as.data.frame(table(sim_streak))
+    cols <- sim_streak$length
+    sim_streak <- data.frame(t(sim_streak$Freq))
+    colnames(sim_streak) <- cols
+    results <- bind_rows(results, sim_streak)
+  }
+  cols <- c()
+  for (i in colnames(results)) {
+    cols <- c(cols, paste0('streak',
+                           str_pad(i, 2, side="left", pad="0")
+                           )
+              )
+  }
+  colnames(results) <- cols
+  results[is.na(results)] <- 0
+  return (results)
+}
+```
+Some text
+```{r exercise7c}
+set.seed(5678)
+results130 <- repeat_sims(130, 1000)
+results13000 <- repeat_sims(13000, 1000) / 100
+```
 
 
+``` {r exercise7d}
+results130_reshape <- data.frame()
+for (i in colnames(results130)) {
+  df <- data.frame(observations = results130[,i],
+                   length = i)
+  results130_reshape <- bind_rows(results130_reshape, df)
+}
 
+ggplot(data = results130_reshape, aes(x = observations, color = length)) + 
+  geom_freqpoly(bins = 50)
+```
+TEXT
+```{r exercise7e}
+results13000_reshape <- data.frame()
+for (i in colnames(results13000)) {
+  df <- data.frame(observations = results13000[,i],
+                   length = i)
+  results13000_reshape <- bind_rows(results13000_reshape, df)
+}
+
+ggplot(data = results13000_reshape, aes(x = observations, color = length)) + 
+  geom_freqpoly(bins = 50)
+```
+
+
+-----------------------
+
+## Exercise 8
+How does Kobe Bryant’s distribution of streak lengths compare to the distribution of streak lengths for the simulated shooter? Using this comparison, do you have evidence that the hot hand model fits Kobe’s shooting patterns? Explain.
+```{r exercise8}
+
+```
