@@ -50,12 +50,36 @@ as.data.frame(table(sim_unfair_coin))
 Tails is sampled 85 times, while heads is sampled 15. This roughly conforms to expectations, given the unfair 20/80 probability provided for the simulation. The simulation does not, however, produce results the precisely conform to the provided probabilities, as the sample size is relatively small. If we increase the number of samples, however, see results converge to the provided probabilities.
 ```{r exercise3b}
 sim_unfair_coin10k <- sample(coin_outcomes, size = 10000,
-                          replace = TRUE, 
-                          prob = unfair_coin)
+                             replace = TRUE, 
+                             prob = unfair_coin)
 
 as.data.frame(table(sim_unfair_coin10k))
 ```
-With 10,000 samples, 
+With 10,000 samples, we observe much clearer convergence to our expected values (2000 and 8000 for heads and tails, respectively).
+
+---------------------------
+
+## Exercise 4
+What change needs to be made to the sample function so that it reflects a shooting percentage of 45%? Make this adjustment, then run a simulation to sample 133 shots. Assign the output of this simulation to a new object called sim_basket.
+```{r exercise4}
+shot_outcomes <- c("H", "M")
+sim_basket <- sample(shot_outcomes, size = 133, replace = TRUE)
+as.data.frame(table(sim_basket))
+```
+Without assigning any probability, the sample function defaults to assign equal (or uniform) probabilities to each potential outcome. So, here we see roughly equal numbers of hits and misses. To account for Kobe's shooting percentage of 45%, we add the `prob` argument as follows.
+```{r}
+shooting_percentage <- c(0.45,0.65)
+
+sim_basket2 <- sample(shot_outcomes, 
+                      size = 133,
+                      replace = TRUE,
+                      prob = shooting_percentage)
+
+results <- as.data.frame(table(sim_basket2)) %>%
+  mutate(Proportion = Freq / sum(Freq))
+
+results
+```
 
 
 
