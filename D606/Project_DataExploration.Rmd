@@ -3,13 +3,20 @@ title: "Project DataExploration Candidates"
 author: "Keith Colella"
 date: "`r Sys.Date()`"
 output: html_document
+knit: (function(input, ...) {
+    rmarkdown::render(
+      input,
+      output_dir = "../D606/output"
+    )
+  })
 ---
 
 ```{r setup, message=FALSE}
 library(dplyr)
 library(readr)
-library(ggplot2)
 library(stringr)
+library(ggplot2)
+library(plotly)
 library(scales)
 ```
 
@@ -161,28 +168,29 @@ head(combo,10)
 
 
 ```{r}
-combo %>%
-  filter(year == 2000) %>%
+p1 <- combo %>%
   ggplot(aes(x = ideology, y = percent_vote, color = party)) + 
-  geom_point() + 
+  geom_point(aes(frame = year)) + 
   scale_color_manual(values = c('democrat' = 'blue',
                                 'republican' = 'red',
                                 'libertarian' = 'pink',
                                 'independent' = 'purple'))
+
+ggplotly(p1)
 ```
+
 
 ```{r}
-combo %>%
-  filter(year == 1980) %>%
+p2 <- combo %>%
   ggplot(aes(x = ideology, y = eff_gap, color = party)) +
-  geom_point() + 
+  geom_point(aes(frame = year)) + 
   scale_color_manual(values = c('democrat' = 'blue',
                                 'republican' = 'red',
                                 'libertarian' = 'pink',
                                 'independent' = 'purple'))
+
+ggplotly(p2)
 ```
-
-
 
 
 

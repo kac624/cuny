@@ -1,0 +1,61 @@
+---
+title: "Lab3_probability_KC"
+author: "Keith Colella"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(openintro)
+```
+
+```{r setup}
+kobe_streak <- calc_streak(kobe_basket$shot)
+```
+
+## Exercise 1
+What does a streak length of 1 mean, i.e. how many hits and misses are in a streak of 1? What about a streak length of 0?
+
+A streak of length 1 refers to a single hit followed by a miss. A streak of 0 refers to no hits, bu rather a single miss. 
+
+------------------------
+
+## Exercise 2
+Describe the distribution of Kobe's streak lengths from the 2009 NBA finals. What was his typical streak length? How long was his longest streak of baskets? Make sure to include the accompanying plot in your answer.
+```{r exercise2}
+ggplot(data = kobe_streak, aes(x = length)) +
+  geom_bar()
+
+as.data.frame(table(kobe_streak))
+```
+Kobe's typical streak was length 0, if by typical we mean most frequent. He had 24 1-hit streaks, represent 32% of all streaks. His longest was a streak of 4, but he only hit that once.
+
+---------------------------
+
+## Exercise 3
+In your simulation of flipping the unfair coin 100 times, how many flips came up heads? Include the code for sampling the unfair coin in your response. Since the markdown file will run the code, and generate a new sample each time you *Knit* it, you should also "set a seed" **before** you sample. Read more about setting a seed below.
+```{r exercise3a}
+coin_outcomes <- c("heads", "tails")
+unfair_coin <- c(0.2, 0.8)
+
+set.seed(1234)
+
+sim_unfair_coin <- sample(coin_outcomes, size = 100,
+                          replace = TRUE, 
+                          prob = unfair_coin)
+
+as.data.frame(table(sim_unfair_coin))
+```
+Tails is sampled 85 times, while heads is sampled 15. This roughly conforms to expectations, given the unfair 20/80 probability provided for the simulation. The simulation does not, however, produce results the precisely conform to the provided probabilities, as the sample size is relatively small. If we increase the number of samples, however, see results converge to the provided probabilities.
+```{r exercise3b}
+sim_unfair_coin10k <- sample(coin_outcomes, size = 10000,
+                          replace = TRUE, 
+                          prob = unfair_coin)
+
+as.data.frame(table(sim_unfair_coin10k))
+```
+With 10,000 samples, 
+
+
+
