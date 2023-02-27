@@ -11,26 +11,102 @@ knit: (function(input, ...) {
   })
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+```{r setup, message=FALSE}
+library(tidyverse)
+library(reshape2)
+library(scales)
 ```
 
-## R Markdown
+## Read in CSV
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+First, I'll read in the data from github. The flights data comes in .csv format, formatted exactly as provided in the assignment.
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+```{r read-csv}
+data <- read_csv('https://raw.githubusercontent.com/kac624/cuny/main/D607/data/week5_flights.csv')
 
-```{r cars}
-summary(cars)
+data
 ```
 
-## Including Plots
+## Tidy data
 
-You can also embed plots, for example:
+Next, I'll clean the data. The series of piped commands performs the following:  
+  1. The "spacer" row from the original data (containing all NAs) is removed.  
+  2. NAs in the Airlines column are filled in with the value above them.  
+  3. The counts of flights going to each destination are melted to reduce the dataframe's width.  
+  4. The count of on-time and delayed flights are cast as separate variables.
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+Finally, the columns are renamed to provide transparency and consistency.
+
+```{r tidying}
+data <- data %>%
+  filter(rowSums(is.na(data)) != ncol(data)) %>%
+  fill(...1, .direction = c('down')) %>%
+  melt(id.vars = 1:2) %>%
+  pivot_wider(id_cols = c(...1, variable),
+              names_from = ...2)
+
+colnames(data) <- c('Airline',
+                    'Destination',
+                    'OnTime',
+                    'Delayed')
+
+data
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+## Analysis
+
+We first visualize the number of on-time flights from each airline, broken out by destination. However, the mismatched proportions inhibit our ability to infer much. Looking at Phoenix for example, it is difficult to tell which airline had more on time flights in a relative sense, given AM WEST's domination at that destination.
+
+```{r absolute-visual}
+data %>%
+  melt(id.vars = 1:2) %>%
+  mutate(OnTimeStatus = variable) %>%
+  ggplot(aes(x = Destination, y = value, fill = OnTimeStatus)) +
+  geom_col(color = 'black', position = 'dodge') +
+  scale_fill_manual(values=c('chartreuse3','firebrick3')) +
+  facet_grid(.~Airline) +
+  coord_flip()
+```
+
+So, we add a new column to calculate the percentage of on-time flights for each row in the data. This gives us an "apples-to-apples" way to compare each airline's rate of delays.
+
+We then create a second plot, showing each airline's on-time rate side-by-side for each destination. From this plot, a clear trend emerges: for all destinations, ALASKA airlines has a higher on-time rate than AM WEST.
+
+```{r on-time-rate}
+data <- data %>%
+  mutate(OnTimeRate = OnTime / (OnTime + Delayed))
+
+ggplot(data, aes(x = Destination, y = OnTimeRate, fill = Airline)) +
+  geom_col(color = 'black', position='dodge') +
+  scale_fill_manual(values=c('deepskyblue','goldenrod1')) +
+  coord_flip()
+```
+
+If we summarize our data to compare the two airlines across all destinations, the trend reverses. Interestingly, AM WEST's aggregate on-time rate is higher than ALASKA's.
+
+```{r summarize}
+data %>%
+  group_by(Airline) %>% 
+  summarize(TotalOnTime = sum(OnTime),
+            TotalDelayed = sum(Delayed),
+            TotalOnTimeRate = percent(TotalOnTime / (TotalOnTime + TotalDelayed), 0.01), 
+            .groups = 'keep')
+```
+
+Finally, we take a quick look at on-time rates for each destination. There do appear to be some significant differences. Phoenix has the highest overall on-time rate, which helps explain why AM WEST has a higher over all on-time rate (as AM WEST has a very large volume of flights into Phoenix). On the other hand, Seattle, where ALASKA dominates, has the second lowest on-time rate. 
+
+```{r}
+data %>%
+  group_by(Destination) %>%
+  summarize(TotalOnTime = sum(OnTime),
+            TotalDelayed = sum(Delayed),
+            TotalOnTimeRate = TotalOnTime / (TotalOnTime + TotalDelayed), 
+            .groups = 'keep') %>%
+  ggplot(aes(x = Destination, y = TotalOnTimeRate)) +
+  geom_col(color = 'black', fill = 'cornflowerblue', position='dodge') +
+  coord_flip()
+```
+
+## Conclusion
+
+From the above, we can infer that, overall, AM WEST has a great on-time arrival rate. However, a lot of that advantage comes from what appears to be greater efficiency at destinations to which AM WEST flies more (primarily Phoenix). When "controlling" for these destination-specific factors, ALASKA appears to have the better on-time rate.
