@@ -1,0 +1,104 @@
+---
+title: "Extra Credit - ELO Calculations"
+author: "Keith Colella"
+date: "`r Sys.Date()`"
+output: html_document
+knit: (function(input, ...) {
+    rmarkdown::render(
+      input,
+      output_dir = "../D607/output"
+    )
+  })
+---
+
+```{r setup, message=FALSE}
+library(tidyverse)
+```
+
+## Assignment
+
+Based on difference in ratings between the chess players and each of their opponents in our Project 1 tournament, calculate each player’s expected score (e.g. 4.3) and the difference from their actual score (e.g 4.0). List the five players who most overperformed relative to their expected score, and the five players that most underperformed relative to their expected score.
+
+You’ll find some small differences in different implementation of ELO formulas. You may use any reasonably sourced formula, but please cite your source.
+
+## Read in data
+
+I'll begin by reading in the csv that I created as part of the Project 1 assignment.
+
+```{r data, message=FALSE}
+df <- read_csv('https://raw.githubusercontent.com/kac624/cuny/main/D607/output/proj1_chessRatings.csv')
+
+glimpse(df)
+```
+
+## Calculating expected score
+
+The formula I'll use for expected score is as follows:
+$$ E_{A} = \frac{1}{1 + 10^{(R_B - R_A)/400}} $$
+where $E$ is the expected score, $R$ is the rating, and subscripts $A$ and $B$ refer to two players, A and B.  
+*Sources: https://medium.com/purple-theory/what-is-elo-rating-c4eb7a9061e0 & https://en.wikipedia.org/wiki/Elo_rating_system*
+
+I begin by defining a function to calculate the expected score.
+```{r exp-score-function}
+expected_score <- function(player_rating, oppnt_rating) {
+  result <- 1 / (1 + 10^((oppnt_rating - player_rating)/400))
+  return(result)
+}
+```
+
+I then use that function in a loop that (i) gathers ratings for all opponents, then (ii) calculates the expected score against each, then (iii) sums them and adds the total expected score as a new column in the dataframe.
+```{r add-exp-score-to-df}
+for (i in 1:nrow(df)) {
+  # initiate variables, and gather index for each opponent 
+  oppnts <- df[i,5:11]
+  ratings <- c()
+  player_rating <- df[i,'pre_rating']
+  total_exp_score <- 0
+  
+  # loop through opponent indexes to gather ratings in list
+  for (j in 1:length(oppnts)) {
+    if (!is.na(oppnts[[j]])) {
+      ratings <- c(ratings, df[oppnts[[j]], 'pre_rating'])
+    }
+  }
+  
+  # loop through ratings to calculate expected score for each and sum
+  for (j in 1:length(ratings)) {
+    if (!is.na(ratings[[j]])) {
+      exp_score <- expected_score(player_rating, ratings[[j]])
+      total_exp_score <- total_exp_score + exp_score
+    }
+  }
+  
+  # add score to df
+  df[i, 'total_exp_score'] <- total_exp_score
+}
+```
+
+I then add a new column to the dataframe that shows the difference between actual and expected scores. This column is calculated as $Actual - Expected$ so that a positive number represents overperformance and a negative represents underperformance.
+```{r}
+df <- df %>%
+  mutate(score_diff = total_pts - total_exp_score)
+```
+
+To respond to the assignment's primary question, I arrange our dataframe to highlight the five players that most over and underperformed relative to their expected scores.
+```{r}
+df %>%
+  arrange(desc(score_diff)) %>%
+  select(!matches('oppnt[0-9]')) %>%
+  head(5)
+
+df %>%
+  arrange(score_diff) %>%
+  select(!matches('oppnt[0-9]')) %>%
+  head(5)
+```
+
+Finally, I put together a plot to visualize actual versus expected scores. I've added both linear and loess lines to get a sense of the trend. Neither, however, appears to provide a very good fit. There is a clear positive trend, but it's very noisy. From this, we can conclude that, at least for this particular tournament, ELO ratings served as a relatively poor predictor of success.
+```{r}
+ggplot(df, aes(total_pts,total_exp_score)) +
+  geom_smooth(method = 'lm', formula = 'y~x', color = 'darkslategray1', alpha = 0.5) +
+  geom_smooth(method = 'loess', formula = 'y~x', color = 'darksalmon', alpha = 0.5) +
+  geom_point()
+```
+
