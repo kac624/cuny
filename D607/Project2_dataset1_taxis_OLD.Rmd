@@ -1,0 +1,409 @@
+---
+title: "Project 2 - Dataset 1"
+author: "Keith Colella"
+date: "`r Sys.Date()`"
+output: html_document
+knit: (function(input, ...) {
+    rmarkdown::render(
+      input,
+      output_dir = "../D607/output"
+    )
+  })
+---
+
+```{r setup, message=FALSE}
+library(tidyverse)
+library(arrow)
+library(lubridate)
+library(tidyselect)
+```
+
+## Reading in Data
+
+https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page
+
+```{r}
+pq_file <- tempfile()
+url <- paste0('https://d37ci6vzurychx.cloudfront.net/',
+              'trip-data/yellow_tripdata_2022-01.parquet')
+
+download.file(url, pq_file, mode = 'wb')
+
+df <- read_parquet(pq_file, as_data_frame = TRUE)
+
+head(df)
+```
+
+The data is very long...
+```{r}
+nrow(df)
+```
+
+Appears to be quite of a bit of dates not in 2022, so clean data.
+```{r}
+df %>%
+  filter(year(tpep_pickup_datetime) != 2022 | month(tpep_pickup_datetime) != 1) %>%
+  group_by(date(tpep_pickup_datetime)) %>%
+  summarize(ride_count = n())
+```
+
+
+
+```{r}
+df <- df %>%
+  filter(year(tpep_pickup_datetime) == 2022 &
+           month(tpep_pickup_datetime) == 1)
+
+df %>%
+  group_by(month(tpep_pickup_datetime)) %>%
+  summarize(ride_count = n(),
+            total_cost = sum(total_amount))
+```
+
+
+
+```{r}
+process_summary <- data.frame(matrix(nrow = 0, ncol = 0))
+```
+
+
+
+```{r}
+aggr_yellow <- data.frame(matrix(nrow = 0, ncol = 0))
+
+for (yr in 2009:2022) {
+  for (mnth in 1:12) {
+    #download file
+    year_month <- paste0(yr,'-',sprintf('%02d',mnth))
+    pq_file <- tempfile()
+    url <- paste0('https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_',
+                  year_month,'.parquet')
+    download.file(url, pq_file, mode = 'wb', quiet = TRUE)
+    
+    # mark progress
+    file_size <- file.size(pq_file) / 10^6
+    time_check <- now()
+    print(paste0('Progress  --  ',
+              'File: ',year_month,'  --  ',
+              'Size: ',file_size,'MB  --  ',
+              'Time: ',time_check
+              ))
+    progress <- data.frame(year_month, file_size, time_check)
+    process_summary <- bind_rows(process_summary, progress)
+    
+    # read to df and clean    
+    pq_data <- read_parquet(pq_file, as_data_frame = TRUE)
+    colnames(pq_data) <- tolower(colnames(pq_data)) %>%
+      str_replace_all('.*pickup_date.*','pickup_date') %>%
+      str_replace_all('total_am.*','total_amount')
+    
+    pq_data <- pq_data %>%
+      mutate(year = year(pickup_date),
+             month = month(pickup_date)) %>%
+      filter(year == yr &
+               month == mnth)
+    
+    #aggregate and add to collection df
+    aggr_data <- pq_data %>%
+      group_by(year,month) %>%
+      summarize(rides = n(),
+                passengers = sum(passenger_count, na.rm = TRUE),
+                distance = sum(trip_distance),
+                cost = sum(total_amount),
+                .groups = 'keep')
+    aggr_data <- aggr_data %>% mutate(type = 'yellow')
+    
+    aggr_yellow <- bind_rows(aggr_yellow, aggr_data)
+    file.remove(pq_file)
+  }
+}
+
+write_csv(aggr_yellow,'output/taxis_aggr_yellow.csv')
+```
+
+
+```{r}
+aggr_green <- data.frame(matrix(nrow = 0, ncol = 0))
+# process_summary <- data.frame(matrix(nrow = 0, ncol = 0))
+
+for (yr in 2014:2022) {
+  for (mnth in 1:12) {
+    #download file
+    year_month <- paste0(yr,'-',sprintf('%02d',mnth))
+    pq_file <- tempfile()
+    url <- paste0('https://d37ci6vzurychx.cloudfront.net/trip-data/green_tripdata_',
+                  year_month,'.parquet')
+    download.file(url, pq_file, mode = 'wb', quiet = TRUE)
+    
+    # mark progress
+    file_size <- file.size(pq_file) / 10^6
+    time_check <- now()
+    print(paste0('Progress  --  ',
+              'File: ',year_month,'  --  ',
+              'Size: ',file_size,'MB  --  ',
+              'Time: ',time_check
+              ))
+    progress <- data.frame(year_month, file_size, time_check)
+    process_summary <- bind_rows(process_summary, progress)
+    
+    # read to df and clean    
+    pq_data <- read_parquet(pq_file, as_data_frame = TRUE)
+    colnames(pq_data) <- tolower(colnames(pq_data)) %>%
+      str_replace_all('.*pickup_date.*','pickup_date') %>%
+      str_replace_all('total_am.*','total_amount')
+    
+    pq_data <- pq_data %>%
+      mutate(year = year(pickup_date),
+             month = month(pickup_date)) %>%
+      filter(year == yr &
+               month == mnth)
+    
+    #aggregate and add to collection df
+    aggr_data <- pq_data %>%
+      group_by(year,month) %>%
+      summarize(rides = n(),
+                passengers = sum(passenger_count, na.rm = TRUE),
+                distance = sum(trip_distance),
+                cost = sum(total_amount),
+                .groups = 'keep')
+    aggr_data <- aggr_data %>% mutate(type = 'green')
+      
+    aggr_green <- bind_rows(aggr_green, aggr_data)
+    file.remove(pq_file)
+  }
+}
+
+write_csv(aggr_green,'output/taxis_aggr_green.csv')
+```
+
+FHV
+
+```{r}
+aggr_fhv <- data.frame(matrix(nrow = 0, ncol = 0))
+# process_summary <- data.frame(matrix(nrow = 0, ncol = 0))
+
+for (yr in 2015:2022) {
+  for (mnth in 1:12) {
+    #download file
+    year_month <- paste0(yr,'-',sprintf('%02d',mnth))
+    pq_file <- tempfile()
+    url <- paste0('https://d37ci6vzurychx.cloudfront.net/trip-data/fhv_tripdata_',
+                  year_month,'.parquet')
+    download.file(url, pq_file, mode = 'wb', quiet = TRUE)
+    
+    # mark progress
+    file_size <- file.size(pq_file) / 10^6
+    time_check <- now()
+    print(paste0('Progress  --  ',
+              'File: ',year_month,'  --  ',
+              'Size: ',file_size,'MB  --  ',
+              'Time: ',time_check
+              ))
+    progress <- data.frame(year_month, file_size, time_check)
+    process_summary <- bind_rows(process_summary, progress)
+    
+    # read to df and clean    
+    pq_data <- read_parquet(pq_file, as_data_frame = TRUE)
+    colnames(pq_data) <- tolower(colnames(pq_data)) %>%
+      str_replace_all('.*pickup_date.*','pickup_date') %>%
+      str_replace_all('total_am.*','total_amount')
+    
+    pq_data <- pq_data %>%
+      mutate(year = year(pickup_date),
+             month = month(pickup_date)) %>%
+      filter(year == yr &
+               month == mnth)
+    
+    #aggregate and add to collection df
+    aggr_data <- pq_data %>%
+      group_by(year,month) %>%
+      summarize(rides = n(),
+                # passengers = sum(passenger_count, na.rm = TRUE),
+                # distance = sum(trip_distance),
+                # cost = sum(total_amount),
+                .groups = 'keep')
+    aggr_data <- aggr_data %>% mutate(type = 'fhv')
+      
+    aggr_fhv <- bind_rows(aggr_fhv, aggr_data)
+    file.remove(pq_file)
+  }
+}
+
+write_csv(aggr_fhv,'output/taxis_aggr_fhv.csv')
+```
+
+
+```{r}
+aggr_fhvhv <- data.frame(matrix(nrow = 0, ncol = 0))
+# process_summary <- data.frame(matrix(nrow = 0, ncol = 0))
+
+for (yr in 2019:2022) {
+  for (mnth in 1:12) {
+    if (yr == 2019 & mnth == 1) {
+      next
+    }
+    
+    #download file
+    year_month <- paste0(yr,'-',sprintf('%02d',mnth))
+    pq_file <- tempfile()
+    url <- paste0('https://d37ci6vzurychx.cloudfront.net/trip-data/fhvhv_tripdata_',
+                  year_month,'.parquet')
+    download.file(url, pq_file, mode = 'wb', quiet = TRUE)
+    
+    # mark progress
+    file_size <- file.size(pq_file) / 10^6
+    time_check <- now()
+    print(paste0('Progress  --  ',
+              'File: ',year_month,'  --  ',
+              'Size: ',file_size,'MB  --  ',
+              'Time: ',time_check
+              ))
+    progress <- data.frame(year_month, file_size, time_check)
+    process_summary <- bind_rows(process_summary, progress)
+    
+    # read to df and clean    
+    pq_data <- read_parquet(pq_file, as_data_frame = TRUE)
+    colnames(pq_data) <- tolower(colnames(pq_data)) %>%
+      str_replace_all('.*pickup_date.*','pickup_date') %>%
+      str_replace_all('total_am.*','total_amount')
+    
+    pq_data <- pq_data %>%
+      mutate(year = year(pickup_date),
+             month = month(pickup_date)) %>%
+      filter(year == yr &
+               month == mnth)
+    
+    #aggregate and add to collection df
+    aggr_data <- pq_data %>%
+      group_by(year,month) %>%
+      summarize(rides = n(),
+                # passengers = sum(passenger_count, na.rm = TRUE),
+                # distance = sum(trip_distance),
+                # cost = sum(total_amount),
+                .groups = 'keep')
+    aggr_data <- aggr_data %>% mutate(type = 'fhvhv')
+      
+    aggr_fhvhv <- bind_rows(aggr_fhvhv, aggr_data)
+    file.remove(pq_file)
+  }
+}
+
+write_csv(aggr_fhvhv,'output/taxis_aggr_fhvhv.csv')
+```
+
+```{r}
+pull_taxi_data_aggr <- function(taxi_type, start_year, end_year, quiet = FALSE) {
+  aggregated_df <- data.frame(matrix(nrow = 0, ncol = 0))
+  process_summary <- data.frame(matrix(nrow = 0, ncol = 0))
+  
+  for (yr in start_year:end_year) {
+    for (mnth in 1:12) {
+      # attempt file download
+      time_check <- now()
+      year_month <- paste0(yr,'-',sprintf('%02d',mnth))
+      pq_file <- tempfile()
+      url <- paste0('https://d37ci6vzurychx.cloudfront.net/trip-data/',
+                    taxi_type,'_tripdata_',year_month,'.parquet')
+      suppressWarnings({
+        test <- tryCatch(download.file(url, pq_file, mode = 'wb', quiet = TRUE), 
+                         error = function(e) e)
+      })
+      if('error' %in% class(test)) {
+        progress <- data.frame(year_month, status = 'FAILED', time_check)
+        process_summary <- bind_rows(process_summary, progress)
+        next
+      }
+      
+      # mark progress
+      status <- paste0('Success: ',file.size(pq_file) / 10^6)
+      progress <- data.frame(year_month, file_size, time_check)
+      process_summary <- bind_rows(process_summary, progress)
+      if (quiet == FALSE) {
+       print(paste0('Progress  --  ',
+                           'File: ',year_month,'  --  ',
+                           'Size: ',file_size,'MB  --  ',
+                           'Time: ',time_check)) 
+      }
+      
+      # read to df and clean    
+      pq_data <- read_parquet(pq_file, as_data_frame = TRUE)
+      colnames(pq_data) <- tolower(colnames(pq_data)) %>%
+        str_replace_all('.*pickup_date.*','pickup_date') %>%
+        str_replace_all('total_am.*','total_amount') %>%
+        str_replace_all('.*p.*location.*','pickup_location') %>%
+        str_replace_all('.*d.*location.*','dropoff_location')
+      
+      pq_data <- pq_data %>%
+        mutate(year = year(pickup_date),
+               month = month(pickup_date)) %>%
+        filter(year == yr &
+                 month == mnth)
+      
+      #aggregate and add to collection df
+      aggr_data <- pq_data %>%
+        group_by(year, month, dropoff_location) %>%
+        summarize(rides = n(), .groups = 'keep') # %>%
+        # try(
+        #   summarize(passengers = sum(passenger_count, na.rm = TRUE),
+        #             distance = sum(trip_distance),
+        #             cost = sum(total_amount),
+        #             .groups = 'keep')
+        # )
+      aggr_data <- aggr_data %>% mutate(type = taxi_type)
+        
+      aggregated_df <- bind_rows(aggregated_df, aggr_data)
+      file.remove(pq_file)
+    }
+  }
+  return(list(aggregated_df, 
+              process_summary))
+}
+```
+
+
+
+```{r}
+types <- c('green','fhv','fhvhv','yellow')
+results <- list()
+
+for (type in types) {
+  result <- pull_taxi_data_aggr(taxi_type = type,
+                                  start_year = 2009,
+                                  end_year = 2020,
+                                  quiet = TRUE)
+  results <- append(results,result)
+  print(paste0('Completed:',type))
+}
+```
+
+
+
+```{r}
+aggr_all <- bind_rows(aggr_yellow,
+                      aggr_green,
+                      aggr_fhv,
+                      aggr_fhvhv)
+
+head(aggr_all)
+```
+
+
+## TBD
+
+TBD
+
+```{r TBD}
+aggr_all  <- aggr_all %>%
+  mutate(date = ymd(paste0(year,'-',sprintf('%02d',month),'-01')),
+         type = case_when(type == 'yellow' ~ 'yellow',
+                          type == 'green' ~ 'green',
+                          type == 'fhv' | type == 'fhvhv' ~ 'rideshare')) %>%
+  group_by(date, type) %>%
+  summarize(rides = sum(rides), .groups = 'drop')
+
+ggplot(aggr_all, aes(x = date, y = rides, fill = type)) + 
+  geom_area() +
+  scale_fill_manual(values = c('darkolivegreen3','deepskyblue3','gold3')) +
+  scale_y_continuous(labels = scales::comma)
+```
+
