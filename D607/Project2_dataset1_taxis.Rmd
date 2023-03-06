@@ -283,7 +283,7 @@ shapefile <- tempfile()
 url <- 'https://d37ci6vzurychx.cloudfront.net/misc/taxi_zones.zip'
 download.file(url, shapefile) #\, mode = 'wb')
 unzip(shapefile, exdir = 'data/nycshapefiles/')
-nyc_shapes <- st_read('taxi_zones.shp')
+nyc_shapes <- st_read('data/nycshapefiles/taxi_zones.shp')
 
 combo_df <- aggregated_df_all_2 %>%
   left_join(nyc_shapes, by = c('location' = 'LocationID')) %>%
