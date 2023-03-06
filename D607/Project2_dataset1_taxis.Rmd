@@ -16,9 +16,10 @@ library(tidyverse)
 library(arrow)
 library(lubridate)
 library(sf)
+library(cowplot)
 ```
 
-## Reading in Data
+## Introduction and Exploratory Data Analysis
 
 I'll focus on a massive dataset detailing all taxis rides in New York City since 2009. The data is maintained by the NYC government at the following site.
 
@@ -29,43 +30,13 @@ The data are maintained in a series of many files, broken out month year, month 
 ```{r}
 pq_file <- tempfile()
 url <- paste0('https://d37ci6vzurychx.cloudfront.net/',
-              'trip-data/fhv_tripdata_2011-01.parquet')
+              'trip-data/yellow_tripdata_2011-01.parquet')
 
 download.file(url, pq_file, mode = 'wb')
 
 df <- read_parquet(pq_file, as_data_frame = TRUE)
 
 head(df)
-
-colnames(df) <- tolower(colnames(df)) %>%
-        str_replace_all('.*pickup_date.*','pickup_date') %>%
-        str_replace_all('total_am.*','total_amount') %>%
-        str_replace_all('.*p.*location.*','pickup_location') %>%
-        str_replace_all('.*d.*location.*','dropoff_location')
-
-df <- df %>%
-        mutate(year = year(pickup_date),
-               month = month(pickup_date),
-               pickup_location = replace_na(pickup_location,0),
-               dropoff_location = replace_na(dropoff_location,0)) %>%
-        filter(year == 2010 &
-                 month == 1)
-
-aggr_data1 <- df %>%
-  group_by(year, month, pickup_location) %>%
-  summarize(pickups = n(), .groups = 'keep')
-
-aggr_data2 <- df %>%
-  group_by(year, month, dropoff_location) %>%
-  summarize(dropoffs = n(), .groups = 'keep')
-
-holder <- data.frame(year = 2022,
-                     month = rep(1:12, each = 265),
-                     location = seq(1:265))
-  
-holder %>%
-  left_join(aggr_data1, by = c('year','month','location' = 'pickup_location')) %>%
-  left_join(aggr_data2, by = c('year','month','location' = 'dropoff_location'))
 ```
 
 It looks like we're dealing with a LOT of data. I'll put together a quick summary to see how many rides we're looking at.
@@ -83,7 +54,46 @@ I also notice that files for all taxi types are not available back to 2009. Gree
 
 After performing the above exploration on files from for each taxi type and across several years, it became clear that the file format has also changed a few times over the years. While I'd like to analyze costs and volume of passengers, those variables appear inconsistently across the data. The variables that appear most consistently are date-time and pickup/dropoff location. So, I'll plan to focus on the total volume of rides across time and geography.
 
-Considering all of the above, I constructed the below function to pull and aggregate data. The function requires a specific taxi type, a starting year and an ending year. It reads through all files matching these input parameters and aggregates the volume of rides, broken out by year, month and dropoff location. Error handling accounts for missing files, and progress is tracked in a distinct progress dataframe.
+Because of the size of the data, I'll need to aggregate as I read in. So, before working to bring in ALL the data, I'll run a sample aggregation to test ensure I'm aggregating in a form that will support the above analysis. I'll use the dataframe from the sample above from January 2011 for yellow cabs. Because the column names change over time and across different taxi types, I will first standardize the names for key columns. Then, I pull out the month and year based on the pick-up date, clean up any NAs in location fields, then filter out any cab rides that don't have dates in the month/year in question. I had trouble creating distinct counts for pickups and dropoffs across locations with a single summarize function, so I'll split the process in half. I create two summary data frames that separately sum all pickups and dropoffs by year, month and location. Then, I create a placeholder dataframe that lists all locations IDs (from 1 to 265, with 0 for NAs) and finally use a left_join to bring in the counts of pickups and dropoffs.
+
+```{r}
+colnames(df) <- tolower(colnames(df)) %>%
+        str_replace_all('.*pickup_date.*','pickup_date') %>%
+        str_replace_all('total_am.*','total_amount') %>%
+        str_replace_all('.*p.*location.*','pickup_location') %>%
+        str_replace_all('.*d.*location.*','dropoff_location')
+
+df <- df %>%
+        mutate(year = year(pickup_date),
+               month = month(pickup_date),
+               pickup_location = replace_na(pickup_location,0),
+               dropoff_location = replace_na(dropoff_location,0)) %>%
+        filter(year == 2011 &
+                 month == 1)
+
+aggr_data1 <- df %>%
+  group_by(year, month, pickup_location) %>%
+  summarize(pickups = n(), .groups = 'keep')
+
+aggr_data2 <- df %>%
+  group_by(year, month, dropoff_location) %>%
+  summarize(dropoffs = n(), .groups = 'keep')
+
+holder <- data.frame(year = 2022,
+                     month = 1,
+                     location = seq(from = 0, to = 265))
+  
+holder %>%
+  left_join(aggr_data1, by = c('year','month','location' = 'pickup_location')) %>%
+  left_join(aggr_data2, by = c('year','month','location' = 'dropoff_location')) %>%
+  head(10)
+```
+
+This approach gives me what I need in a size that I can handle, so let's move ahead!
+
+## Read and aggregate data
+
+Considering all of the above, I constructed the below function to pull and aggregate data. The function requires a specific taxi type, a starting year and an ending year. It reads through all files matching these input parameters and aggregates the volume of rides, broken out by year, month and location. Error handling accounts for missing files, and progress is tracked in a distinct progress dataframe.
 
 ```{r}
 pull_taxi_data_aggr <- function(taxi_type, start_year, end_year, quiet = FALSE) {
@@ -161,54 +171,63 @@ pull_taxi_data_aggr <- function(taxi_type, start_year, end_year, quiet = FALSE) 
 }
 ```
 
-We then use this function in a loop to grab data for all four taxi types from 2009 to 2020. I'll kick this off and let it run.
+We then use this function in a loop to grab data for all four taxi types from 2009 to 2020. I ran this process previously and it took many several hours to download, read, clean and aggregates all the data. So, rather than have to repeat that whenever I wish to knit, I saved the output as a .csv. If I wish to skip this process, I can simply code the `preloaded` variable to `Yes`, and that previously aggregated data will be loaded to complete the rest of the functions in this markdown.
 
 ```{r}
-greens <- pull_taxi_data_aggr(taxi_type = 'green', 
-                             start_year = 2013,
+preloaded <- 'Yes'
+
+if (preloaded == 'No') {
+  greens <- pull_taxi_data_aggr(taxi_type = 'green', 
+                               start_year = 2013,
+                               end_year = 2022,
+                               quiet = FALSE)
+  
+  fhvs <- pull_taxi_data_aggr(taxi_type = 'fhv', 
+                             start_year = 2015,
                              end_year = 2022,
                              quiet = FALSE)
-
-fhvs <- pull_taxi_data_aggr(taxi_type = 'fhv', 
-                           start_year = 2015,
-                           end_year = 2022,
-                           quiet = FALSE)
-
-fhvhvs <- pull_taxi_data_aggr(taxi_type = 'fhvhv', 
-                             start_year = 2019,
-                             end_year = 2022,
-                             quiet = FALSE)
-
-yellows <- pull_taxi_data_aggr(taxi_type = 'yellow', 
-                             start_year = 2011,
-                             end_year = 2022,
-                             quiet = FALSE)
-```
-
-
-
-```{r}
-aggregated_df_all <- bind_rows(greens[[1]],
+  
+  fhvhvs <- pull_taxi_data_aggr(taxi_type = 'fhvhv', 
+                               start_year = 2019,
+                               end_year = 2022,
+                               quiet = FALSE)
+  
+  yellows <- pull_taxi_data_aggr(taxi_type = 'yellow', 
+                               start_year = 2011,
+                               end_year = 2022,
+                               quiet = FALSE)
+  
+  aggregated_df_all <- bind_rows(greens[[1]],
                                fhvs[[1]],
                                fhvhvs[[1]],
                                yellows[[1]])
 
-full_process_summary <-  bind_rows(greens[[2]],
-                                   fhvs[[2]],
-                                   fhvhvs[[2]],
-                                   yellows[[2]])
+  full_process_summary <-  bind_rows(greens[[2]],
+                                     fhvs[[2]],
+                                     fhvhvs[[2]],
+                                     yellows[[2]])
+  
+  write_csv(aggregated_df_all, 'data/aggregated_taxi_data.csv')
+  write_csv(full_process_summary, 'data/taxi_process_summary.csv')
+  
+} else {
+  aggregated_df_all<- read_csv('data/aggregated_taxi_data.csv')
+  full_process_summary <- read_csv('data/taxi_process_summary.csv')
+}
 ```
 
-
+With our read-in function complete, I'll construct a few summaries to check that data quality was maintained. I conclude the following:  
+  1. Only 17 files were not downloaded. These consist of all green taxi files from 2013. I was also unable to download these files manually, so there appears to be some issue with nyc.gov. The remainder relate to files from December 2022, which are not yet uploaded to nyc.gov. Finally, one fhvhv file from Jan 2019 is missing, but again, this is missing from nyc.gov.  
+  2. There are 1654 rows in which both pickups and dropoffs are empty, which raises some eyebrows. These appear to be related to low volume locations, but I purused the NA rows manually, and there did not appear to be any locations which had ZERO pickups or dropoffs, so my concerns of a data quality issue were eased.  
+  3. There are 2.9 billion taxi trips captured in total in the dataset.  
+  4. There are ~218 million pickups and ~411 dropoffs with missing locations. These are primarily related to fhv rides, for which locations were not tracked in the earlier datasets. This constitutes ~8 to ~14% of the dataset, which is quite material. In future analyses, I'll need to think of some kind of workaround to address this gap, but for now, we'll simply acknowledge this limitation before moving ahead.
 
 ```{r}
-filter(aggregated_df_all, is.na(pickups) & is.na(dropoffs)) %>%
-  arrange(type, year, month, location)
-
 filter(full_process_summary, is.na(file_size))
 
+filter(aggregated_df_all, is.na(pickups) & is.na(dropoffs))
+
 aggregated_df_all %>%
-  group_by(year, type) %>%
   summarize(pickups_total = sum(pickups, na.rm = TRUE),
             dropoffs_total = sum(dropoffs, na.rm = TRUE),
             .groups = 'keep')
@@ -217,67 +236,139 @@ aggregated_df_all %>%
   group_by(location) %>%
   summarize(pickups_total = sum(pickups, na.rm = TRUE),
             dropoffs_total = sum(dropoffs, na.rm = TRUE),
-            .groups = 'keep')
+            .groups = 'keep') %>%
+  filter(location == 0 | location == 264 | location == 265)
 ```
 
 
+
+## Analysis
+
+We can now plot the volume of rides over time, separated by taxi type (we use pickups, but as shown above, the volumes are essentially equal). A very clear trend emerges. We see the volume of yellow taxis slowly decline, while rideshare volumes increase. All taxi usage falls dramatically in 2020 due to COVID. Shortly after, rideshares begin returning to pre-pandemic levels, but yellow taxi volumes appear to just barely return.
 
 ```{r}
-write_csv(aggregated_df_all, 'output/aggregated_taxi_data.csv')
-write_csv(full_process_summary, 'output/taxi_process_summary.csv')
+aggregated_df_all %>%
+  mutate(date = ymd(paste0(year,'-',sprintf('%02d',month),'-01'))) %>%
+  group_by(date, type) %>%
+  summarize(pickups = sum(pickups, na.rm = TRUE), 
+            .groups = 'keep') %>%
+  ggplot(aes(x = date, y = pickups, fill = type)) + 
+  geom_area() +
+  scale_fill_manual(values = c('blue','deepskyblue3','darkolivegreen3','gold3')) +
+  scale_y_continuous(labels = scales::comma)
 ```
 
-
-## TBD
-
-TBD
+It also becomes clear that green taxis represent a very small sliver of overall volume. The same applies for fhv after 2019, when the heavy hitter (Uber, Lyft, etc.) were separated into the "high-volume" category. To make things clearer as we move ahead, I'll group both fhv types under a new heading, "rideshare", and I'll group both yellow and green under the yellow category to broadly represent "public" NYC cabs. The plot below shows the same view as above, but with these consolidated groups.
 
 ```{r}
 aggregated_df_all_2  <- aggregated_df_all %>%
   mutate(date = ymd(paste0(year,'-',sprintf('%02d',month),'-01')),
-         type = case_when(type == 'yellow' ~ 'yellow',
-                          type == 'green' ~ 'green',
-                          type == 'fhv' | type == 'fhvhv' ~ 'rideshare')) %>%
-  group_by(date, location, type) %>%
-  summarize(pickups = sum(pickups, na.rm = TRUE), 
-            dropoffs = sum(dropoffs, na.rm = TRUE),
-            .groups = 'keep')
-```
+         type = case_when(type == 'fhv' | type == 'fhvhv' ~ 'rideshare',
+                          type == 'yellow' | type == 'green' ~ 'yellow'))
 
-
-
-```{r}
 aggregated_df_all_2 %>%
   group_by(date, type) %>%
   summarize(pickups = sum(pickups, na.rm = TRUE), 
-            dropoffs = sum(dropoffs, na.rm = TRUE),
             .groups = 'keep') %>%
   ggplot(aes(x = date, y = pickups, fill = type)) + 
   geom_area() +
-  scale_fill_manual(values = c('darkolivegreen3','deepskyblue3','gold3')) +
+  scale_fill_manual(values = c('deepskyblue3','gold3')) +
   scale_y_continuous(labels = scales::comma)
 ```
 
-
+The last thing we'll plot is a view of geography, to see if there are any clear differences in *where* hail cabs and rideshares are most used. The NYC Taxi dataset also offers shapefiles that map out the various taxi locations in the taxi dataset. Below, we download those shape files and map them into a new combined dataframe.
 
 ```{r}
-pq_file <- tempfile()
-url <- paste0('https://d37ci6vzurychx.cloudfront.net/',
-              'trip-data/fhv_tripdata_2011-01.parquet')
-download.file(url, pq_file, mode = 'wb')
-shapes <- read_parquet(pq_file, as_data_frame = TRUE)
+shapefile <- tempfile()
+url <- 'https://d37ci6vzurychx.cloudfront.net/misc/taxi_zones.zip'
+download.file(url, shapefile) #\, mode = 'wb')
+unzip(shapefile, exdir = 'data/nycshapefiles/')
+nyc_shapes <- st_read('taxi_zones.shp')
+
+combo_df <- aggregated_df_all_2 %>%
+  left_join(nyc_shapes, by = c('location' = 'LocationID')) %>%
+  filter(borough != 'Staten Island')
 ```
 
-
+I'd like to put together a few map plots, so I'll start by creating a function.
 
 ```{r}
-aggregated_df_all_2 %>%
-  group_by(date, type) %>%
-  summarize(pickups = sum(pickups, na.rm = TRUE), 
-            dropoffs = sum(dropoffs, na.rm = TRUE),
-            .groups = 'keep') %>%
-  ggplot(aes(x = date, y = pickups, fill = type)) + 
-  geom_area() +
-  scale_fill_manual(values = c('darkolivegreen3','deepskyblue3','gold3')) +
-  scale_y_continuous(labels = scales::comma)
+map_plot_taxi_data <- function(input, title, taxi_type, ride_type, year,
+                               color = 'dodgerblue4', legend = TRUE) {
+  input %>%
+  filter(type == taxi_type, year == year) %>%
+  group_by(year, location) %>%
+  mutate(Ride_Volume = sum((!!as.symbol(ride_type)), na.rm = TRUE)) %>%
+  ungroup() %>%
+  ggplot() +
+  geom_sf(aes(geometry = geometry, fill = Ride_Volume),
+          show.legend = legend) +
+  scale_fill_gradient(low = 'gray100', 
+                      high = color,
+                      limits = c(0,10^6),
+                      labels = scales::comma) +
+  ggtitle(title) +
+  theme(axis.text.x=element_blank(),
+        axis.text.y=element_blank())
+}
+```
+
+Let's test it out! We'll start with a view of yellow (and green) cab pickups in 2014.
+
+```{r}
+map_plot_taxi_data(input = combo_df, title = 'Yellow Pickups 2012',
+                   taxi_type = 'yellow', ride_type = 'pickups', year = 2014, 
+                   color = 'gold3', legend = TRUE)
+```
+
+Next, we'll compare a few plots, showing dropoffs and pickups for rideshares and yellows in 2021. I've remove dthe legends to save space, but note that these plots (and all others below) have the same scale as the plot above, with color density ranging from 0 to 1 million rides. *Note: I checked separately, and the most rides to/from a single location in a single month was ~700k.*
+
+```{r}
+p1 <- map_plot_taxi_data(input = combo_df, title = 'Rideshare Pickups 2021',
+                   taxi_type = 'rideshare', ride_type = 'pickups', year = 2021, 
+                   color = 'dodgerblue4', legend = FALSE)
+
+p2 <- map_plot_taxi_data(input = combo_df, title = 'Rideshare Dropoffs 2021',
+                   taxi_type = 'rideshare', ride_type = 'dropoffs', year = 2021, 
+                   color = 'dodgerblue4', legend = FALSE)
+
+p3 <- map_plot_taxi_data(input = combo_df, title = 'Yellow Pickups 2021',
+                   taxi_type = 'yellow', ride_type = 'pickups', year = 2021, 
+                   color = 'gold3', legend = FALSE)
+
+p4 <- map_plot_taxi_data(input = combo_df, title = 'Yellow Dropoffs 2021',
+                   taxi_type = 'yellow', ride_type = 'dropoffs', year = 2021, 
+                   color = 'gold3', legend = FALSE)
+
+plot_grid(p1, p2, p3, p4, nrow = 2, ncol = 2)
+```
+
+Finally, we'll put together a series of plots to see how (or if) the mapping of pickups have changed over time. We'll start with rideshares, looking at pickups from 2015 to 2022.
+
+```{r}
+rideshare_plist <- list()
+
+for (yr in 2015:2022) {
+  plt <- map_plot_taxi_data(input = combo_df, title = yr,
+                   taxi_type = 'rideshare', ride_type = 'pickups', year = yr, 
+                   color = 'dodgerblue4', legend = FALSE)
+  rideshare_plist[[yr-2014]] <- plt
+}
+
+plot_grid(plotlist = rideshare_plist, nrow = 2, ncol = 4)
+```
+
+And again for yellow cabs!
+
+```{r}
+yellow_plist <- list()
+
+for (yr in 2015:2022) {
+  plt <- map_plot_taxi_data(input = combo_df, title = yr,
+                   taxi_type = 'yellow', ride_type = 'pickups', year = yr, 
+                   color = 'gold3', legend = FALSE)
+  yellow_plist[[yr-2014]] <- plt
+}
+
+plot_grid(plotlist = yellow_plist, nrow = 2, ncol = 4)
 ```

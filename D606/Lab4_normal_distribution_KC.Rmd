@@ -54,7 +54,7 @@ fastfood %>%
 
 The number of observations in for each restaurant is relatively low (~50 each), and calories from fat covers a wide range of values, from 0 to 1270. As a result, the distributions can appear "bumpy" if the binwidth is set too low.
 
-So, I've included two plots, using the freqpoly geom, which allows us to view both restaurants together. The first plot uses wide bins to reduce "noise" and give a broad sense of the distribution. From this first plot, the center of each distribution appears roughly aligned, centering around ~200 calories.
+So, I've included two plots, using the freqpoly geom, which allows us to view both restaurants together. The first plot uses wide bins to reduce "noise" and give a broad sense of the distribution. From this first plot, the centers of both distributions appear roughly aligned, centering around ~200 calories.
 ```{r}
 fastfood %>%
   filter(restaurant == 'Mcdonalds' | restaurant == 'Dairy Queen') %>%
