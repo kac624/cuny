@@ -1,0 +1,27 @@
+---
+title: "Project 2 - Dataset 2"
+author: "Keith Colella"
+date: "`r Sys.Date()`"
+output: html_document
+knit: (function(input, ...) {
+    rmarkdown::render(
+      input,
+      output_dir = "../D607/output"
+    )
+  })
+---
+
+```{r, message = FALSE}
+library(tidyverse)
+library(reshape2)
+```
+
+## Read in CSV
+
+TBD
+
+```{r}
+data <- read_csv('https://github.com/jwilber/Bob_Ross_Paintings/raw/master/data/bob_ross_paintings.csv')
+
+head(data)
+```
