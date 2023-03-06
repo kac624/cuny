@@ -18,7 +18,9 @@ library(reshape2)
 
 ## Read in CSV
 
-I'll start by reading in the file and pulling up a quick preview of the top and bottom of the data frame. I know from previewing the .csv that the top four rows contain extaneous info, so I'll skip them when reading in.
+I'll use the Healthcare employment dataset posted by Jian Quan Chen. The data covers the number of employees and the mean hourly wages for various occupational groups within the healthcare industry.
+
+I'll start by reading in the file and pulling up a quick preview of the top and bottom of the data frame. I know from previewing the .csv that the top four rows contain extraneous info, so I'll skip them when reading in.
 
 ```{r}
 employment <- read_csv('https://github.com/kac624/cuny/raw/main/D607/data/healthcare_empl.csv',

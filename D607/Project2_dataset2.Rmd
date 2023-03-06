@@ -18,10 +18,103 @@ library(reshape2)
 
 ## Read in CSV
 
-TBD
+For our second dataset, we'll use the Boss Ross color scheme data provided by Taha Ahmed.
+
+I begin by reading in the file and having a quick preview. The data appears relatively clean, but there are some extraneous columns and it is in a wide format.
 
 ```{r}
 paintings <- read_csv('https://github.com/jwilber/Bob_Ross_Paintings/raw/master/data/bob_ross_paintings.csv')
 
 head(paintings)
 ```
+
+## Tidying Data
+
+I'm going to want to use the hex color codes four visualizations later, so I'll start by taking the color name and hex code columns and extracting the unique values. Each column contains a list of values, so I'll use regex to extract all individual colors in a list, then `unlist` them to flatten the data. I then add those two lists to a dataframe and remove duplicates to create a mapping last of colors to codes.
+
+```{r}
+color_names <- unlist(str_extract_all(paintings$colors,'([A-Za-z]+ [A-Za-z]+)'))
+color_codes <- unlist(str_extract_all(paintings$color_hex,'(#[A-Z0-9]{6})'))
+
+color_mapping <- distinct(
+  data.frame(name = color_names,
+             code = color_codes)) %>%
+  arrange(code)
+```
+
+Now, onto the dataframe itself. First, I remove some extraneous columns. Colors and color_hex can be removed because we've already taken the mappings in the step above, and the actual color-related observations are captured in the various pivoted columns. 
+
+From there, I melt the data into long format, and add a concatenated episode-season column. I want to map in the hex codes to match colors in the new `color` column, but first I must clean up the naming conventions for the colors (specifically, by removing underscores). Next, I can map in the codes using a left join (and then rearrange the columns to a more intuitive order). 
+
+```{r}
+paintings <- paintings %>%
+  select(-...1,
+         -painting_index,
+         -img_src,
+         -youtube_src,
+         -colors,
+         -color_hex)
+
+paintings_long <- paintings %>%
+  melt(id.vars = 1:4, variable.name = 'color', value.name = 'count') %>%
+  mutate(episode_unique = paste0(sprintf('%02d',season),'-',sprintf('%02d',episode))) %>%
+  arrange(episode_unique)
+
+paintings_long$color <- str_replace_all(paintings_long$color, '_', ' ') %>%
+  str_replace_all(' Brown', '')
+
+paintings_long <- paintings_long %>%
+  left_join(color_mapping, by = c('color' = 'name')) %>%
+  select(painting_title, season, episode, episode_unique,
+         num_colors, color, code, count)
+
+paintings_long <- paintings_long[order(paintings_long$code),]
+
+head(paintings_long)
+```
+
+## Visualizations
+
+There isn't quite as much "analysis" to perform here, but we can create several visualizations to give us a sense of Mr. Ross' preferred colors. First, we create a summary view to show which colors he used most across all 30+ seasons. A clear palette emerges, and I feel myself being transported to one of Mr. Ross' "happy tree" forests...
+
+```{r}
+paintings_long %>%
+  group_by(color, code) %>%
+  summarize(color_count = sum(count), .groups = 'keep') %>%
+  ggplot(aes(x = fct_reorder(color, color_count), y = color_count, fill = code)) +
+  geom_col(position = 'dodge') + 
+  scale_fill_identity() +
+  coord_flip()
+```
+
+We can then view his color usage over time. First, we look at total color usage per season. The trend appears mostly consistent, though the first season he seemed to limit his color choices a bit more. Seems like Bob knew what he liked, and stuck with it!
+
+```{r}
+paintings_long %>%
+  group_by(season) %>%
+  mutate(color_count = sum(count)) %>%
+  ungroup() %>%
+  ggplot(aes(x = season, y = count, fill = code)) +
+  geom_col() +
+  scale_fill_identity()
+```
+
+Finally, we repeat the same visualization as above, but with the colors displayed from each individual episode. We can view this two ways. First, we simply view through time, and second, we create separations by season. I prefer the first, as it's more fluid.
+
+Again, the color scheme is mostly consistent, but we do see Mr. Ross mixing things up a bit more in the later seasons.
+
+```{r}
+ggplot(paintings_long, aes(x = episode_unique, y = count, fill = code)) +
+  geom_col() + 
+  scale_fill_identity() + 
+  theme(axis.ticks.x = element_blank(),
+        axis.text.x = element_blank()) +
+  xlab('Time')
+
+ggplot(paintings_long, aes(x = episode, y = count, fill = code)) +
+  geom_col() + 
+  scale_fill_identity() + 
+  facet_grid(~season)
+```
+
+In terms of conclusions, it seems that Bob Ross stuck to what he knew. And what he knew worked well enough for 30+ lovely seasons!

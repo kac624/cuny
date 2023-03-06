@@ -305,7 +305,7 @@ map_plot_taxi_data <- function(input, title, taxi_type, ride_type, year,
           show.legend = legend) +
   scale_fill_gradient(low = 'gray100', 
                       high = color,
-                      # limits = c(0,2*10^6),
+                      limits = c(0,4*10^6),
                       labels = scales::comma) +
   ggtitle(title) +
   theme(axis.text.x=element_blank(),
@@ -321,7 +321,7 @@ map_plot_taxi_data(input = combo_df, title = 'Yellow Pickups 2012',
                    color = 'gold3', legend = TRUE)
 ```
 
-Next, we'll compare a few plots, showing dropoffs and pickups for rideshares and yellows in 2021. I've remove dthe legends to save space, but note that these plots (and all others below) have the same scale as the plot above, with color density ranging from 0 to 7 million rides. *Note: I checked separately, and the most rides to/from a single location in a single year was ~6.4mm.*
+Next, we'll compare a few plots, showing dropoffs and pickups for rideshares and yellows in 2021. I've remove dthe legends to save space, but note that these plots (and all others below) have the same scale as the plot above, with color density ranging from 0 to 4 million rides.
 
 ```{r}
 p1 <- map_plot_taxi_data(input = combo_df, title = 'Rideshare Pickups 2021',
@@ -373,7 +373,4 @@ for (yr in 2015:2022) {
 plot_grid(plotlist = yellow_plist, nrow = 2, ncol = 4)
 ```
 
-```{r}
-aggregated_df_all_2 %>% filter(location != 0, location != 264, location != 265) %>% group_by(year, type, location) %>% summarize (pickups = sum(pickups)) %>% arrange(desc(pickups))
-```
 
