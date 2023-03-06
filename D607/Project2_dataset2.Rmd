@@ -21,7 +21,7 @@ library(reshape2)
 TBD
 
 ```{r}
-data <- read_csv('https://github.com/jwilber/Bob_Ross_Paintings/raw/master/data/bob_ross_paintings.csv')
+paintings <- read_csv('https://github.com/jwilber/Bob_Ross_Paintings/raw/master/data/bob_ross_paintings.csv')
 
-head(data)
+head(paintings)
 ```

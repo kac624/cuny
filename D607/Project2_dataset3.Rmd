@@ -18,15 +18,136 @@ library(reshape2)
 
 ## Read in CSV
 
-TBD
+I'll start by reading in the file and pulling up a quick preview of the top and bottom of the data frame. I know from previewing the .csv that the top four rows contain extaneous info, so I'll skip them when reading in.
 
 ```{r}
-data <- read_csv('https://github.com/kac624/cuny/raw/main/D607/data/healthcare_empl.csv',
-                 skip = 3)
+employment <- read_csv('https://github.com/kac624/cuny/raw/main/D607/data/healthcare_empl.csv',
+                 skip = 4)
 
-head(data)
+head(employment)
 
-tail(data)
+tail(employment)
 ```
 
+Problems appear at both the top and the bottom. The columns names are difficult to understand, so I'll rename them. The first set of years detail the number of filled positions for each occupation in each year, whereas the second set of years shows the mean hourly wage. We'll clean these a bit more later, but for now, I'll rename the columns to show an e (for employees) and a w (for wages) to distinguish the two sets of variables.
+
+```{r}
+colnames(employment)
+
+colnames(employment) <- c('occupation',
+                          'e2000', 'e2005', 'e2009', 'e2010', 'e2015', 'e2016', 'e2020',
+                          'w2000', 'w2005', 'w2009', 'w2010', 'w2015', 'w2016', 'w2020')
+```
+
+The bottom of the dataframe contains some extreanous information, as well, so we can remove the bottom three rows.
+
+```{r}
+employment <- employment[1:(nrow(employment) - 3),]
+
+tail(employment)
+```
+
+There appear to be two columns that contain all NAs. They serve as categories for the occupations, but they serve no purpose in our data. So, I remove them.
+
+```{r}
+employment %>%
+  filter(is.na(e2000))
+
+employment <- employment %>%
+  filter(!is.na(e2000))
+```
+
+It appears that missing values are denoted by an ellipses ("…"), so we must find and replace those values with NAs. This will support conversion of the values from characters to strings later on.
+
+```{r}
+employment %>%
+  filter(e2000 == '…')
+
+employment[employment == '…'] <- NA
+```
+
+Next, we'll convert the dataset from a wide to a long format. We want to remove years as columns and convert it to a variable, but we have two sets of years in the data. So, we'll perform to separate conversions and then join them in a final data frame.
+
+```{r}
+positions <- employment %>%
+  melt(measure.vars = 2:8, variable.name = 'year', value.name = 'positions') %>%
+  mutate(year = str_replace(year,'e','')) %>%
+  select(occupation, year, positions)
+
+wages <- employment %>%
+  melt(measure.vars = 9:15, variable.name = 'year', value.name = 'wage') %>%
+  mutate(year = str_replace(year,'w','')) %>%
+  select(occupation, year, wage)
+
+employment_long <- left_join(positions, wages, by = c('occupation', 'year'))
+
+head(employment_long,10)
+```
+
+Now that we have a clean, long format, we can convert our numeric variables from string to double format. First, however, we must remove the commas from the position count values.
+
+```{r}
+employment_long$positions <- str_replace_all(employment_long$positions,',','')
+
+employment_long[2:4] <- lapply(employment_long[2:4], function(x) as.numeric(as.character(x)))
+```
+
+
+## Analysis
+
+To analyze the data, we'll construct a number of plots to identify trends. If we aggregate across occupations, we see a clear upward trend both in the total number of filled positions and in the mean wage.
+
+```{r}
+employment_long %>%
+  filter(!is.na(positions)) %>%
+  group_by(year) %>%
+  summarize(total_positions = sum(positions)) %>%
+  ggplot(aes(x = year, y = total_positions)) +
+  geom_line(linewidth = 1)
+
+employment_long %>%
+  filter(!is.na(positions)) %>%
+  group_by(year) %>%
+  summarize(mean_wage = mean(wage)) %>%
+  ggplot(aes(x = year, y = mean_wage)) +
+  geom_line(linewidth = 1)
+```
+
+What about trends in individual occupations? In terms of filled positions, it seems that, while the aggregate figure is going up, various trends emerge within individual occupations. Wages, however, show a much clearer upward trend across all occupations. Finally, we can try and subset a group of related occupations. For example, if we look at positions related to physical therapy, it becomes clear that this particular field is growing.
+
+```{r}
+employment_long %>%
+  filter(!is.na(positions)) %>%
+  ggplot(aes(x = year, color = occupation)) +
+  geom_line(aes(y = positions), show.legend = FALSE) +
+  scale_y_log10()
+
+employment_long %>%
+  filter(!is.na(positions)) %>%
+  ggplot(aes(x = year, color = occupation)) +
+  geom_line(aes(y = wage), show.legend = FALSE)
+
+employment_long %>%
+  filter(!is.na(positions),
+         str_detect(occupation, 'Phys')) %>%
+  ggplot(aes(x = year, color = occupation)) +
+  geom_line(aes(y = positions), linewidth = 1)
+
+```
+
+Finally, we'll create a plot to observe the relationship between volume and employment and wages. Because of the large disparity in volumes across occupations, however, the first plot is quite difficult to read. So, we create a second plot and transform both variables to log space. While we're now able to distinguish across points, there is no apparent trend. I suspected a downward trend might emerge, where, positions with fewer filled roles have higher wages (because of increased demand and/or specialization). However, no such trend emerges. We do see, however that wage observations tend to be higher for later years, which matches the observations above regarding the upward trend in wage growth.
+
+```{r}
+employment_long %>%
+  filter(!is.na(positions)) %>%
+  ggplot(aes(x = wage, y = positions, color = year)) +
+  geom_point()
+
+employment_long %>%
+  filter(!is.na(positions)) %>%
+  ggplot(aes(x = wage, y = positions, color = year)) +
+  geom_point() + 
+  scale_x_log10() +
+  scale_y_log10()
+```
 
