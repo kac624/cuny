@@ -1,7 +1,7 @@
 {
   "root": {
     "row": [
-      "book1": {
+      {
         "index": "1",
         "title": "Iran Between Two Revolutions",
         "author": "Ervand Abrahamian",
@@ -9,7 +9,7 @@
         "publish_year": "1982",
         "isbn": "978-0691101347"
       },
-      "book2": {
+      {
         "index": "2",
         "title": "Orientalsm",
         "author": "Edward Said",
@@ -17,7 +17,7 @@
         "publish_year": "1978",
         "isbn": "978-0394428147"
       },
-      "book3": {
+      {
         "index": "3",
         "title": "The Arab Spring: Pathways of Repression and Reform",
         "author": "Jason Brownlee; Tarek Masoud; Andrew Reynolds",
