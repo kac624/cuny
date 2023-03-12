@@ -15,7 +15,7 @@ knit: (function(input, ...) {
 library(tidyverse)
 library(rvest)
 library(xml2)
-library(jsonlite)
+library( jsonlite)
 ```
 
 ## HTML
@@ -78,19 +78,20 @@ books_df_xml
 
 Read in the file
 ```{r}
-json <- read_html('https://raw.githubusercontent.com/kac624/cuny/main/D607/data/week7_books.html')
+json <- fromJSON('https://raw.githubusercontent.com/kac624/cuny/main/D607/data/week7_books.json')
+json <- read_text('https://raw.githubusercontent.com/kac624/cuny/main/D607/data/week7_books.json')
+
+
+json <- fromJSON('data/week7_books.json')
+json <- read_json('data/week7_books.json')
 ```
 
 Explore
 ```{r}
-
+tibble(json = parse_json(json))
 ```
 
 Convert to dataframe
 ```{r}
-books_df_html <- html %>%
-  html_element('table') %>% 
-  html_table()
 
-books_df_html
 ```
