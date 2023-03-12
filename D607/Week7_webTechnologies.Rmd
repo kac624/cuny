@@ -14,11 +14,83 @@ knit: (function(input, ...) {
 ```{r setup, message=FALSE}
 library(tidyverse)
 library(rvest)
+library(xml2)
+library(jsonlite)
 ```
 
-## Read in HTML
+## HTML
 
+Read in the file
 ```{r}
-html <- read_html('https://raw.githubusercontent.com/kac624/cuny/main/D607/data/week7_books.html') 
+html <- read_html('https://raw.githubusercontent.com/kac624/cuny/main/D607/data/week7_books.html')
 ```
 
+Explore
+```{r}
+html %>% html_elements('title')
+
+html %>% html_elements('td')
+```
+
+Convert to dataframe
+```{r}
+books_df_html <- html %>%
+  html_element('table') %>% 
+  html_table()
+
+books_df_html
+```
+
+## XML
+
+Read in the file
+```{r}
+xml <- read_xml('https://raw.githubusercontent.com/kac624/cuny/main/D607/data/week7_books.xml')
+```
+
+Explore
+```{r}
+xml_structure(xml)
+
+xml_find_all(xml, xpath = '//title') 
+```
+
+Convert to dataframe
+```{r}
+elements <- c('index','title','author','publisher','publish_year','isbn')
+
+for (element in elements) {
+  contents <- xml_find_all(xml, xpath = str_c('//',element)) %>% xml_text()
+  assign(element, contents)
+}
+
+books_df_xml <- tibble(index = index,
+                       title = title,
+                       author = author,
+                       publisher = publisher,
+                       publish_year = publish_year,
+                       isbn = isbn)
+
+books_df_xml
+```
+
+## JSON
+
+Read in the file
+```{r}
+json <- read_html('https://raw.githubusercontent.com/kac624/cuny/main/D607/data/week7_books.html')
+```
+
+Explore
+```{r}
+
+```
+
+Convert to dataframe
+```{r}
+books_df_html <- html %>%
+  html_element('table') %>% 
+  html_table()
+
+books_df_html
+```
