@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+	<row>
+		<index>1</index>
+		<title>Iran Between Two Revolutions</title>
+		<author>Ervand Abrahamian</author>
+		<publisher>Princeton University Press</publisher>
+		<publish_year>1982</publish_year>
+		<isbn>978-0691101347</isbn>
+	</row>
+	<row>
+		<index>2</index>
+		<title>Orientalsm</title>
+		<author>Edward Said</author>
+		<publisher>Pantheon Books</publisher>
+		<publish_year>1978</publish_year>
+		<isbn>978-0394428147</isbn>
+	</row>
+	<row>
+		<index>3</index>
+		<title>The Arab Spring: Pathways of Repression and Reform</title>
+		<author>Jason Brownlee; Tarek Masoud; Andrew Reynolds</author>
+		<publisher>Oxford University Press</publisher>
+		<publish_year>2015</publish_year>
+		<isbn>978-0199660063</isbn>
+	</row>
+</root>
