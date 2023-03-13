@@ -53,7 +53,7 @@ as.data.frame(table(samp1)) %>%
   mutate(Proportion = Freq / sum(Freq))
 ```
 
-The distribution of responses in our sample differs significantly from the population distribution. In our sample, nearly half (~47%) of respondents do not believe scientific research benefits them, representing double the proportion seen in the broader population.
+The distribution of responses in our sample differs significantly from the population distribution. In our sample, roughly a third (~32%) of respondents do not believe scientific research benefits them, representing 1.5x the proportion seen in the broader population.
 
 ---
 
@@ -89,7 +89,7 @@ as.data.frame(table(samp2)) %>%
   mutate(Proportion = Freq / sum(Freq))
 ```
 
-In our second sample, we actually see $\hat{p}$ much close to $p$ at 7 out of 50 or 14%. If we were to table two additional samples of 100 and 1000, I would expect their sample means to become increasingly closer to the population means. Let's test it out!
+In our second sample, we actually see $\hat{p}$ much closer to $p$ at 7 out of 50 or 14%. If we were to take two additional samples of 100 and 1000, I would expect their sample means to become increasingly closer to the population means. Let's test it out!
 
 ```{r}
 sample_sizes <- c(100,1000)
@@ -135,9 +135,9 @@ ggplot(data = sample_props50, aes(x = p_hat)) +
   )
 ```
 
-The `sample_props50` dataframe contains 15,000 observations (each comprised of 50 samples) of four variables / elements, including the trial number, the response on which we're focused ("Doesn't benefit"), the number of respondents who gave that response in each trial, and the resulting sample proportion or $\hat{p}$, calculated as the number of respondents who responded "Doesn't benefit" divided by 50.
+The `sample_props50` dataframe contains 15,000 observations (each comprised of 50 samples) of four variables, including the trial number, the response on which we're focused ("Doesn't benefit"), the number of respondents who gave that response in each trial, and the resulting sample proportion or $\hat{p}$, calculated as the number of respondents who responded "Doesn't benefit" divided by 50.
 
-Based on the plot provided in the lab, the resulting distribution is very nearly normal. The distribution's mean is very clearly centered around 0.20, which matches the population proportion. This provides very clear support for the Central Limit Theorem. 
+Using the same plot as that found in the lab, the resulting distribution is very nearly normal. The distribution's mean is very clearly centered around 0.20, which matches the population proportion. This provides very clear support for the Central Limit Theorem. 
 
 ---
 
@@ -160,12 +160,12 @@ sample_props_small <- global_monitor %>%
          sample_size = 10) %>%
   select(replicate, sample_size, doesnt_benefit, p_hat)
 
-sample_props_small
+print(sample_props_small)
 ```
 
 The dataframe contains 25 observations, each capturing the number of "successes" (i.e. number of respondents who do not find benefits) for each trial, as well as the resulting sample proportion.
 
-One thing that became clear while constructing the data frame was that the `rep_sample_n` does *not* return rows when n = 0. In other words, if no "Doesn't benefit" responses are sampled in a given iteration, then only the results for "Benefits" are added for the dataframe. As a result, I had to initially focus on "Benefits" results, then calculate the complement to back out "Doesn't benefit" results.
+One thing that became clear while constructing the data frame was that the `rep_sample_n` function does *not* return rows when n = 0. In other words, if no "Doesn't benefit" responses are sampled in a given iteration, then only the results for "Benefits" are added for the dataframe. As a result, I had to initially focus on "Benefits" results, then calculate the complement to back out "Doesn't benefit" results. Otherwise, our dataframe would have had less than 25 observations, which might skew any analysis of aggregated results.
 
 ---
 
@@ -214,7 +214,7 @@ sample_props_10_50_100 %>%
             sd = sd(p_hat))
 ```
 
-We see trends emerge consistent with the Central Limit Theorem. As we increase the sample size, we see (i) the mean of the sampling distribution converges to the populatiuon mean, and (ii) the standard deviation decreases. These trends are apparent when plotting the distributions, as well. The larger samples drive tighter distributions with less spread.
+We see trends emerge consistent with the Central Limit Theorem. As we increase the sample size, we see (i) the mean of the sampling distribution converges to the population mean (though all sizes produce very close estimates), and (ii) the standard deviation decreases. These trends are apparent when plotting the distributions, as well. The larger samples drive tighter distributions with less spread.
 
 ---
 
@@ -234,7 +234,7 @@ global_monitor %>%
   mutate(Proportion = Freq / sum(Freq))
 ```
 
-Based on this limited sample, I would estimate the population proportion at ~87%.
+Despite the limited sample, we obtain a very solid estimate of population proportion at 80%.
 
 ---
 
@@ -259,7 +259,7 @@ ggplot(data = sample_props15, aes(x = p_hat)) +
 summary(sample_props15$p_hat)
 ```
 
-The sampling distribution appears left skewed. Because of the low sample size, we see that the CLT does not hold quite as strongly here. However, the sampling distribution also has a mean very close to the population proportion, at 79.8% versus 80%.
+The sampling distribution appears left skewed. Because of the low sample size, we see that the CLT does not hold quite as strongly here. However, the sampling distribution also has a mean very close to the population proportion, at 79.9% versus 80%.
 
 ---
 
@@ -284,7 +284,7 @@ ggplot(data = sample_props150, aes(x = p_hat)) +
 summary(sample_props150$p_hat)
 ```
 
-With an increased sample size, the sampling distribution is more clearly normal. The resulting sample proportion, however, remains largely unchanged, and very closely resembles the 80% population proportion.
+With an increased sample size, the sampling distribution appears much more normal. The mean of the sampling distribution, however, remains largely unchanged, and very closely resembles the 80% population proportion.
 
 ---
 

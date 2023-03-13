@@ -155,7 +155,7 @@ plot_ci <- function(sample_size, conf_level, iterations, bootstraps = 1000) {
 plot_ci(sample_size = 60, conf_level = 0.95, iterations = 50)
 ```
 
-The proportion of CIs that capture the population proportion is 48 out of 50 or 96%, roughly conforming to the confidence level, as expected. The match, however, is not exact. First, we don't have 100 confidence intervals, and second, there is a degree of randomness to these simulations, so we can't expect that results exactly conform to expected values.
+The proportion of CIs that capture the population proportion is 47 out of 50 or 94%, roughly conforming to the confidence level, as expected. The match, however, is not exact. First, we don't have 100 confidence intervals. More importantly, there is a degree of randomness to these simulations, so we can't expect that results exactly conform to expected values.
 
 ---
 
@@ -171,7 +171,7 @@ Choose a different confidence level than 95%. Would you expect a confidence inte
 plot_ci(sample_size = 60, conf_level = 0.85, iterations = 50)
 ```
 
-
+We run the same exercise to generate 50 confidence intervals with a confidence level of 85%. With a lower confidence level, we can produce tighter intervals. However, we must also expect more "misses" (or CIs that do not capture the true mean). This plot confirms that expectation, as we now have only 44 intervals (88%) that cover the 62% population proportion.
 
 ---
 
@@ -194,7 +194,7 @@ samp %>%
   get_ci(level = 0.99)
 ```
 
-I've reperformed the sample here and compared the original 95% CI to a 99% CI. 
+Based on our sample of 60, we expect with 99% confidence that the population proportion of adults who believe climate change is affecting their local community is between 50% and 81.7%. By "99% confidence", we mean that if we performed this survey 100 times, we would expect only one of the results confidence intervals to not correctly captured to the true population proportion.
 
 ---
 
@@ -210,7 +210,7 @@ Using the app, calculate 50 confidence intervals at the confidence level you cho
 plot_ci(sample_size = 60, conf_level = 0.999, iterations = 50)
 ```
 
-TBD
+We produce another plot at the 99.9% confidence level. This time, all the intervals encompass the 62% population mean. However, our intervals are much larger than the intervals produced at lower confidence levels, diminishing the ability to infer much.
 
 ---
 
@@ -222,13 +222,13 @@ Lastly, try one more (different) confidence level. First, state how you expect t
 
 #### Response
 
-I'll use an 80% confidence interval,
+I'll use an 80% confidence interval. With a lower confidence level, I would expect much tigher intervals, but a much higher miss rate.
 
 ```{r}
 plot_ci(sample_size = 60, conf_level = 0.80, iterations = 50)
 ```
 
-TBD
+The plot confirms my expectations. The intervals are much tighter than those observed above with a 99.9% confidence level, but only 41 of the intervals (82%) capture the true mean.
 
 ---
 
@@ -241,14 +241,15 @@ Using the app, experiment with different sample sizes and comment on how the wid
 #### Response
 
 ```{r}
-p1 <- plot_ci(sample_size = 60, conf_level = 0.95, iterations = 50)
-p2 <- plot_ci(sample_size = 10, conf_level = 0.95, iterations = 50)
+p1 <- plot_ci(sample_size = 30, conf_level = 0.95, iterations = 50)
+p2 <- plot_ci(sample_size = 60, conf_level = 0.95, iterations = 50)
 p3 <- plot_ci(sample_size = 100, conf_level = 0.95, iterations = 50)
 p4 <- plot_ci(sample_size = 200, conf_level = 0.95, iterations = 50)
 
 cowplot::plot_grid(p1, p2, p3, p4, nrow = 2, ncol = 2)
 ```
 
+Holding the confidence levels constant, we can see that increasing sample sizes drive tighter intervals. However, the "miss rate" appears relatively consistent, with 1 to 5 intervals missing the true population mean. So, we can infer that greater sample sizes drive tighter intervals, but only the confidence level determines the expected "miss rate".
 
 ---
 
@@ -256,7 +257,7 @@ cowplot::plot_grid(p1, p2, p3, p4, nrow = 2, ncol = 2)
 
 #### Question
 
-Finally, given a sample size (say, 60), how does the width of the interval change as you increase the number of bootstrap samples. Hint: Does changing the number of bootstap samples affect the standard error?
+Finally, given a sample size (say, 60), how does the width of the interval change as you increase the number of bootstrap samples. Hint: Does changing the number of bootstrap samples affect the standard error?
 
 #### Response
 
@@ -269,5 +270,6 @@ p4 <- plot_ci(sample_size = 60, conf_level = 0.95, iterations = 50, bootstraps =
 cowplot::plot_grid(p1, p2, p3, p4, nrow = 2, ncol = 2)
 ```
 
+The bootstrap size does not seem to have a discernible impact on the width of confidence intervals or the "miss rate". If anything, it appears to drive more consistent intervals. Whereas the intervals produces with bootstraps >=1000 move around quite a bit, the intervals produced with 5000 bootstraps appear more consistently centered on the population mean.
 
 ---

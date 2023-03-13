@@ -15,7 +15,7 @@ knit: (function(input, ...) {
 library(tidyverse)
 library(rvest)
 library(xml2)
-library( jsonlite)
+library(jsonlite)
 ```
 
 ## HTML
@@ -38,7 +38,7 @@ books_df_html <- html %>%
   html_element('table') %>% 
   html_table()
 
-books_df_html
+knitr::kable(books_df_html)
 ```
 
 ## XML
@@ -71,27 +71,27 @@ books_df_xml <- tibble(index = index,
                        publish_year = publish_year,
                        isbn = isbn)
 
-books_df_xml
+knitr::kable(books_df_xml)
 ```
 
 ## JSON
 
 Read in the file
 ```{r}
-json <- fromJSON('https://raw.githubusercontent.com/kac624/cuny/main/D607/data/week7_books.json')
-json <- read_text('https://raw.githubusercontent.com/kac624/cuny/main/D607/data/week7_books.json')
-
-
-json <- fromJSON('data/week7_books.json')
-json <- read_json('data/week7_books.json')
+json <- read_json('https://raw.githubusercontent.com/kac624/cuny/main/D607/data/week7_books.json')
 ```
 
 Explore
 ```{r}
-tibble(json = parse_json(json))
+json[[2]]
+
+json[[3]]$title
 ```
 
 Convert to dataframe
 ```{r}
+books_df_json <- tibble(json = json) %>%
+  unnest_wider(json)
 
+knitr::kable(books_df_json)
 ```
