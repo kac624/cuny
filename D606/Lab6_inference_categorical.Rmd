@@ -1,0 +1,246 @@
+---
+title: "Lab5a - Sampling Distributions"
+author: "Keith Colella"
+date: "`r Sys.Date()`"
+output: html_document
+knit: (function(input, ...) {
+    rmarkdown::render(
+      input,
+      output_dir = "../D606/output"
+    )
+  })
+---
+
+## Setup
+
+Config
+
+```{r setup, message = FALSE}
+library(tidyverse)
+library(openintro)
+library(infer)
+set.seed(2012)
+```
+
+Data
+
+```{r}
+data('yrbss', package='openintro')
+no_helmet <- yrbss %>%
+  filter(helmet_12m == "never")
+```
+
+## Exercise 1
+
+#### Question
+
+What are the counts within each category for the amount of days these students have texted while driving within the past 30 days?
+
+#### Response
+
+```{r}
+table(yrbss$text_while_driving_30d)
+
+yrbss %>%
+  filter(text_while_driving_30d != 'did not drive') %>%
+  select(text_while_driving_30d) %>%
+  table() %>% as.data.frame() %>%
+  mutate(Prop = Freq / sum(Freq)) %>%
+  arrange(factor(text_while_driving_30d,
+                 levels = c('0','1-2','3-5','6-9','10-19','20-29','30')))
+```
+
+The table above summarizes the frequency of responses under each category. Based on these responses, the majority of respondents who drove within the past 30 days did so without texting. Good to hear!
+
+---
+
+## Exercise 2
+
+#### Question
+
+What is the proportion of people who have texted while driving every day in the past 30 days and never wear helmets?
+
+#### Response
+
+```{r}
+yrbss %>%
+  select(text_while_driving_30d, helmet_12m) %>%
+  table() %>% as.data.frame() %>%
+  mutate(Prop = Freq / sum(Freq)) %>%
+  filter(text_while_driving_30d == '30',
+         helmet_12m == 'never')
+```
+
+Of the respondents, 463 answered that they texted while driving on 30 out of the last 30 days and never wore a helmet over the last 12 months, representing ~3.74% of total respondents.
+
+---
+
+## Exercise 3
+
+#### Question
+
+What is the margin of error for the estimate of the proportion of non-helmet wearers that have texted while driving each day for the past 30 days based on this survey?
+
+#### Response
+
+```{r}
+yrbss <- yrbss %>%
+  mutate(text_binary = if_else(text_while_driving_30d == '30',
+                               'yes','no'))
+
+yrbss %>%
+  filter(helmet_12m == 'never',
+         !is.na(text_binary)) %>%
+  specify(response = text_binary, success = 'yes') %>%
+  generate(reps = 1000, type = 'bootstrap') %>%
+  calculate(stat = 'prop') %>%
+  get_ci(level = 0.95) %>%
+  mutate(margin_error = (upper_ci - lower_ci) / 2)
+```
+
+The margin of error for the proportion of non-helmet wearers who text while driving everyday is ~0.65%. This formulation removed all observations for which `text_while_driving_30d` was NA. Different treatments of NAs may drive slightly different results.
+
+---
+
+## Exercise 4
+
+#### Question
+
+Using the `infer` package, calculate confidence intervals for two other categorical variables (you’ll need to decide which level to call “success”, and report the associated margins of error. Interpet the interval in context of the data. It may be helpful to create new data sets for each of the two countries first, and then use these data sets to construct the confidence intervals.
+
+#### Response
+
+I calculate confidence intervals for the proportion of high schoolers who (i) got 0 hours of physical activity per week and (ii) watched more than 5 hours of TV per school day. On the first point, I estimate between 15.#% and 16.#% of high schoolers get 0 hours of physical activity a week. On the second, I estimate between 11.#% and 12.#% of high schoolers watch more than 5 hours of TV a day.
+
+```{r}
+yrbss %>%
+  filter(!is.na(physically_active_7d)) %>%
+  mutate(phys_act_binary  = if_else(
+    physically_active_7d == 0,'yes','no')) %>%
+  specify(response = phys_act_binary, success = 'yes') %>%
+  generate(reps = 1000, type = 'bootstrap') %>%
+  calculate(stat = 'prop') %>%
+  get_ci(level = 0.95) %>%
+  mutate(margin_error = (upper_ci - lower_ci) / 2)
+
+yrbss %>%
+  filter(!is.na(hours_tv_per_school_day )) %>%
+  mutate(hour_tv_binary  = if_else(
+    hours_tv_per_school_day == '5+','yes','no')) %>%
+  specify(response = hour_tv_binary, success = 'yes') %>%
+  generate(reps = 1000, type = 'bootstrap') %>%
+  calculate(stat = 'prop') %>%
+  get_ci(level = 0.95) %>%
+  mutate(margin_error = (upper_ci - lower_ci) / 2)
+```
+
+---
+
+## Exercise 5
+
+#### Question
+
+Describe the relationship between `p` and `me`. Include the margin of error vs. population proportion plot you constructed in your answer. For a given sample size, for which value of p is margin of error maximized?
+
+#### Response
+
+TBD
+
+---
+
+## Exercise 6
+
+#### Question
+
+Describe the sampling distribution of sample proportions at $n=300$ and $p=0.1$. Be sure to note the center, spread, and shape.
+
+#### Response
+
+```{r}
+
+```
+
+TBD
+
+---
+
+## Exercise 7
+
+#### Question
+
+Keep $n$ constant and change $p$. How does the shape, center, and spread of the sampling distribution vary as $p$ changes. You might want to adjust min and max for the $x$-axis for a better view of the distribution.
+
+#### Response
+
+```{r}
+
+```
+
+TBD
+
+---
+
+## Exercise 8
+
+#### Question
+
+Now also change $n$. How does $n$ appear to affect the distribution of $p^$?
+
+#### Response
+
+```{r}
+
+```
+
+TBD
+
+---
+
+## Exercise 9
+
+#### Question
+
+Is there convincing evidence that those who sleep 10+ hours per day are more likely to strength train every day of the week? As always, write out the hypotheses for any tests you conduct and outline the status of the conditions for inference. If you find a significant difference, also quantify this difference with a confidence interval.
+
+#### Response
+
+```{r}
+
+```
+
+TBD
+
+---
+
+## Exercise 10
+
+#### Question
+
+Let’s say there has been no difference in likeliness to strength train every day of the week for those who sleep 10+ hours. What is the probability that you could detect a change (at a significance level of 0.05) simply by chance? *Hint:* Review the definition of the Type 1 error.
+
+#### Response
+
+TBD
+
+```{r}
+
+```
+
+---
+
+## Exercise 11
+
+#### Question
+
+Suppose you’re hired by the local government to estimate the proportion of residents that attend a religious service on a weekly basis. According to the guidelines, the estimate must have a margin of error no greater than 1% with 95% confidence. You have no idea what to expect for $p$. How many people would you have to sample to ensure that you are within the guidelines?
+*Hint:* Refer to your plot of the relationship between $p$ and margin of error. This question does not require using a dataset.
+
+#### Response
+
+```{r}
+
+```
+
+TBD
+
+---
