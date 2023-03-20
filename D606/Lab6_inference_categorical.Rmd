@@ -1,5 +1,5 @@
 ---
-title: "Lab5a - Sampling Distributions"
+title: "Lab6 - Inference with Categorical Variables"
 author: "Keith Colella"
 date: "`r Sys.Date()`"
 output: html_document
@@ -19,6 +19,7 @@ Config
 library(tidyverse)
 library(openintro)
 library(infer)
+library(cowplot)
 set.seed(2012)
 ```
 
@@ -144,7 +145,17 @@ Describe the relationship between `p` and `me`. Include the margin of error vs. 
 
 #### Response
 
-TBD
+```{r}
+n <- 1000
+p <- seq(from = 0, to = 1, by = 0.01)
+me <- 2 * sqrt(p * (1 - p)/n)
+dd <- data.frame(p = p, me = me)
+ggplot(data = dd, aes(x = p, y = me)) + 
+  geom_line() +
+  labs(x = "Population Proportion", y = "Margin of Error")
+```
+
+For a given sample size, the margin of error is smallest as the population proportion nears 0 and 1. Conversely, the margin of error greater as the proportion nears 0.5. It appears the margin of error is greatest exactly at the proportion of 0.5.
 
 ---
 
@@ -157,10 +168,24 @@ Describe the sampling distribution of sample proportions at $n=300$ and $p=0.1$.
 #### Response
 
 ```{r}
+plot_samp_dist <- function(n,p,x_min,x_max) {
+  pp <- data.frame(p_hat = rep(0, 5000))
+      for(i in 1:5000){
+        samp <- sample(c(TRUE, FALSE), n, replace = TRUE, 
+                       prob = c(p, 1 - p))
+        pp$p_hat[i] <- sum(samp == TRUE) / n
+      }
+      bw <- diff(range(pp$p_hat)) / 30
+      ggplot(data = pp, aes(x = p_hat)) +
+        geom_histogram(binwidth = bw) +
+        xlim(x_min, x_max) +
+        ggtitle(paste0("p = ", p, ", n = ", n))
+}
 
+plot_samp_dist(300,0.1,0,0.25)
 ```
 
-TBD
+The distribution appears centered on 0.1, aligning to $p$. Most values are between 0.5 and 0.15. In terms of shape, the distribution appears approximately normal, but we do see some quasi-modes appear different from the mean.
 
 ---
 
@@ -173,10 +198,10 @@ Keep $n$ constant and change $p$. How does the shape, center, and spread of the 
 #### Response
 
 ```{r}
-
+plot_samp_dist(300,0.3,0.1,0.5)
 ```
 
-TBD
+This distributions appears to adhere more closely to a normal distribution. The mean and mode are much closer, and the overall shape is more symmetrical. There is, however, more spread, as most values now appear between a wider range of 0.2 and 0.4.
 
 ---
 
@@ -189,10 +214,15 @@ Now also change $n$. How does $n$ appear to affect the distribution of $p^$?
 #### Response
 
 ```{r}
+p1 <- plot_samp_dist(100,0.3,0.1,0.5)
+p2 <- plot_samp_dist(500,0.3,0.1,0.5)
+p3 <- plot_samp_dist(100,0.1,0.0,0.2)
+p4 <- plot_samp_dist(500,0.1,0.0,0.2)
 
+plot_grid(p1, p2, p3, p4, nrow = 2, ncol = 2)
 ```
 
-TBD
+We can see that increasing the sample size reinforces the normality of the sampling distribution, for a given $p$. So, as $p$ nears 0.5, the normality appears to increase, but so does the spread (as note previously in viewing the interaction of $p$ and the margin of error). Similarly, increasing the sample sizes increases the normality and *decreases* spread.
 
 ---
 
@@ -204,11 +234,26 @@ Is there convincing evidence that those who sleep 10+ hours per day are more lik
 
 #### Response
 
-```{r}
+We are testing whether the proportion of high schoolers who sleep 10+ hours a day and workout 7 days a week is different from the proportion of high schoolers who do *not* sleep 10+ hours a day and workout 7 days a week. Our null hypothesis is that the difference between these proportions is zero, and out alternative hypothesis is that the difference is *not* zero.
 
+$H_0: p_1 - p_2 = 0$  
+$H_\alpha: p_1 - p_2 \neq 0$
+
+```{r}
+yrbss %>%
+  filter(!is.na(school_night_hours_sleep),
+         !is.na(strength_training_7d)) %>%
+  mutate(sleep_10 = if_else(school_night_hours_sleep == '10+',
+                               'yes','no'),
+         strength_7 = if_else(strength_training_7d == '7',
+                               'yes','no')) %>%
+  specify(response = strength_7, explanatory = sleep_10, success = 'yes') %>%
+  generate(reps = 1000, type = 'bootstrap') %>%
+  calculate(stat = 'diff in props', order = c('no','yes')) %>%
+  get_ci(level = 0.95)
 ```
 
-TBD
+Our resulting confidence interval does *not* include zero, so we can conclude with 95% confidence that the difference between the two populations is not zero (i.e. we reject $H_0$). The negative values indicate that the proportion of heavy trainers who also sleep 10+ hours a day is *lower* than the proportion of heavy trainers who sleep <10 hours a day (i.e. $p_1 < p_2$). In other words, we conclude that high schoolers who sleep 10+ hours per day are *less* likely to strength train every day of the week. Our confidence interval indicates that heavy sleepers are ~6% to ~16% less likely to train sever days a week.
 
 ---
 
@@ -220,11 +265,7 @@ Let’s say there has been no difference in likeliness to strength train every d
 
 #### Response
 
-TBD
-
-```{r}
-
-```
+The probability of wrongly rejecting a null hypothesis that is actually true (i.e. a Type 1 error) is the same as the significance level. So, in our example, we would expect that, there is a 5% likelihood that we observed a difference in the two proportions simply by chance.
 
 ---
 
@@ -237,10 +278,43 @@ Suppose you’re hired by the local government to estimate the proportion of res
 
 #### Response
 
-```{r}
+If we reconstruct the earlier plot of $p$ against margin of error, we see that the maximum margin of error occurs at $p = 0.5$.
 
+```{r}
+n <- 1000
+p <- seq(from = 0, to = 1, by = 0.01)
+me <- 2 * sqrt(p * (1 - p)/n)
+dd <- data.frame(p = p, me = me)
+ggplot(data = dd, aes(x = p, y = me)) + 
+  geom_line() +
+  labs(x = "Population Proportion", y = "Margin of Error")
 ```
 
-TBD
+So, we can get a sense of the largest margin of error by assuming that $p = 50$. Moreover, we know that we'll be using a confidence level of 95%, so we know that our z-value will be 1.96. We can then use the formula for margin of hour to back out the minimum sample size needed to ensure our margin of error does not exceed 1%.
+
+$$
+z * \sqrt{
+  \frac{p^(1-p^)}{n}
+} 
+$$
+
+We adapt the approach above exploring the interaction between $p$ and the margin of error to plot $n$ and the margin of error. We then isolate the sample size that gives us a ~1% margin of error.
+
+```{r}
+n <- seq(from = 0, to = 10000, by = 1)
+p <- 0.5
+me <- 1.96 * sqrt(p * (1 - p) / n)
+dd <- data.frame(n = n, me = me)
+
+ggplot(data = dd, aes(x = n, y = me)) + 
+  geom_line() +
+  labs(x = "Sample Size", y = "Margin of Error")
+
+dd %>%
+  filter(round(me,4) == 0.0100) %>%
+  head()
+```
+
+We conclude that we need a sample size of >9,509 to obtain a margin of error no larger than ~1.00% with a 95% confidence level.
 
 ---
