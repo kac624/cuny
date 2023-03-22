@@ -1,0 +1,273 @@
+---
+title: "Lab7 - Inference for Numerical Variables"
+author: "Keith Colella"
+date: "`r Sys.Date()`"
+output: html_document
+knit: (function(input, ...) {
+    rmarkdown::render(
+      input,
+      output_dir = "../D606/output"
+    )
+  })
+---
+
+## Setup
+
+Config
+
+```{r setup, message = FALSE}
+library(tidyverse)
+library(openintro)
+library(infer)
+set.seed(789)
+```
+
+Data
+
+```{r}
+data('yrbss', package='openintro')
+```
+
+## Exercise 1
+
+#### Question
+
+What are the cases in this data set? How many cases are there in our sample?
+
+#### Response
+
+```{r}
+nrow(yrbss)
+```
+
+A case in this data set is a series of responses from a single respondent (i.e. a high school included in the sample). There are a total of 13583 cases / observations in the data.
+
+---
+
+## Exercise 2
+
+#### Question
+
+How many observations are we missing weights from?
+
+#### Response
+
+```{r}
+yrbss %>%
+  filter(is.na(weight)) %>%
+  nrow()
+```
+
+There are 1004 cases in which weight is missing.
+
+---
+
+## Exercise 3
+
+#### Question
+
+Make a side-by-side boxplot of `physical_3plus` and `weight`. Is there a relationship between these two variables? What did you expect and why?
+
+```{r}
+yrbss <- yrbss %>% 
+  mutate(physical_3plus = ifelse(physically_active_7d > 2, "yes", "no"))
+```
+
+#### Response
+
+I would expect there is a negative correlation between physical activity and weight, as individuals who exercise more tend to carry less body fat. So, I would expect the mean weight of the "yes" level of `physical_3plus` to be less than the mean wieght of the no category. Let's see!
+
+```{r}
+ggplot(yrbss, aes(physical_3plus, weight)) + 
+  geom_boxplot()
+```
+
+Seems I was wrong! First, there does not appear to be a very strong relationship between physical activity at the 3-day cut-off and weight. If anything, there is a *positive* correlation between activity and weight, as the mean weight is slightly higher for those who do exercise 3+ days a week. The difference, however, appears minimal. Moreover, the distribution of weights for those who did not respond to the physical activity question (i.e. NAs) appears very similar to the No's and Yes's, indicating that the physical activity response does not correlate particularly well with physical activity.
+
+---
+
+## Exercise 4
+
+#### Question
+
+Are all conditions necessary for inference satisfied? Comment on each. You can compute the group sizes with the summarize command above by defining a new variable with the definition `n()`.
+
+#### Response
+
+First, we must consider independence. Inference requires that the sample observations be independent. In terms of data gathering, we must assume that the CDC's survey methodology observed best practices to maintain independence (e.g. random sampling). We can, however, perform one check: according to the "10% rule", we can assume independence if our sample constitutes no more than 10% of the target population. According to the National Center for Education Statistics, there were more than 15mm students in American public high schools in 2021 (https://nces.ed.gov/fastfacts/display.asp?id=372). Our 13,583 person sample therefore constitutes less than 1% of the total high school population, so we can confidently assume independence, and our first condition is met.
+
+```{r}
+nrow(yrbss) / (15*10^6)
+```
+
+Second, we must assess normality. With sample sizes <30, we must assess whether the sample comes from a normally distributed population. However, our sample is well above 30, so we can assume the Central Limit Theorem applies, and our sampling distribution is approximately normal. As such, our second condition is met.
+
+---
+
+## Exercise 5
+
+#### Question
+
+Write the hypotheses for testing if the average weights are different for those who exercise at least three times a week and those who don’t.
+
+#### Response
+
+Our null hypothesis is that the mean weight of individuals who exercise at least three times a week is the same as those who do not, and our alternative is that they are different. Written mathematically, we have the following.
+
+$H_0:\mu_{yes} - \mu_{no} = 0$
+$H_A:\mu_{yes} - \mu_{no} \neq 0 $
+
+---
+
+## Exercise 6
+
+#### Question
+
+How many of these null permutations have a difference of at least obs_stat?
+
+```{r}
+obs_diff <- yrbss %>%
+  filter(!is.na(weight),
+         !is.na(physical_3plus)) %>%
+  specify(weight ~ physical_3plus) %>%
+  calculate(stat = "diff in means", order = c("yes", "no"))
+
+mean_3plus <- yrbss %>%
+  filter(physical_3plus == 'yes',
+         !is.na(weight)) %>%
+  .$weight %>%
+  mean()
+
+mean_2minus <- yrbss %>%
+  filter(physical_3plus == 'no',
+         !is.na(weight)) %>%
+  .$weight %>%
+  mean()
+
+mean_3plus - mean_2minus
+
+null_dist <- yrbss %>%
+  filter(!is.na(weight),
+         !is.na(physical_3plus)) %>%
+  specify(weight ~ physical_3plus) %>%
+  hypothesize(null = "independence") %>%
+  generate(reps = 1000, type = "permute") %>%
+  calculate(stat = "diff in means", order = c("yes", "no"))
+
+ggplot(data = null_dist, aes(x = stat)) +
+  geom_histogram()
+```
+
+#### Response
+
+None of the difference in the null distribution have a difference at the level of `obs_stat`. The max `stat` in the null distribution is 1.038, whereas the `obs_stat` is 1.775.
+
+```{r}
+max(null_dist$stat)
+obs_diff
+```
+
+---
+
+## Exercise 7
+
+#### Question
+
+Construct and record a confidence interval for the difference between the weights of those who exercise at least three times a week and those who don’t, and interpret this interval in context of the data.
+
+#### Response
+
+```{r}
+null_dist %>%
+  get_p_value(obs_stat = obs_diff, direction = "two_sided")
+
+null_dist %>%
+  get_ci(level = 0.95)
+```
+
+The confidence interval straddles zero, indicating that the difference between means may actually be zero. 
+
+---
+
+## Exercise 8
+
+#### Question
+
+Calculate a 95% confidence interval for the average height in meters (height) and interpret it in context.
+
+#### Response
+
+```{r}
+yrbss %>%
+  filter(!is.na(height)) %>%
+  specify(response = height) %>%
+  generate(reps = 1000, type = 'bootstrap') %>%
+  calculate(stat = 'mean') %>%
+  get_ci(level = 0.95)
+```
+
+
+---
+
+## Exercise 9
+
+#### Question
+
+Calculate a new confidence interval for the same parameter at the 90% confidence level. Comment on the width of this interval versus the one obtained in the previous exercise.
+
+#### Response
+
+TBD
+
+---
+
+## Exercise 10
+
+#### Question
+
+Conduct a hypothesis test evaluating whether the average height is different for those who exercise at least three times a week and those who don’t.
+
+#### Response
+
+```{r}
+yrbss %>%
+  filter(!is.na(height)) %>%
+  specify(response = height) %>%
+  generate(reps = 1000, type = 'bootstrap') %>%
+  calculate(stat = 'mean') %>%
+  get_ci(level = 0.90)
+```
+
+TBD
+
+---
+
+## Exercise 11
+
+#### Question
+
+Now, a non-inference task: Determine the number of different options there are in the dataset for the `hours_tv_per_school_day` there are.
+
+#### Response
+
+```{r}
+yrbss$hours_tv_per_school_day %>%
+  table()
+```
+
+
+TBD
+
+---
+
+## Exercise 12
+
+#### Question
+
+Come up with a research question evaluating the relationship between height or weight and sleep. Formulate the question in a way that it can be answered using a hypothesis test and/or a confidence interval. Report the statistical results, and also provide an explanation in plain language. Be sure to check all assumptions, state your $\alpha$ level, and conclude in context.
+
+#### Response
+
+TBD
+
+---
