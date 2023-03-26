@@ -19,6 +19,7 @@ Config
 library(tidyverse)
 library(openintro)
 library(infer)
+library(kableExtra)
 set.seed(789)
 ```
 
@@ -137,8 +138,8 @@ null_dist <- yrbss %>%
          !is.na(physical_3plus)) %>%
   specify(weight ~ physical_3plus) %>%
   hypothesize(null = "independence") %>%
-  # generate(reps = 1000, type = "permute") %>%
-  generate(reps = 1000, type = "bootstrap") %>%
+  generate(reps = 1000, type = "permute") %>%
+  # generate(reps = 1000, type = "bootstrap") %>%
   calculate(stat = "diff in means", order = c("yes", "no"))
 
 ggplot(data = null_dist, aes(x = stat)) +
@@ -148,15 +149,11 @@ ggplot(data = null_dist, aes(x = stat)) +
 
 #### Response
 
-None of the difference in the null distribution have a difference at the level of `obs_stat`. The max `stat` in the null distribution is 1.038, whereas the `obs_stat` is 1.775.
+None of the differences in the null distribution have a difference at the level of `obs_stat`. The max `stat` in the null distribution is 1.038, whereas the `obs_stat` is 1.775.
 
 ```{r}
-max(null_dist$stat)
-obs_diff
-
-null_dist %>%
-  filter(stat > obs_diff$stat) %>%
-  count()
+cat('Max difference from null dist:',max(null_dist$stat)[1],
+    '\nObserved difference from sample:',obs_diff$stat[1])
 ```
 
 ---
@@ -169,20 +166,25 @@ Construct and record a confidence interval for the difference between the weight
 
 #### Response
 
-```{r}
-null_dist %>%
+```{r, warning = FALSE}
+pval <- null_dist %>%
   get_p_value(obs_stat = obs_diff, direction = "two_sided")
 
-null_dist %>%
-  get_ci(level = 0.95)
-
-yrbss %>%
+ci <- yrbss %>%
   filter(!is.na(weight),
          !is.na(physical_3plus)) %>%
   specify(weight ~ physical_3plus) %>%
   generate(reps = 1000, type = "bootstrap") %>%
   calculate(stat = "diff in means", order = c("yes", "no")) %>%
   get_ci(level = 0.95)
+
+cat('95% Confidence Interval:',ci$lower_ci,'-',ci$upper_ci,
+    '\nP-value:',pval$p_value)
+
+null_dist %>%
+  visualize() +
+  shade_p_value(obs_stat = obs_diff, direction = 'two-sided') + 
+  shade_ci(endpoints = ci)
 ```
 
 The confidence interval straddles zero, indicating that the difference between means may actually be zero. 
@@ -236,7 +238,7 @@ Conduct a hypothesis test evaluating whether the average height is different for
 
 #### Response
 
-```{r}
+```{r, warning = FALSE}
 yrbss %>%
   ggplot(aes(physical_3plus, height)) + 
   geom_boxplot()
@@ -246,7 +248,7 @@ yrbss %>%
 #   summarize(mean_diff = mean(height, na.rm = TRUE))
 
 mean_diff <- yrbss %>%
-    filter(!is.na(height),
+  filter(!is.na(height),
          !is.na(physical_3plus)) %>%
   specify(height ~ physical_3plus) %>%
   calculate(stat = 'diff in means', order = c('yes', 'no'))
@@ -256,10 +258,11 @@ null_dist <- yrbss %>%
          !is.na(physical_3plus)) %>%
   specify(height ~ physical_3plus) %>%
   hypothesize(null = 'independence') %>%
-  generate(reps = 1000, type = 'bootstrap') %>%
+  # generate(reps = 1000, type = 'bootstrap') %>%
+  generate(reps = 1000, type = 'permute') %>%
   calculate(stat = 'diff in means', order = c('yes', 'no'))
 
-null_dist %>% 
+pval <- null_dist %>% 
   get_p_value(obs_stat = mean_diff, direction = 'two-sided')
 
 ci <- yrbss %>%
@@ -269,6 +272,9 @@ ci <- yrbss %>%
   generate(reps = 1000, type = 'bootstrap') %>%
   calculate(stat = 'diff in means', order = c('yes', 'no')) %>%
   get_ci(level = 0.95)
+
+cat('95% Confidence Interval:',ci$lower_ci,'-',ci$upper_ci,
+    '\nP-value:',pval$p_value)
 ```
 
 TBD
@@ -287,7 +293,7 @@ Finally, just some visualizations.
 ```{r}
 null_dist %>%
   visualize() +
-  # shade_p_value(obs_stat = mean_diff, direction = 'two-sided') + 
+  shade_p_value(obs_stat = mean_diff, direction = 'two-sided') + 
   shade_ci(endpoints = ci)
 ```
 
@@ -320,13 +326,213 @@ Come up with a research question evaluating the relationship between height or w
 
 #### Response
 
+First, test both for relationship. Then, create multi-level categorical variable combining height and weight to assess joint relationships.
 
+Begin by examining the sleep variable and plotting relationships.
+
+```{r}
+yrbss$school_night_hours_sleep %>%
+  table()
+```
+
+This variable is multinomial, so we'll construct a binary version. Then, we can plot the relationships.
+
+```{r}
+yrbss <- yrbss %>%
+  mutate(sleep_7plus = case_when(school_night_hours_sleep == '<5' ~ 'no',
+                                 school_night_hours_sleep == '5' ~ 'no',
+                                 school_night_hours_sleep == '6' ~ 'no',
+                                 TRUE ~ 'yes'))
+
+ggplot(yrbss, aes(sleep_7plus, height)) +
+  geom_boxplot()
+
+ggplot(yrbss, aes(sleep_7plus, weight)) +
+  geom_boxplot()
+```
+
+Then start our testing. We'll test weight and sleep first
+
+```{r, warning = FALSE}
+mean_diff <- yrbss %>%
+  filter(!is.na(height),
+         !is.na(sleep_7plus)) %>%
+  specify(height ~ sleep_7plus) %>%
+  calculate(stat = 'diff in means', order = c('yes', 'no'))
+
+null_dist <- yrbss %>%
+  filter(!is.na(height),
+         !is.na(sleep_7plus)) %>%
+  specify(height ~ sleep_7plus) %>%
+  hypothesize(null = 'independence') %>%
+  # generate(reps = 1000, type = 'bootstrap') %>%
+  generate(reps = 1000, type = 'permute') %>%
+  calculate(stat = 'diff in means', order = c('yes', 'no'))
+
+pval <- null_dist %>% 
+  get_p_value(obs_stat = mean_diff, direction = 'two-sided')
+
+ci <- yrbss %>%
+  filter(!is.na(height),
+         !is.na(sleep_7plus)) %>%
+  specify(height ~ sleep_7plus) %>%
+  generate(reps = 1000, type = 'bootstrap') %>%
+  calculate(stat = 'diff in means', order = c('yes', 'no')) %>%
+  get_ci(level = 0.95)
+
+cat('95% Confidence Interval:',ci$lower_ci,'-',ci$upper_ci,
+    '\nP-value:',pval$p_value)
+
+null_dist %>%
+  visualize() +
+  shade_p_value(obs_stat = mean_diff, direction = 'two-sided') + 
+  shade_ci(endpoints = ci)
+```
+
+And again for weight.
+
+```{r, warning = FALSE}
+mean_diff <- yrbss %>%
+  filter(!is.na(weight),
+         !is.na(sleep_7plus)) %>%
+  specify(weight ~ sleep_7plus) %>%
+  calculate(stat = 'diff in means', order = c('yes', 'no'))
+
+null_dist <- yrbss %>%
+  filter(!is.na(weight),
+         !is.na(sleep_7plus)) %>%
+  specify(weight ~ sleep_7plus) %>%
+  hypothesize(null = 'independence') %>%
+  # generate(reps = 1000, type = 'bootstrap') %>%
+  generate(reps = 1000, type = 'permute') %>%
+  calculate(stat = 'diff in means', order = c('yes', 'no'))
+
+pval <- null_dist %>% 
+  get_p_value(obs_stat = mean_diff, direction = 'two-sided')
+
+ci <- yrbss %>%
+  filter(!is.na(weight),
+         !is.na(sleep_7plus)) %>%
+  specify(weight ~ sleep_7plus) %>%
+  generate(reps = 1000, type = 'bootstrap') %>%
+  calculate(stat = 'diff in means', order = c('yes', 'no')) %>%
+  get_ci(level = 0.95)
+
+cat('95% Confidence Interval:',ci$lower_ci,'-',ci$upper_ci,
+    '\nP-value:',pval$p_value)
+
+null_dist %>%
+  visualize() +
+  shade_p_value(obs_stat = mean_diff, direction = 'two-sided') + 
+  shade_ci(endpoints = ci)
+```
 
 ANOVA for binary version of all four variables
 
 ```{r}
+yrbss$school_night_hours_sleep <- factor(yrbss$school_night_hours_sleep,
+                                         levels = c('<5','5','6','7',
+                                                    '8','9','10+'),
+                                         ordered = TRUE)
 
+ggplot(yrbss, aes(school_night_hours_sleep, weight)) +
+  geom_boxplot()
+
+ggplot(yrbss, aes(weight, ..density.., color = school_night_hours_sleep)) +
+  geom_freqpoly(binwidth = 5)
 ```
+
+ANOVA
+
+```{r}
+anova <- aov(data = yrbss, formula = weight ~ school_night_hours_sleep)
+anova_stats <- summary(anova)[[1]]
+summary(anova)
+
+rf(10000, anova_stats$Df[1], anova_stats$Df[2]) %>%
+  data.frame() %>%
+  ggplot(aes(.)) +
+  geom_density() +
+  geom_vline(xintercept = anova_stats$`F value`,
+             color = 'red')
+```
+
+```{r}
+yrbss %>%
+  filter(!is.na(weight),
+         !is.na(school_night_hours_sleep)) %>%
+  group_by(school_night_hours_sleep) %>%
+  summarize(Mean = mean(weight, na.rm = TRUE))
+```
+
+
+```{r, warning = FALSE}
+sleep_levels <- levels(yrbss$school_night_hours_sleep)
+combinations <- combn(sleep_levels, 2)
+
+alpha = 0.05
+mod_alpha = alpha / ncol(combinations)
+mod_sig_level = 1 - mod_alpha
+
+results <- data.frame(dep_var = '',
+                      ind_var = '',
+                      p_value = 0,
+                      ci_lower = 0,
+                      ci_higher = 0,
+                      conclusion = '')
+
+for (i in 1:ncol(combinations)) {
+  level1 <- combinations[1,i]
+  level2 <- combinations[2,i]
+  
+  df <- yrbss %>%
+    mutate(sleep = case_when(school_night_hours_sleep == 
+                               level1 ~ 'yes',
+                             TRUE ~ 'no')) %>%
+    filter(!is.na(weight),
+           !is.na(school_night_hours_sleep),
+           school_night_hours_sleep == level1 |
+             school_night_hours_sleep == level2
+    ) 
+  
+  mean_diff <- df %>%
+    specify(weight ~ sleep) %>%
+    calculate(stat = 'diff in means', order = c('yes', 'no'))
+  
+  pval <- df %>%
+    specify(weight ~ sleep) %>%
+    hypothesize(null = 'independence') %>%
+    # generate(reps = 1000, type = 'bootstrap') %>%
+    generate(reps = 1000, type = 'permute') %>%
+    calculate(stat = 'diff in means', order = c('yes', 'no')) %>% 
+    get_p_value(obs_stat = mean_diff, direction = 'two-sided')
+  
+  ci <- df %>%
+    specify(weight ~ sleep) %>%
+    generate(reps = 1000, type = 'bootstrap') %>%
+    calculate(stat = 'diff in means', order = c('yes', 'no')) %>%
+    get_ci(level = mod_sig_level)
+  
+  conclusion = if_else(p_value < (1 - mod_sig_level),
+                          'Reject Null - Means are different',
+                          'Accept Null - Means are not different')
+  
+  results[i,] <- c(level1,
+                   level2,
+                   pval,
+                   ci$lower_ci,
+                   ci$upper_ci,
+                   conclusion)
+}
+
+kbl(results) %>%
+  kable_classic(full_width = F) %>%
+  column_spec(6, background = ifelse(
+    str_detect(results$conclusion, 'Accept'), 
+    'azure', 'deepskyblue'))
+```
+
+
 
 
 ---
