@@ -17,7 +17,7 @@ Your task is to choose one of the New York Times APIs, construct an interface in
 
 ## Setup
 
-In addition to standard tidyverse usage, we'll leverage the `jsonlite` and `lubridate` packages.
+In addition to standard `tidyverse` usage, we'll leverage the `jsonlite` for querying the API, `lubridate` for formatting dates, and `kableExtra` to display our results.
 
 ```{r setup, message = FALSE}
 library(tidyverse)
@@ -26,7 +26,9 @@ library(lubridate)
 library(kableExtra)
 ```
 
-The NYTimes APIs require a key, which users can obtain by creating an account at https://developer.nytimes.com/. I'll read in my key from a .txt file.
+For this assignment, I've focused on the New York Time's Article Search API. The API instructions note that equests will be limited to 10 articles unless query hits are spaced at least 6 seconds apart. For the sake of this exercise, we'll ignore timing and work within the 10-article limit.
+
+The API requires a key, which users can obtain by creating an account at https://developer.nytimes.com/. I'll read in my key from a .txt file.
 
 ```{r}
 key <- read_lines('data/nyt_api_key.txt')
@@ -74,14 +76,22 @@ We can preview the first three rows of the resulting dataframe to get a sense of
 df[1:3,] %>% kbl() %>% kable_classic()
 ```
 
-Now that we've tested our approach, we can create a function to enable more efficient programming of queries.
+Now that we've tested our approach, we can create a function to enable more efficient programming of queries. I've added some functionality to (i) add additional search parameters, and (ii) allow certain search parameters to be optional.
 
 ```{r}
-nyt_query <- function(search_term, begin_date, end_date) {
+nyt_query <- function(search_term, begin_date = NULL, 
+                      end_date = NULL, news_desk = NULL, 
+                      type_of_material = NULL) {
   url <- str_c(base_url,
-               if_else('q=',search_term,
-               '&begin_date=',begin_date,
-               '&end_date=',end_date,
+               'q=',search_term,
+               if_else(is.null(begin_date), '',
+                       str_c('&begin_date=',begin_date)),
+               if_else(is.null(end_date), '',
+                       str_c('&end_date=',end_date)),
+               if_else(is.null(news_desk), '',
+                       str_c('&fq=news_desk:(',news_desk,')')),
+               if_else(is.null(type_of_material), '',
+                       str_c('&fq=type_of_material:',type_of_material)),
                '&api-key=',key)
   
   request <- fromJSON(url)
@@ -105,13 +115,35 @@ nyt_query <- function(search_term, begin_date, end_date) {
 }
 ```
 
-
+We first test this by re-producing our original query to confirm we obtain comparable results.
 
 ```{r}
 nyt_query(search_term = 'gerrymandering', 
-          begin_date = '20230101',
-          end_date = '20230331') %>% 
-  filter(byline != 'By Reid J. Epstein') %>%
+          begin_date = '20230101')[1:3,] %>% 
   kbl() %>% kable_classic()
 ```
+
+Finally, we can try a few additional queries with different parameters.
+
+```{r}
+nyt_query(search_term = 'svb', 
+          begin_date = '20230301',
+          end_date = '20230320',
+          type_of_material = 'News') %>% 
+  kbl() %>% kable_classic()
+
+nyt_query(search_term = 'svb', 
+          begin_date = '20230301',
+          end_date = '20230320',
+          news_desk = 'Business',
+          type_of_material = 'News') %>% 
+  kbl() %>% kable_classic()
+
+nyt_query(search_term = 'svb', 
+          begin_date = '20230301',
+          end_date = '20230320',
+          type_of_material = 'Op-Ed') %>% 
+  kbl() %>% kable_classic()
+```
+
 
