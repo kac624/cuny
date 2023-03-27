@@ -1,0 +1,117 @@
+---
+title: "Data 607 - Week 9 - Web APIs"
+author: "Keith Colella"
+date: "`r Sys.Date()`"
+output: html_document
+knit: (function(input, ...) {
+    rmarkdown::render(
+      input,
+      output_dir = "../D607/output"
+    )
+  })
+---
+
+## Assignment
+
+Your task is to choose one of the New York Times APIs, construct an interface in R to read in the JSON data, and transform it into an R DataFrame.
+
+## Setup
+
+In addition to standard tidyverse usage, we'll leverage the `jsonlite` and `lubridate` packages.
+
+```{r setup, message = FALSE}
+library(tidyverse)
+library(jsonlite)
+library(lubridate)
+library(kableExtra)
+```
+
+The NYTimes APIs require a key, which users can obtain by creating an account at https://developer.nytimes.com/. I'll read in my key from a .txt file.
+
+```{r}
+key <- read_lines('data/nyt_api_key.txt')
+```
+
+We'll begin with a static example. Per the instructions on the NYT API page, we'll use the base API url and add key terms to filter our search. For now, we'll just use a simple keyword search (`q=`) within a specific date range (using `&begin_date=` and `&end_date=`).
+
+```{r}
+base_url <- 'https://api.nytimes.com/svc/search/v2/articlesearch.json?'
+search_term <- 'gerrymandering'
+begin_date <- '20230101'
+end_date <- '20230331'
+
+url <- str_c(base_url,
+             'q=',search_term,
+             '&begin_date=',begin_date,
+             '&end_date=',end_date,
+             '&api-key=',key)
+
+request <- fromJSON(url)
+```
+
+The JSON we obtain from our request is a large, heavily nested list. After some exploration, it becomes clear that the actual content of the query is in the `response$docs$` sublist. I create a variable of that sublist, then parse out key pieces of content from within that sublist into a dataframe. For now, I've focused on key article-related details (e.g. date, author, desk) along with whatever actual text content is available (headline, abstract and lead paragraph). 
+
+```{r}
+response <- request$response$docs
+
+df <- data.frame(pub_date = as_date(response$pub_date),
+                 byline = response$byline$original,
+                 news_desk = response$news_desk,
+                 document_type = response$document_type,
+                 type_of_material = response$type_of_material,
+                 word_count = response$word_count,
+                 headline = if_else(!is.na(response$headline$print_headline),
+                                    response$headline$print_headline,
+                                    response$headline$main),
+                 abstract = response$abstract,
+                 lead_paragraph = response$lead_paragraph
+                 )
+```
+
+We can preview the first three rows of the resulting dataframe to get a sense of our results.
+
+```{r}
+df[1:3,] %>% kbl() %>% kable_classic()
+```
+
+Now that we've tested our approach, we can create a function to enable more efficient programming of queries.
+
+```{r}
+nyt_query <- function(search_term, begin_date, end_date) {
+  url <- str_c(base_url,
+               if_else('q=',search_term,
+               '&begin_date=',begin_date,
+               '&end_date=',end_date,
+               '&api-key=',key)
+  
+  request <- fromJSON(url)
+  
+  response <- request$response$docs
+  
+  df <- data.frame(pub_date = as_date(response$pub_date),
+                   byline = response$byline$original,
+                   news_desk = response$news_desk,
+                   document_type = response$document_type,
+                   type_of_material = response$type_of_material,
+                   word_count = response$word_count,
+                   headline = if_else(!is.na(response$headline$print_headline),
+                                      response$headline$print_headline,
+                                      response$headline$main),
+                   abstract = response$abstract,
+                   lead_paragraph = response$lead_paragraph
+  )
+  
+  return(df)
+}
+```
+
+
+
+```{r}
+nyt_query(search_term = 'gerrymandering', 
+          begin_date = '20230101',
+          end_date = '20230331') %>% 
+  filter(byline != 'By Reid J. Epstein') %>%
+  kbl() %>% kable_classic()
+```
+
