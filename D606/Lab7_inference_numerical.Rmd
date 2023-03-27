@@ -19,6 +19,7 @@ Config
 library(tidyverse)
 library(openintro)
 library(infer)
+library(cowplot)
 library(kableExtra)
 set.seed(789)
 ```
@@ -41,7 +42,7 @@ What are the cases in this data set? How many cases are there in our sample?
 nrow(yrbss)
 ```
 
-A case in this data set is a series of responses from a single respondent (i.e. a high school included in the sample). There are a total of 13583 cases / observations in the data.
+A case in this data set is a series of responses from a single respondent (i.e. a high schooler included in the sample). There are a total of 13,583 cases / observations in the data.
 
 ---
 
@@ -59,7 +60,7 @@ yrbss %>%
   nrow()
 ```
 
-There are 1004 cases in which weight is missing.
+There are 1004 cases in which the response for weight is missing.
 
 ---
 
@@ -76,14 +77,14 @@ yrbss <- yrbss %>%
 
 #### Response
 
-I would expect there is a negative correlation between physical activity and weight, as individuals who exercise more tend to carry less body fat. So, I would expect the mean weight of the "yes" level of `physical_3plus` to be less than the mean wieght of the no category. Let's see!
+I would expect there is a negative correlation between physical activity and weight, as individuals who exercise more tend to carry less body fat. So, I would expect the mean weight of the "yes" level of `physical_3plus` to be less than the mean weight of the "no" category. Let's see!
 
 ```{r}
 ggplot(yrbss, aes(physical_3plus, weight)) + 
   geom_boxplot()
 ```
 
-Seems I was wrong! First, there does not appear to be a very strong relationship between physical activity at the 3-day cut-off and weight. If anything, there is a *positive* correlation between activity and weight, as the mean weight is slightly higher for those who do exercise 3+ days a week. The difference, however, appears minimal. Moreover, the distribution of weights for those who did not respond to the physical activity question (i.e. NAs) appears very similar to the No's and Yes's, indicating that the physical activity response does not correlate particularly well with physical activity.
+Seems I was wrong! First, there does not appear to be a very strong relationship between physical activity at the 3-day cut-off and weight. If anything, there is a *positive* correlation between activity and weight, as the mean weight is slightly higher for those who do exercise 3+ days a week. The difference, however, appears minimal. Moreover, the distribution of weights for those who did not respond to the physical activity question (i.e. NAs) appears very similar to the No's and Yes's, indicating that the physical activity response does not correlate particularly well with weight.
 
 ---
 
@@ -113,7 +114,7 @@ Write the hypotheses for testing if the average weights are different for those 
 
 #### Response
 
-Our null hypothesis is that the mean weight of individuals who exercise at least three times a week is the same as those who do not, and our alternative is that they are different. Written mathematically, we have the following.
+Our null hypothesis is that the mean weight of individuals who exercise at least three times a week is the same as those who do not, and our alternative is that they are different. In other words, the null states that the difference between the means of each group is zero, and the alternative states that this difference is *not* zero. Written mathematically, we have the following.
 
 $H_0:\mu_{yes} - \mu_{no} = 0$
 $H_A:\mu_{yes} - \mu_{no} \neq 0 $
@@ -152,7 +153,7 @@ ggplot(data = null_dist, aes(x = stat)) +
 None of the differences in the null distribution have a difference at the level of `obs_stat`. The max `stat` in the null distribution is 1.038, whereas the `obs_stat` is 1.775.
 
 ```{r}
-cat('Max difference from null dist:',max(null_dist$stat)[1],
+cat('Max difference from simulated null distribution:',max(null_dist$stat)[1],
     '\nObserved difference from sample:',obs_diff$stat[1])
 ```
 
@@ -187,7 +188,11 @@ null_dist %>%
   shade_ci(endpoints = ci)
 ```
 
-The confidence interval straddles zero, indicating that the difference between means may actually be zero. 
+The confidence interval does not cover zero, indicating that we are 95% confident the true difference between population mean weights of those who exercise at least 3 times a week and those who do not *is not zero*. In other words, there is a statistically significant difference in the weight of those who exercise 3+ times a week and those who don't. The confidence interval indicates that those who exercise 3+ times a week are, on average, ~1.12 - ~2.49 kg *heavier* than those who do not. As the survey is observational in nature, we cannot assume any causal relationship between these variables, only correlation.
+
+As a sanity check, I've included a p-value, which also rejects the null, supporting the conclusions above. I've suppressed a warning that highlights the problems with reporting a zero p-value, which is likely a small value less than 3/1000 or 0.003. Regardless, we can confidently reject the null based on these data.
+
+Finally, I've added a visualization showing our simulated sampling distribution and the related confidence interval and p-value. We can see the confidence interval is completely outside the sampling distribution, and the observed difference in means is well beyond the max value of the simulated distribution. This visualization confers with out conclusions above.
 
 ---
 
@@ -208,6 +213,7 @@ yrbss %>%
   get_ci(level = 0.95)
 ```
 
+Based on these data, we are 95% confident that the average height of US high schoolers is between ~1.689 and ~1.693 meters.
 
 ---
 
@@ -228,6 +234,8 @@ yrbss %>%
   get_ci(level = 0.90)
 ```
 
+With a lower confidence level, we receive a tighter interval. This is because, with a lower confidence level, there is a greater chance of a Type 1 error and a greater chance that our interval misses the true population mean.
+
 ---
 
 ## Exercise 10
@@ -238,15 +246,17 @@ Conduct a hypothesis test evaluating whether the average height is different for
 
 #### Response
 
-```{r, warning = FALSE}
+I'll begin with a visualization to assess the relationship between height and exercise.
+
+```{r}
 yrbss %>%
   ggplot(aes(physical_3plus, height)) + 
   geom_boxplot()
+```
 
-# mean_diff <- yrbss %>%
-#   group_by(physical_3plus) %>% 
-#   summarize(mean_diff = mean(height, na.rm = TRUE))
+It appears there is a noticeable difference in the mean height between those who exercise 3+ days a week and those who don't. We'll aim to confirm this difference with our hypothesis test.
 
+```{r, warning = FALSE}
 mean_diff <- yrbss %>%
   filter(!is.na(height),
          !is.na(physical_3plus)) %>%
@@ -277,18 +287,9 @@ cat('95% Confidence Interval:',ci$lower_ci,'-',ci$upper_ci,
     '\nP-value:',pval$p_value)
 ```
 
-TBD
+Our 95% interval does not included zero, indicating that the difference between the mean height of 3+ exercisers and <2 exercises is not zero. It seems that 3+ exercisers are, on average, ~3.4 - ~4.1 centimeters taller than <2 exercisers. Our p-value is again zero. While we recognize a true p-value of zero is not possible, we can confidently say the true p-value is <0.003, so we can reject the null that the mean height across exercise groups is the same.
 
-```{r}
-yrbss %>%
-  filter(!is.na(height),
-         !is.na(physical_3plus)) %>%
-  nrow()
-```
-
-Sample size inflate p-value?
-
-Finally, just some visualizations.
+Finally, the visualization below confirms our conclusion.
 
 ```{r}
 null_dist %>%
@@ -304,7 +305,7 @@ null_dist %>%
 
 #### Question
 
-Now, a non-inference task: Determine the number of different options there are in the dataset for the `hours_tv_per_school_day` there are.
+Now, a non-inference task: Determine the number of different options there are in the dataset for the `hours_tv_per_school_day` variable.
 
 #### Response
 
@@ -313,8 +314,7 @@ yrbss$hours_tv_per_school_day %>%
   table()
 ```
 
-
-TBD
+There are 7 options or levels for the `hours_tv_per_school_day` variable.
 
 ---
 
@@ -326,16 +326,34 @@ Come up with a research question evaluating the relationship between height or w
 
 #### Response
 
-First, test both for relationship. Then, create multi-level categorical variable combining height and weight to assess joint relationships.
+I'll examine the relationship between weight and sleep. In short, I'll aim to answer the following research question: is there a significant relationship between high schoolers' sleeping patterns and weight?
 
-Begin by examining the sleep variable and plotting relationships.
+I'll begin by examining the plotting the two variables.
 
 ```{r}
-yrbss$school_night_hours_sleep %>%
-  table()
+ggplot(yrbss, aes(school_night_hours_sleep, weight)) +
+  geom_boxplot()
 ```
 
-This variable is multinomial, so we'll construct a binary version. Then, we can plot the relationships.
+It appears there may be some relationship between these variables, as the mean weight appears to decrease as hours of sleep increases. There is, however, an exception: the mean weight of individuals who sleep 10 or more hours a night is higher than the mean weight of individuals who sleep less (with the exception of those who sleep <5 hours a night). A summary table of the means of each group confirms this insight.
+
+```{r}
+yrbss$school_night_hours_sleep <- factor(yrbss$school_night_hours_sleep,
+                                         levels = c('<5','5','6','7',
+                                                    '8','9','10+'),
+                                         ordered = TRUE)
+yrbss %>%
+  filter(!is.na(weight),
+         !is.na(school_night_hours_sleep)) %>%
+  group_by(school_night_hours_sleep) %>%
+  summarize(Mean = mean(weight, na.rm = TRUE))
+```
+
+The mean weight for the 10+ hour group is most interesting, as it hints at some potential non-linearity in the relationship. So, I'll split this analysis into two parts. First, I'll run a hypothesis test to assess the relationship between greater levels and sleep and weight, focusing on difference in mean weights between those who sleep 7+ hours a night and those who sleep less than 7 hours a night. Second, I'll perform a one-way ANOVA and multiple comparisons to provide a more granular look at the relationship between specific amounts of sleep and weight.
+ 
+I begin with the hypothesis test. As noted above, our data meets the conditions for inference. Specifically, observations are independent, and our sample size is sufficiently large to assume a normal sampling distribution, based on the CLT.
+
+Moving to the data, we note that the sleep variable is multinomial. So, we'll construct a binary version of the variable, using 7 hours as the cut-off.
 
 ```{r}
 yrbss <- yrbss %>%
@@ -344,52 +362,14 @@ yrbss <- yrbss %>%
                                  school_night_hours_sleep == '6' ~ 'no',
                                  TRUE ~ 'yes'))
 
-ggplot(yrbss, aes(sleep_7plus, height)) +
-  geom_boxplot()
-
 ggplot(yrbss, aes(sleep_7plus, weight)) +
   geom_boxplot()
 ```
 
-Then start our testing. We'll test weight and sleep first
+Based on the above box plot, the mean weight for those who sleep 7+ hours a night appears lower. To confirm this relationship, we'll run the hypothesis test. Our null hypothesis is that the mean weight of individuals who sleep at least seven hours a night is the same as those who do not, and our alternative is that these mean weights are different. In other words, the null states that the difference between the mean weights of each sleep group is zero, and the alternative states that this difference is *not* zero. Written mathematically, we have the following.
 
-```{r, warning = FALSE}
-mean_diff <- yrbss %>%
-  filter(!is.na(height),
-         !is.na(sleep_7plus)) %>%
-  specify(height ~ sleep_7plus) %>%
-  calculate(stat = 'diff in means', order = c('yes', 'no'))
-
-null_dist <- yrbss %>%
-  filter(!is.na(height),
-         !is.na(sleep_7plus)) %>%
-  specify(height ~ sleep_7plus) %>%
-  hypothesize(null = 'independence') %>%
-  # generate(reps = 1000, type = 'bootstrap') %>%
-  generate(reps = 1000, type = 'permute') %>%
-  calculate(stat = 'diff in means', order = c('yes', 'no'))
-
-pval <- null_dist %>% 
-  get_p_value(obs_stat = mean_diff, direction = 'two-sided')
-
-ci <- yrbss %>%
-  filter(!is.na(height),
-         !is.na(sleep_7plus)) %>%
-  specify(height ~ sleep_7plus) %>%
-  generate(reps = 1000, type = 'bootstrap') %>%
-  calculate(stat = 'diff in means', order = c('yes', 'no')) %>%
-  get_ci(level = 0.95)
-
-cat('95% Confidence Interval:',ci$lower_ci,'-',ci$upper_ci,
-    '\nP-value:',pval$p_value)
-
-null_dist %>%
-  visualize() +
-  shade_p_value(obs_stat = mean_diff, direction = 'two-sided') + 
-  shade_ci(endpoints = ci)
-```
-
-And again for weight.
+$H_0:\mu_{yes} - \mu_{no} = 0$
+$H_A:\mu_{yes} - \mu_{no} \neq 0 $ 
 
 ```{r, warning = FALSE}
 mean_diff <- yrbss %>%
@@ -427,22 +407,54 @@ null_dist %>%
   shade_ci(endpoints = ci)
 ```
 
-ANOVA for binary version of all four variables
+As the p-value is near-zero, and the confidence interval does not encompass zero, we can say with at least 95% confidence that the mean weights between these two sleep groups are *not* the same. The confidence interval indicates that those who sleep 7+ hours a night are, on average, ~0.64 to ~1.89 kg lighter than those who sleep less than 7 hours.
+
+We note earlier, however, that the mean weights appeared to decrease as hours of sleep increased, with one exception: the mean weight for those who sleep 10+ hours was nearly as high at the <5 hour group. This observation raises a question: are very high levels of sleep associated with greater weights?
+
+To explore this question, we'll conduct a one-way ANOVA test, assess mean weights across high schoolers based on the number of hours of sleep on school nights. Before we perform this test, we'll confirm we meet the conditions for inference with ANOVA. There are three:
+
+1. Independence within and between groups  
+2. Approximately normal distributions for each group  
+3. Roughly equal variance across grou
+
+Regarding independence, we can say confidently that observations within groups are independent, given the use of random sampling and the size of each group with respect to the broader population (much less than 10%). Moreover, we can feel confident that there is no paired structure between the groups. These sleep groups are really just a grouped factoring of a numerical variable, so there should be no concern regarding independence between groups.
+
+Regarding normality, we can generate Q-Q plots to assess the distribution of weights within each sleep group.
 
 ```{r}
-yrbss$school_night_hours_sleep <- factor(yrbss$school_night_hours_sleep,
-                                         levels = c('<5','5','6','7',
-                                                    '8','9','10+'),
-                                         ordered = TRUE)
+plot_list <- list()
 
-ggplot(yrbss, aes(school_night_hours_sleep, weight)) +
-  geom_boxplot()
+for (i in levels(yrbss$school_night_hours_sleep)) {
+  subset <- yrbss %>% 
+    filter(!is.na(weight),
+           !is.na(school_night_hours_sleep),
+           school_night_hours_sleep == i)
+  p <- ggplot() +
+    geom_point(data = subset, aes(sample = weight), stat = 'qq') +
+    geom_abline(intercept = mean(subset$weight), slope = sd(subset$weight),
+                color = 'red', linetype = 'dashed') + 
+    ggtitle(i)
+  plot_list[[i]] <- p
+}
 
-ggplot(yrbss, aes(weight, ..density.., color = school_night_hours_sleep)) +
-  geom_freqpoly(binwidth = 5)
+plot_grid(plotlist = plot_list, nrow = 2, ncol = 4)
 ```
 
-ANOVA
+The distribution of these groups are not perfectly normal. There appears to be some skew, but the level of normality appears sufficient to move ahead.
+
+Regarding roughly equal variance, we'll look directly at the standard deviation of weights within each sleep group.
+
+```{r}
+yrbss %>%
+  filter(!is.na(weight),
+         !is.na(school_night_hours_sleep)) %>%
+  group_by(school_night_hours_sleep) %>%
+  summarize(std_dev = sd(weight, na.rm = TRUE))
+```
+
+The standard deviations appear sufficiently similar to proceed.
+
+With our conditions for inference met, we perform our one-way ANOVA test.
 
 ```{r}
 anova <- aov(data = yrbss, formula = weight ~ school_night_hours_sleep)
@@ -457,25 +469,37 @@ rf(10000, anova_stats$Df[1], anova_stats$Df[2]) %>%
              color = 'red')
 ```
 
-```{r}
-yrbss %>%
-  filter(!is.na(weight),
-         !is.na(school_night_hours_sleep)) %>%
-  group_by(school_night_hours_sleep) %>%
-  summarize(Mean = mean(weight, na.rm = TRUE))
-```
+The high F-stat, low p-value and associated visual provide strong evidence that the mean weights across these different sleep groups are *not* the same. In other words, as our previous hypothesis test indicated, there is a significant relationship between sleep and weight.
 
+Our final set of tests consists of pairwise comparisons of means across different sleep groups. We'll want to adjust our $\alpha$ to account for the inflated probability of Type 1 errors that comes with multiple comparisons. Given the high number of levels with in the sleep variable, a Bonferonni correction would result in an exceedingly small $\alpha$, such that rejecting the null would become near impossible. So we'll group some of the levels in this variable.
 
 ```{r, warning = FALSE}
-sleep_levels <- levels(yrbss$school_night_hours_sleep)
+yrbss <- yrbss %>%
+  mutate(sleep_grouped = case_when(school_night_hours_sleep == 5 ~ '5-6',
+                                   school_night_hours_sleep == 6 ~ '5-6',
+                                   school_night_hours_sleep == 7 ~ '7-8',
+                                   school_night_hours_sleep == 8 ~ '5-6',
+                                   TRUE ~ school_night_hours_sleep))
+
+yrbss$sleep_grouped <- factor(yrbss$sleep_grouped,
+                              levels = c('<5','5-6','7-8','9','10+'),
+                              ordered = TRUE)
+
+sleep_levels <- levels(yrbss$sleep_grouped)
 combinations <- combn(sleep_levels, 2)
 
 alpha = 0.05
 mod_alpha = alpha / ncol(combinations)
 mod_sig_level = 1 - mod_alpha
 
-results <- data.frame(dep_var = '',
-                      ind_var = '',
+mod_sig_level
+```
+
+We still end up with a rather strict confidence level of 99.5%, so we can rest assured we're taking a conservative approach. We can now loop through each pairwise combination of levels in the grouped sleep variable and perform a hypothesis test to assess whether the population mean weights of each combination are equal. The loop below does just that and saves results of each pairwise test in a new dataframe.
+
+```{r}
+results <- data.frame(sub_group1 = '',
+                      sub_group2 = '',
                       p_value = 0,
                       ci_lower = 0,
                       ci_higher = 0,
@@ -486,13 +510,13 @@ for (i in 1:ncol(combinations)) {
   level2 <- combinations[2,i]
   
   df <- yrbss %>%
-    mutate(sleep = case_when(school_night_hours_sleep == 
+    mutate(sleep = case_when(sleep_grouped == 
                                level1 ~ 'yes',
                              TRUE ~ 'no')) %>%
     filter(!is.na(weight),
-           !is.na(school_night_hours_sleep),
-           school_night_hours_sleep == level1 |
-             school_night_hours_sleep == level2
+           !is.na(sleep_grouped),
+           sleep_grouped == level1 |
+             sleep_grouped == level2
     ) 
   
   mean_diff <- df %>%
@@ -513,7 +537,7 @@ for (i in 1:ncol(combinations)) {
     calculate(stat = 'diff in means', order = c('yes', 'no')) %>%
     get_ci(level = mod_sig_level)
   
-  conclusion = if_else(p_value < (1 - mod_sig_level),
+  conclusion = if_else(pval$p_value < (1 - mod_sig_level),
                           'Reject Null - Means are different',
                           'Accept Null - Means are not different')
   
@@ -524,15 +548,25 @@ for (i in 1:ncol(combinations)) {
                    ci$upper_ci,
                    conclusion)
 }
+```
 
+We know review our results in two firms. First, we simply print the `results` dataframe. And second, we review the results in matrix form, looking at the conclusion (reject or accept the null) for each combination.
+
+```{r}
 kbl(results) %>%
-  kable_classic(full_width = F) %>%
+  kable_paper(full_width = F) %>%
   column_spec(6, background = ifelse(
     str_detect(results$conclusion, 'Accept'), 
     'azure', 'deepskyblue'))
+
+results %>%
+  pivot_wider(id_cols =  1, names_from = sub_group2, values_from = conclusion) %>%
+  replace(is.na(.),'--') %>%
+  kbl() %>% kable_paper(full_width = TRUE)
 ```
 
+A few conclusions can be drawn. First, it appears the mean weight for those sleeping <5 hours a night is different from all other groups, **except** for the mean weight for those sleeping 10+ hours. This insight confers with our earlier review of mean weights, indicating that very low *and* very high amounts of sleep are associated with greater weights.
 
-
+Second, it appears that 9 hours of sleep has a unique associated with weight. We cannot confidently conclude that the mean weights for those sleeping 5-6 hours and those sleeping 7-8 hours is different. However, we can conclude that the mean weight for high schoolers sleeping 9 hours a night is lower than the mean weight for any other type of sleep pattern.
 
 ---
