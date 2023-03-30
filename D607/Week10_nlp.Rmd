@@ -15,6 +15,7 @@ library(janeaustenr)
 library(wordcloud)
 library(reshape2)
 library(lexicon)
+library(httr)
 ```
 
 The function `get_sentiments()` allows us to get specific sentiment lexicons with the appropriate measures for each one.
@@ -58,7 +59,7 @@ Next, we count up how many positive and negative words there are in defined sect
 
 ```{r janeaustensentiment}
 jane_austen_sentiment <- tidy_books %>%
-  inner_join(get_sentiments("bing")) %>%
+  inner_join(bing) %>%
   count(book, index = linenumber %/% 80, sentiment) %>%
   pivot_wider(names_from = sentiment, values_from = n, values_fill = 0) %>% 
   mutate(sentiment = positive - negative)
@@ -258,6 +259,48 @@ Sentiment analysis provides a way to understand the attitudes and opinions expre
 First, we'll
 
 ```{r}
+username <- 'kac624'
+authkey <- '685bf57c27bb46400dc2d8e93d514838'
 
+url <- 'https://www.kaggle.com/api/v1/datasets/download/kac624/moc2020tweets/tweets2020.csv'
+response <- GET(url, authenticate(username, authkey, type = "basic"))
+temp <- tempfile()
+download.file(response$url,temp)
+tweets <- read.csv(unzip(temp, "tweets2020.csv"))
+unlink(temp)
+```
+
+```{r}
+tweets <- tweets %>%
+  select(-views, -retweeted_id, -quoted_id) %>%
+  mutate(date_created = str_extract(date_created, '.*(?=\\+00\\:00)'),
+         date_created = lubridate::as_datetime(date_created))
+
+tidy_tweets <- tweets %>%
+  unnest_tokens(word, text)
+
+head(tidy_tweets)
+```
+
+```{r}
+tweets_afinn <- tidy_tweets %>% 
+  inner_join(afinn, by = 'word') %>% 
+  group_by(tweet_id, date_created, username, verified_status,
+           likes, replies, retweets, source, language) %>% 
+  summarize(sentiment = sum(value), .groups = 'keep') %>%
+  mutate(method = "AFINN")
+
+tweets_afinn
+
+tweets_afinn %>%
+  mutate(hour = lubridate::hour(date_created)) %>%
+  group_by(hour, sentiment) %>%
+  ggplot(aes(hour, sentiment, fill = method)) +
+  geom_col(show.legend = FALSE)
+
+tweets_afinn %>%
+  ggplot(aes(sentiment, replies, color = source)) +
+  geom_point(show.legend = FALSE) +
+  scale_x_log10()
 ```
 
