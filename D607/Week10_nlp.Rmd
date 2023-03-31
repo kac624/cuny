@@ -312,10 +312,22 @@ tweets_afinn %>%
 tweets_afinn %>%
   left_join(select(candidates, party, twitter_id), 
             by = 'twitter_id') %>%
-  left_join(select(tweets, likes, twitter_id),
+  filter(!is.na(party),
+         party == 'DEMOCRATIC PARTY' |
+           party == 'REPUBLICAN PARTY') %>%
+  ggplot(aes(sentiment, fill = party)) +
+  geom_density(alpha = 0.5)
+
+tidy_tweets %>%
+  anti_join(stop_words) %>%
+  left_join(select(candidates, party, twitter_id), 
             by = 'twitter_id') %>%
-  ggplot(aes(sentiment, likes, color = source)) +
-  geom_point(show.legend = FALSE) +
-  scale_x_log10()
+  filter(!is.na(party),
+         party == 'DEMOCRATIC PARTY' |
+           party == 'REPUBLICAN PARTY') %>%
+  count(word, party, sort = TRUE) %>%
+  acast(word ~ party, value.var = 'n', fill = 0) %>%
+  comparison.cloud(colors = c("blue", "red"),
+                   max.words = 80)
 ```
 
