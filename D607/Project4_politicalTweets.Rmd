@@ -1,0 +1,140 @@
+---
+title: "Project4"
+author: "Keith Colella"
+date: "`r Sys.Date()`"
+output: html_document
+knit: (function(input, ...) {
+    rmarkdown::render(
+      input,
+      output_dir = "../D607/output"
+    )
+  })
+---
+
+```{r setup, message = FALSE}
+library(tidyverse)
+library(httr)
+library(jsonlite)
+```
+
+## Initial Universe of Candidates
+
+https://api.open.fec.gov/developers/
+https://github.com/stephenholzman/tidyusafec
+
+```{r}
+year = 2022
+fec_key <- read_lines('data/fec_api.txt')
+
+query_params <- list(election_year = year,
+                     office = 'H',
+                     api_key = fec_key)
+url <- modify_url('https://api.open.fec.gov/', 
+                  path = '/v1/candidates/search/',
+                  query = query_params)
+
+initial_response <- GET(url)
+parsed_response <- fromJSON(content(initial_response, "text", encoding="UTF-8"), 
+                            simplifyVector = FALSE)
+total_pages <- parsed_response$pagination$pages
+```
+
+Loop through pages to get total responses
+
+```{r}
+response <- list()
+
+for (i in 1:total_pages) {
+  query_params <- list(page = i,
+                       election_year = year,
+                       office = 'H',
+                       api_key = fec_key)
+  url <- modify_url('https://api.open.fec.gov/', 
+                    path = '/v1/candidates/search/',
+                    query = query_params)
+  initial_response <- GET(url)
+  parsed_response <- fromJSON(content(initial_response, 'text', encoding='UTF-8'), 
+                              simplifyVector = FALSE)
+  response[[i]] <- parsed_response
+  Sys.sleep(0.5)
+}
+```
+
+Loop through responses and grab individual observations
+
+```{r}
+candidates <- map(response, function(x) x$results) %>%
+    unlist(recursive = F) %>%
+    tibble(
+      fec_id = map_chr(., 'candidate_id', .default = NA),
+      name = map_chr(., 'name', .default = NA),
+      state = map_chr(., 'state', .default = NA),
+      district = map_chr(., 'district', .default = NA),
+      party = map_chr(., 'party_full', .default = NA),
+      office = map_chr(., 'office_full', .default = NA),
+      incumbent_challenge = map_chr(., 'incumbent_challenge_full', .default = NA),
+      candidate_status = map_chr(., 'candidate_status', .default = NA),
+    ) %>%
+  select(-.)
+
+candidates %>% head()
+```
+
+## Twitter IDs for candidates
+
+https://github.com/unitedstates/congress-legislators
+https://www.propublica.org/datastore/dataset/politicians-tracked-by-politwoops
+
+```{r, message = FALSE}
+congress_current <- read_csv('https://theunitedstates.io/congress-legislators/legislators-current.csv')
+congress_history <- read_csv('https://theunitedstates.io/congress-legislators/legislators-historical.csv')
+
+congress <- rbind(congress_current, congress_history)
+
+poliwoops = read_csv('https://s3.amazonaws.com/pp-projects-static/politwoops/active_accounts.csv')
+```
+
+Join
+
+```{r}
+candidates_twitter <- candidates %>%
+  ## Join with IDs from congress data
+  left_join(
+    select(congress, twitter_id, bioguide_id, fec_ids),
+    by = c('fec_id' = 'fec_ids'), 
+    suffix = c('','_congress'), 
+    keep = FALSE) %>%
+  ## Join with IDs from poliwoops data based on bioguide ID
+  left_join(
+    select(poliwoops, twitter_id, bioguide_id) %>%
+      filter(!is.na(bioguide_id)),
+    by = 'bioguide_id', suffix = c('','_poliw_bio'), keep = FALSE) %>%
+  ## Join with IDs from poliwoops data based on fec ID
+  left_join(
+    select(poliwoops, twitter_id, fec_candidate_id) %>%
+      filter(!is.na(fec_candidate_id)), 
+    by = c('fec_id' = 'fec_candidate_id'), suffix = c('','_poliw_fec'), keep = FALSE)%>%
+  ## Fill in twitter_id col to allow filtering
+  mutate(twitter_id = case_when(
+    !is.na(twitter_id) ~ twitter_id,
+    !is.na(twitter_id_poliw_fec) ~ twitter_id_poliw_fec,
+    !is.na(twitter_id_poliw_bio) ~ twitter_id_poliw_bio)) %>%
+  filter(!is.na(twitter_id)) %>%
+  ## Convert IDs to list, then unnest to long format
+  unite(twitter_id, twitter_id, twitter_id_poliw_fec, twitter_id_poliw_bio, 
+        sep = ',', na.rm = TRUE) %>% 
+  mutate(twitter_id = str_split(as.character(twitter_id), ",")) %>%
+  unnest(twitter_id)
+
+## Remove dupes
+candidates_twitter <- candidates_twitter[!duplicated(candidates_twitter), ]
+
+candidates_twitter
+```
+
+
+```{r}
+write_csv(candidates_twitter, paste0('data/candidates',year,'.csv'))
+```
+
+

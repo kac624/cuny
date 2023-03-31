@@ -3,6 +3,12 @@ title: "Week 10 - NLP "
 author: "Keith Colella"
 date: "`r Sys.Date()`"
 output: html_document
+knit: (function(input, ...) {
+    rmarkdown::render(
+      input,
+      output_dir = "../D607/output"
+    )
+  })
 ---
 
 # Reperformance of Textbook Exercises
@@ -89,13 +95,13 @@ pride_prejudice %>% head(10)
 Now, we can use `inner_join()` to calculate the sentiment in different ways. 
 
 ```{r comparesentiment, dependson = "pride_prejudice"}
-afinn <- pride_prejudice %>% 
+pride_afinn <- pride_prejudice %>% 
   inner_join(afinn) %>% 
   group_by(index = linenumber %/% 80) %>% 
   summarise(sentiment = sum(value)) %>% 
   mutate(method = "AFINN")
 
-bing_and_nrc <- bind_rows(
+pride_bing_and_nrc <- bind_rows(
   pride_prejudice %>% 
     inner_join(bing) %>%
     mutate(method = "Bing et al."),
@@ -115,8 +121,8 @@ bing_and_nrc <- bind_rows(
 Comparing three sentiment lexicons using *Pride and Prejudice*
 
 ```{r compareplot, dependson = "comparesentiment", fig.cap="(ref:comparecap)"}
-bind_rows(afinn, 
-          bing_and_nrc) %>%
+bind_rows(pride_afinn, 
+          pride_bing_and_nrc) %>%
   ggplot(aes(index, sentiment, fill = method)) +
   geom_col(show.legend = FALSE) +
   facet_wrap(~method, ncol = 1, scales = "free_y")
@@ -128,10 +134,7 @@ Let's look briefly at how many positive and negative words are in these lexicons
 nrc %>% 
   filter(sentiment %in% c("positive", "negative")) %>% 
   count(sentiment)
-```
 
-
-```{r}
 bing %>% 
   count(sentiment)
 ```
@@ -259,47 +262,59 @@ Sentiment analysis provides a way to understand the attitudes and opinions expre
 First, we'll
 
 ```{r}
-username <- 'kac624'
-authkey <- '685bf57c27bb46400dc2d8e93d514838'
+kaggle <- jsonlite::read_json('data/kaggle.json')
+username <- kaggle$username
+authkey <- kaggle$key
 
-url <- 'https://www.kaggle.com/api/v1/datasets/download/kac624/moc2020tweets/tweets2020.csv'
-response <- GET(url, authenticate(username, authkey, type = "basic"))
+url <- 'https://www.kaggle.com/api/v1/datasets/download/kac624/politicaltweets/candidate_tweets2022.csv'
+response <- GET(url, authenticate(username, authkey, type = 'basic'))
 temp <- tempfile()
-download.file(response$url,temp)
-tweets <- read.csv(unzip(temp, "tweets2020.csv"))
+download.file(response$url, temp, mode = 'wb')
+tweets <- read_csv(unzip(temp, 'candidate_tweets2022.csv'))
 unlink(temp)
 ```
 
+TBD
+
 ```{r}
 tweets <- tweets %>%
-  select(-views, -retweeted_id, -quoted_id) %>%
-  mutate(date_created = str_extract(date_created, '.*(?=\\+00\\:00)'),
-         date_created = lubridate::as_datetime(date_created))
+  select(-...1, -views, -retweeted_id, -quoted_id)
 
 tidy_tweets <- tweets %>%
+  select(twitter_id, tweet_id, date_created, text) %>%
   unnest_tokens(word, text)
 
 head(tidy_tweets)
 ```
 
+TBD
+
 ```{r}
 tweets_afinn <- tidy_tweets %>% 
   inner_join(afinn, by = 'word') %>% 
-  group_by(tweet_id, date_created, username, verified_status,
-           likes, replies, retweets, source, language) %>% 
-  summarize(sentiment = sum(value), .groups = 'keep') %>%
-  mutate(method = "AFINN")
+  group_by(twitter_id, tweet_id, date_created) %>% 
+  summarize(sentiment = sum(value), .groups = 'keep')
 
 tweets_afinn
+```
+
+TBD
+
+```{r}
+candidates <- read_csv('data/candidates2022.csv')
 
 tweets_afinn %>%
   mutate(hour = lubridate::hour(date_created)) %>%
   group_by(hour, sentiment) %>%
-  ggplot(aes(hour, sentiment, fill = method)) +
+  ggplot(aes(hour, sentiment)) +
   geom_col(show.legend = FALSE)
 
 tweets_afinn %>%
-  ggplot(aes(sentiment, replies, color = source)) +
+  left_join(select(candidates, party, twitter_id), 
+            by = 'twitter_id') %>%
+  left_join(select(tweets, likes, twitter_id),
+            by = 'twitter_id') %>%
+  ggplot(aes(sentiment, likes, color = source)) +
   geom_point(show.legend = FALSE) +
   scale_x_log10()
 ```
