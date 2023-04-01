@@ -1,5 +1,5 @@
 ---
-title: "Week 10 - NLP "
+title: "Week 10 - NLP Part 1"
 author: "Keith Colella"
 date: "`r Sys.Date()`"
 output: html_document
@@ -12,6 +12,12 @@ knit: (function(input, ...) {
 ---
 
 # Reperformance of Textbook Exercises
+
+We begin by re-performing the text mining and sentiment analysis from Chapter 2 of Silge and Robinson's "Text Mining with R" (https://www.tidytextmining.com/). I've directly leveraged the code and snippets of explanatory text from their book. 
+
+In Part 2, I'll complete the assignment by extending the analysis to another corpus.
+
+## Set-up
 
 ```{r, message = FALSE}
 library(tidyverse)
@@ -254,80 +260,3 @@ tidy_books %>%
 ## Summary
 
 Sentiment analysis provides a way to understand the attitudes and opinions expressed in texts. In this chapter, we explored how to approach sentiment analysis using tidy data principles; when text data is in a tidy data structure, sentiment analysis can be implemented as an inner join. We can use sentiment analysis to understand how a narrative arc changes throughout its course or what words with emotional and opinion content are important for a particular text. We will continue to develop our toolbox for applying sentiment analysis to different kinds of text in our case studies later in this book.
-
-# Assignment
-
-## Extension to Another Corpus with Another Lexicon
-
-First, we'll
-
-```{r}
-kaggle <- jsonlite::read_json('data/kaggle.json')
-username <- kaggle$username
-authkey <- kaggle$key
-
-url <- 'https://www.kaggle.com/api/v1/datasets/download/kac624/politicaltweets/candidate_tweets2022.csv'
-response <- GET(url, authenticate(username, authkey, type = 'basic'))
-temp <- tempfile()
-download.file(response$url, temp, mode = 'wb')
-tweets <- read_csv(unzip(temp, 'candidate_tweets2022.csv'))
-unlink(temp)
-```
-
-TBD
-
-```{r}
-tweets <- tweets %>%
-  select(-...1, -views, -retweeted_id, -quoted_id)
-
-tidy_tweets <- tweets %>%
-  select(twitter_id, tweet_id, date_created, text) %>%
-  unnest_tokens(word, text)
-
-head(tidy_tweets)
-```
-
-TBD
-
-```{r}
-tweets_afinn <- tidy_tweets %>% 
-  inner_join(afinn, by = 'word') %>% 
-  group_by(twitter_id, tweet_id, date_created) %>% 
-  summarize(sentiment = sum(value), .groups = 'keep')
-
-tweets_afinn
-```
-
-TBD
-
-```{r}
-candidates <- read_csv('data/candidates2022.csv')
-
-tweets_afinn %>%
-  mutate(hour = lubridate::hour(date_created)) %>%
-  group_by(hour, sentiment) %>%
-  ggplot(aes(hour, sentiment)) +
-  geom_col(show.legend = FALSE)
-
-tweets_afinn %>%
-  left_join(select(candidates, party, twitter_id), 
-            by = 'twitter_id') %>%
-  filter(!is.na(party),
-         party == 'DEMOCRATIC PARTY' |
-           party == 'REPUBLICAN PARTY') %>%
-  ggplot(aes(sentiment, fill = party)) +
-  geom_density(alpha = 0.5)
-
-tidy_tweets %>%
-  anti_join(stop_words) %>%
-  left_join(select(candidates, party, twitter_id), 
-            by = 'twitter_id') %>%
-  filter(!is.na(party),
-         party == 'DEMOCRATIC PARTY' |
-           party == 'REPUBLICAN PARTY') %>%
-  count(word, party, sort = TRUE) %>%
-  acast(word ~ party, value.var = 'n', fill = 0) %>%
-  comparison.cloud(colors = c("blue", "red"),
-                   max.words = 80)
-```
-

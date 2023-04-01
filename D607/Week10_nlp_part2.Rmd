@@ -1,0 +1,215 @@
+---
+title: "Week 10 - NLP "
+author: "Keith Colella"
+date: "`r Sys.Date()`"
+output: html_document
+knit: (function(input, ...) {
+    rmarkdown::render(
+      input,
+      output_dir = "../D607/output"
+    )
+  })
+---
+
+# Assignment
+
+We've reviewed the sentiment analysis from Chapter 2 of Silge and Robinson's "Text Mining with R" (https://www.tidytextmining.com/). Now, I'll perform similar analysis on another corpus.
+
+The corpus I've chosen is a collection of ~280,000 tweets from 424 congressional candidates from the 2022 election cycle (hosted here on Kaggle: https://www.kaggle.com/datasets/kac624/politicaltweets). I gathered the tweets by scraping Twitter in Python using the `snscrape` package. As an aside, I attempted to gather this corpus in R, but all approaches I found require Twitter API keys. I've been waiting several weeks for a key for the Twitter API, but I suspect it may never come, as Twitter has recently moved to monetize the API. So, I've had to resort to the few tools still working to gather tweets.
+
+Data on the 424 target candidates were gathered from Federal Election Commission data. I initially gathered many more candidates (3000+), but I'm not yet able to reliably pair all of those candidates with their Twitter IDs / handle. I plan to continue working on this effort for Project 4. Please see https://github.com/kac624/cuny/raw/main/D607/Project4_politicalTweets.Rmd for the collection and cleaning of the list of candidates and their IDs, and https://github.com/kac624/cuny/raw/main/D607/twitterScrape.ipynb for details on scraping.
+
+## Setup
+
+```{r, message = FALSE}
+library(tidyverse)
+library(tidytext)
+library(wordcloud)
+library(lexicon)
+library(reshape2)
+library(httr)
+library(kableExtra)
+```
+
+## Extension to Another Corpus with Another Lexicon
+
+First, we'll read in our data from Kaggle. We'll take a quick preview of the dataframe, with the actual tweet (under the `text` column) in a second table.
+
+```{r, message = FALSE}
+kaggle <- jsonlite::read_json('data/kaggle.json')
+username <- kaggle$username
+authkey <- kaggle$key
+
+url <- 'https://www.kaggle.com/api/v1/datasets/download/kac624/politicaltweets/candidate_tweets2022.csv'
+response <- GET(url, authenticate(username, authkey, type = 'basic'))
+temp <- tempfile()
+download.file(response$url, temp, mode = 'wb')
+tweets <- read_csv(unz(temp, 'candidate_tweets2022.csv'))
+unlink(temp)
+
+tweets %>%
+  select(-text) %>%
+  head(5) %>%
+  kable(align = 'l') %>% 
+  kable_classic(position = 'center')
+  
+tweets %>%
+  select(username, text) %>%
+  head(10) %>%
+  kable(align = 'l') %>% 
+  kable_classic(position = 'center')
+```
+
+I'll remove a few extraneous columns and attempt to clean up the tweet text. I'll remove poorly captured characters (e.g. the ampersand), remove links, eliminate non-UTF characters and emojis, eliminate "'s" at the end of words (for better aggregation), and remove line breaks / control elements. We again preview our text column to see the cleaned version. Compared to the above, it looks much nicer!
+
+```{r}
+tweets <- tweets %>%
+  select(-...1, -views, -retweeted_id, -quoted_id)
+
+tweets$text <- tweets$text %>%
+  str_remove_all('&amp;') %>%
+  str_remove_all('https://t.co/[a-z,A-Z,0-9]*') %>%
+  str_remove_all('[â¢\u0080-\uFFFF]') %>%
+  str_remove_all('\\p{So}') %>%
+  str_remove_all('\'s') %>%
+  str_replace_all('[[:cntrl:]]', ' ')
+
+tweets %>%
+  select(username, text) %>%
+  head(10) %>%
+  kable(align = 'l') %>% 
+  kable_classic(position = 'center')
+```
+
+Next, we'll tokenize our tweets to support the sentiment analysis.
+
+```{r}
+tidy_tweets <- tweets %>%
+  select(twitter_id, tweet_id, date_created, text) %>%
+  unnest_tokens(word, text)
+
+head(tidy_tweets) %>% 
+  kable(align = 'l') %>% 
+  kable_classic(position = 'center')
+```
+
+We'll use the AFINN lexicon for most of our analysis. The code below captures that lexicon in a dataframe and joins it with our tidy tweets dataframe. Each tweet is treated as a separate "chapter" or document. The net sentiment of all words in a single tweet is calculated to provide an overall positive / negative rating for the tweet.
+
+```{r}
+afinn <- get_sentiments('afinn')
+
+tweets_afinn <- tidy_tweets %>% 
+  inner_join(afinn, by = 'word') %>% 
+  group_by(twitter_id, tweet_id, date_created) %>% 
+  summarize(sentiment = sum(value), .groups = 'keep')
+
+head(tweets_afinn) %>% 
+  kable(align = 'l') %>% 
+  kable_classic(position = 'center')
+```
+
+Now that we have our data cleaned, we can begin with some analysis. I'll first pull in a the previously mentioned data (see https://github.com/kac624/cuny/raw/main/D607/Project4_politicalTweets.Rmd) that provides details on all congressional candidates from the 2022 cycle. This dataset also contains a unique Twitter ID for each candidate. We'll use that ID as a key to join our sentiment dataframe with the candidates dataframe so we can classify each tweet by party.  
+
+```{r}
+candidates <- read_csv('data/candidates2022.csv')
+```
+
+For now, we'll focus on just Democrats and Republicans. Our first visualization provides a sense of the distribution of positive and negative tweets for candidates in each party. 
+
+```{r}
+tweets_afinn %>%
+  left_join(select(candidates, party, twitter_id), 
+            by = 'twitter_id') %>%
+  filter(!is.na(party),
+         party == 'DEMOCRATIC PARTY' |
+           party == 'REPUBLICAN PARTY') %>%
+  ggplot(aes(sentiment, fill = party)) +
+  geom_density(alpha = 0.5) +
+  scale_fill_manual(values = c('blue','red'))
+```
+
+The distributions are very similar, with most tweets remaining largely neutral. We do see a second mode just under zero, indicating that most tweets are either slightly positive or slightly negative overall.
+
+Next, we'll examine the sentiment of tweets over the whole election year, separated by week. The week of the election in November is highlighted as a vertical line. Overall, the dataset is biased (in terms of volume) towards Democratic candidates (i.e. there are more tweets from Democrats than Republicans). To create a more "apples-to-apples" comparison, I standardized the sentiment scores, by taking the sum sentiment rating of all tweets within a week and dividing by the number of tweets.
+
+```{r}
+tweets_afinn %>%
+  left_join(select(candidates, party, twitter_id),
+            by = 'twitter_id') %>%
+  filter(!is.na(party),
+         party == 'DEMOCRATIC PARTY' |
+           party == 'REPUBLICAN PARTY') %>%
+  group_by(week = lubridate::week(date_created), party) %>%
+  summarize(sum_sentiment = sum(sentiment),
+            std_sentiment = sum_sentiment / n(),
+            .groups = 'keep') %>%
+  ggplot(aes(week, std_sentiment, fill = party)) +
+  geom_col() + 
+  geom_vline(xintercept = lubridate::week('02-11-2022'),
+             color = 'purple') +
+  scale_fill_manual(values = c('blue','red')) +
+  facet_wrap(~party, ncol = 1)
+```
+
+In terms of a time series, no clear trend emerges. The sentiment rating appears mostly consistent through the year, with a few aberrant peaks. What's most notable is that the aggregate sentiment rating remains positive for all weeks. This insight aligns with the density distribution above, showing that most tweets lean positive. Overall, it seems that Democratic candidates tweeted with more positive language. This could be related to the position of each party in 2022. With a Democratic administration in the White House, Democrats may be more inclined to lean on positive news in support of the status quo. By contrast, Republicans were looking to win seats in Congress, so they appeared to be more focused on highlighting problems and negative news to inspire voters to vote for change.
+
+Our next visualization is a wordcloud, highting the most frequently used words in tweets from candidates of each party. 
+
+```{r, message = FALSE}
+tidy_tweets %>%
+  anti_join(stop_words) %>%
+  left_join(select(candidates, party, twitter_id), 
+            by = 'twitter_id') %>%
+  filter(!is.na(party),
+         party == 'DEMOCRATIC PARTY' |
+           party == 'REPUBLICAN PARTY') %>%
+  count(word, party, sort = TRUE) %>%
+  acast(word ~ party, value.var = 'n', fill = 0) %>%
+  comparison.cloud(colors = c('blue', 'red'),
+                   max.words = 80)
+```
+
+In line with the narrative highlighted by the previous visualization, it seems that Republicans, seeking to drive voters to vote for change, tweeted mostly about topics they construe as problematic: the border, inflation, energy prices, and drugs. They also focused a lot on Biden. Democratic candidates, by contrast, tweeted a lot about issues that are typically associated with Democrats: gun control, abortion rights, race and climate. 
+
+Finally, we'll use the NRC lexicon to highlight the general emotions most frequently evoked in tweets. I'll remove the binary "positive" and "negative" labels and instead focus more on specific emotions, such as anger, joy and trust. The first visualization shows the top words that contribute to each sentiment across all parties. The second then provides a side-by-side comparison of the sentiments most frequently evoked by candidates on each side. As above, we use a "standardized" sentiment (calculated the proportion of total words tied to each sentiment) to address the imbalance in the dataset.
+
+```{r, message = FALSE, warning = FALSE}
+nrc <- get_sentiments('nrc')
+
+exclusions <- tibble(word = c('vote','congress'))
+
+tweets_nrc <- tidy_tweets %>%
+  anti_join(exclusions) %>%
+  inner_join(nrc, by = 'word') %>%
+  left_join(select(candidates, party, twitter_id), 
+            by = 'twitter_id') %>%
+  filter(!is.na(party),
+         party == 'DEMOCRATIC PARTY' |
+           party == 'REPUBLICAN PARTY') %>%
+  count(word, sentiment, party, sort = TRUE)
+
+tweets_nrc %>%
+  filter(sentiment != 'positive',
+         sentiment != 'negative') %>%
+  group_by(sentiment) %>%
+  slice_max(n, n = 10) %>%
+  ungroup() %>%
+  mutate(word = reorder(word, n)) %>%
+  ggplot(aes(n, word, fill = sentiment)) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~sentiment, scales = 'free_y')
+
+tweets_nrc %>%
+  filter(sentiment != 'positive',
+         sentiment != 'negative') %>%
+  group_by(sentiment, party) %>%
+  summarize(total = sum(n)) %>%
+  group_by(party) %>%
+  mutate(freq = total / sum(total)) %>%
+  ggplot(aes(freq, sentiment, fill = party)) +
+  geom_col() + 
+  scale_fill_manual(values = c('blue','red')) +
+  facet_wrap(~party)
+```
+
+The distribution of sentiments is very similar across parties. The most noticeable difference is that Republican candidates appear to use words associated with fear more frequently than Democratic candidates. Similarly, Democratic candidates appear to use words associated with joy more frequently. These differences, however, appears quite minor.
