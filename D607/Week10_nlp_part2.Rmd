@@ -171,7 +171,7 @@ tidy_tweets %>%
 
 In line with the narrative highlighted by the previous visualization, it seems that Republicans, seeking to drive voters to vote for change, tweeted mostly about topics they construe as problematic: the border, inflation, energy prices, and drugs. They also focused a lot on Biden. Democratic candidates, by contrast, tweeted a lot about issues that are typically associated with Democrats: gun control, abortion rights, race and climate. 
 
-Finally, we'll use the NRC lexicon to highlight the general emotions most frequently evoked in tweets. I'll remove the binary "positive" and "negative" labels and instead focus more on specific emotions, such as anger, joy and trust. I've excluded a few custom stop words that were high ranking, but appeared incorrectly categorized (e.g. "vote" was associated with "fear", and "congress" with "disgust").
+Next, we'll use the NRC lexicon to highlight the general emotions most frequently evoked in tweets. I'll remove the binary "positive" and "negative" labels and instead focus more on specific emotions, such as anger, joy and trust. I've excluded a few custom stop words that were high ranking, but appeared incorrectly categorized (e.g. "vote" was associated with "fear", and "congress" with "disgust").
 
 The first visualization shows the top words that contribute to each sentiment across all parties. The second then provides a side-by-side comparison of the sentiments most frequently evoked by candidates on each side. As above, we use a "standardized" sentiment (calculated the proportion of total words tied to each sentiment) to address the imbalance in the dataset.
 
@@ -215,3 +215,31 @@ tweets_nrc %>%
 ```
 
 The distribution of sentiments is very similar across parties. The most noticeable difference is that Republican candidates appear to use words associated with fear more frequently than Democratic candidates. Similarly, Democratic candidates appear to use words associated with joy more frequently. These differences, however, appears quite minor.
+
+Finally, we'll bring in a new lexicon, sourced from an assignment posted to RPubs by Colin Vail (*MBA 676: Political Sentiment Lexicon*, https://rpubs.com/colinvail/338458). The analysis aims to produce a lexicon characterizing words as right-leaning or left-leaning (in terms of the US political spectrum) on a scale from -4 to 4. The author produces the lexicon with a relatively straightforward approach, but they do provide some validation work. Overall, however, I can't confirm the quality of the lexicon with a high degree of confidence. In applying it to our data, however, we can provide an assessment of its quality. We would expect that tweets from Democratic candidates would have a left-leaning score (i.e. positive) and tweets from Republican candidates would have a right-leaning (i.e. negative) score.
+
+Let's read in the data and join it to our `tidy_tweets` dataframe to see if the lexicon can correctly characterize tweets according to the candidates' political orientation.
+
+```{r, message = FALSE}
+poli_sent <- read_csv('data/poli_sent_lexicon.csv') %>%
+  select(-...1)
+
+tweets_poli <- tidy_tweets %>%
+  inner_join(poli_sent, by = 'word') %>%
+  left_join(select(candidates, party, twitter_id), 
+            by = 'twitter_id') %>%
+  filter(!is.na(party),
+         party == 'DEMOCRATIC PARTY' |
+           party == 'REPUBLICAN PARTY') %>% 
+  group_by(tweet_id, party) %>% 
+  summarize(orientation = sum(value), .groups = 'keep')
+
+tweets_poli %>%
+  ggplot(aes(orientation, fill = party)) +
+  geom_density(alpha = 0.5) +
+  scale_fill_manual(values = c('blue','red'))
+```
+
+Unfortunately, it seems the lexicon provides little value in assessing the political orientation of candidates from different parties. The distributions above are nearly identical, indicating little difference between the orientation of opposing candidates. Obviously, however, this is not the case. We know the political orientations of Republican and Democratic candidates differ significantly. So, we would expect divergent peaks in each distribution, with Republicans having primarily negative scores and Democrats positive. The distributions above, however, show no such difference.
+
+We can conclude that this lexicon alone provides little insight on political orientation when used for sentiment analysis. I hope to characterize tweets according to political orientation for future assignments, so finding (or constructing) a suitable lexicon will be an area of future research!
