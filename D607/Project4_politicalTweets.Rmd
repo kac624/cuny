@@ -15,6 +15,7 @@ knit: (function(input, ...) {
 library(tidyverse)
 library(httr)
 library(jsonlite)
+library(fuzzyjoin)
 ```
 
 ## Initial Universe of Candidates
@@ -83,6 +84,7 @@ candidates %>% head()
 ## Twitter IDs for candidates
 
 https://github.com/unitedstates/congress-legislators
+https://ballotpedia.org/List_of_congressional_candidates_in_the_2022_elections
 https://www.propublica.org/datastore/dataset/politicians-tracked-by-politwoops
 
 ```{r, message = FALSE}
@@ -91,7 +93,43 @@ congress_history <- read_csv('https://theunitedstates.io/congress-legislators/le
 
 congress <- rbind(congress_current, congress_history)
 
+ballotpedia <- read_csv('data/ballotpedia_scrape2022.csv')
+
 poliwoops = read_csv('https://s3.amazonaws.com/pp-projects-static/politwoops/active_accounts.csv')
+```
+
+https://www.rdocumentation.org/packages/stringdist/versions/0.9.10/topics/stringdist-metrics
+
+```{r}
+ballotpedia <- ballotpedia %>%
+  mutate(state = state.abb[match(state,state.name)],
+         party_simple = case_when(party == 'Republican Party' ~ 'Republican',
+                                  party == 'Democratic Party' ~ 'Democrat',
+                                  TRUE ~ 'Other'),
+         key = str_c(state, ' ', party_simple, ' ', name))
+
+candidates <- candidates %>%
+  mutate(party_simple = case_when(party == 'REPUBLICAN PARTY' ~ 'Republican',
+                                  party == 'DEMOCRATIC PARTY' ~ 'Democrat',
+                                  TRUE ~ 'Other'),
+         last_name = str_extract(candidates$name, '.*(?=,)'),
+         first_name = str_extract(candidates$name, '(?<=,).*'),
+         name = str_c(first_name, ' ', last_name),
+         key = str_c(state, ' ', party_simple, ' ', name)) %>%
+  select(-last_name, -first_name)
+
+candidates[is.na(candidates)]
+ballotpedia[is.na(ballotpedia)] <- ''
+
+candidates %>%
+select(which(~   is.na(.)))
+
+candidates %>%
+  ## Fuzzy join to grab twitter handles from ballotpedia
+  stringdist_join(
+    select(ballotpedia, twitter, ballotpedia, key),
+    by = 'key', # suffix = c('','_ballotpedia'),
+    method = 'lv')
 ```
 
 Join
@@ -101,9 +139,7 @@ candidates_twitter <- candidates %>%
   ## Join with IDs from congress data
   left_join(
     select(congress, twitter_id, bioguide_id, fec_ids),
-    by = c('fec_id' = 'fec_ids'), 
-    suffix = c('','_congress'), 
-    keep = FALSE) %>%
+    by = c('fec_id' = 'fec_ids'), suffix = c('','_congress'), keep = FALSE) %>%
   ## Join with IDs from poliwoops data based on bioguide ID
   left_join(
     select(poliwoops, twitter_id, bioguide_id) %>%
