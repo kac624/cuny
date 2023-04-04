@@ -101,35 +101,97 @@ poliwoops = read_csv('https://s3.amazonaws.com/pp-projects-static/politwoops/act
 https://www.rdocumentation.org/packages/stringdist/versions/0.9.10/topics/stringdist-metrics
 
 ```{r}
-ballotpedia <- ballotpedia %>%
-  mutate(state = state.abb[match(state,state.name)],
-         party_simple = case_when(party == 'Republican Party' ~ 'Republican',
-                                  party == 'Democratic Party' ~ 'Democrat',
-                                  TRUE ~ 'Other'),
-         key = str_c(state, ' ', party_simple, ' ', name))
+for (i in colnames(ballotpedia)) {
+  ballotpedia[is.na(ballotpedia[i]), ] %>%
+    print()
+}
+
+ballotpedia$party_simple %>% unique()
+
+og_candidates <- candidates
+og_ballotpedia <- ballotpedia
+```
+
+
+```{r}
+candidates <- og_candidates
+ballotpedia <- og_ballotpedia
+
+candidates[is.na(candidates)] <- ''
+ballotpedia[is.na(ballotpedia)] <- ''
 
 candidates <- candidates %>%
   mutate(party_simple = case_when(party == 'REPUBLICAN PARTY' ~ 'Republican',
                                   party == 'DEMOCRATIC PARTY' ~ 'Democrat',
                                   TRUE ~ 'Other'),
          last_name = str_extract(candidates$name, '.*(?=,)'),
-         first_name = str_extract(candidates$name, '(?<=,).*'),
-         name = str_c(first_name, ' ', last_name),
-         key = str_c(state, ' ', party_simple, ' ', name)) %>%
+         first_name = str_extract(candidates$name, '(?<=, ).*'),
+         name = str_c(first_name, ' ',last_name)) %>%
+  replace(is.na(.), '') %>%
+  # mutate(key = str_c(state, party_simple, 
+  #                    str_replace_all(name, fixed(' '), '')) %>%
+  #          tolower() %>% trimws() %>% 
+  #          str_remove_all('[[:punct:]]'))
+  mutate(key = str_remove_all(name, fixed(' ')) %>%
+           str_remove_all('[[:punct:]]') %>%
+           tolower() %>% trimws()) %>%
   select(-last_name, -first_name)
 
-candidates[is.na(candidates)]
-ballotpedia[is.na(ballotpedia)] <- ''
+ballotpedia <- ballotpedia %>%
+  mutate(state = state.abb[match(state,state.name)],
+         party_simple = case_when(party == 'Republican Party' ~ 'Republican',
+                                  party == 'Democratic Party' ~ 'Democrat',
+                                  TRUE ~ 'Other')) %>%
+  replace(is.na(.), '') %>%
+  # mutate(key = str_c(state, party_simple, 
+  #                    str_replace_all(name, fixed(' '), '')) %>%
+  #          tolower() %>% trimws() %>% 
+  #          str_remove_all('[[:punct:]]'))
+  mutate(key = str_remove_all(name, fixed(' ')) %>%
+           str_remove_all('[[:punct:]]') %>%
+           tolower() %>% trimws())
 
-candidates %>%
-select(which(~   is.na(.)))
+# candidates
+# ballotpedia
+# 
+# candidates[candidates$key == 'ut republican tim aalders', ]
+# ballotpedia[ballotpedia$key == 'ut republican timothy noel aalders', ]
+# 
+# candidates %>%
+#   left_join(
+#     ballotpedia %>%
+#       select(twitter, ballotpedia, key),
+#     by = 'key', suffix = c('.x', '.y'),
+#     keep = TRUE) %>%
+#   select(key.x, key.y, twitter, party, state)
+
+# candidates %>%
+#   ## Fuzzy join to grab twitter handles from ballotpedia
+#   stringdist_join(
+#     select(ballotpedia, twitter, state, party_simple),
+#     by = 'key',
+#     mode = 'inner',
+#     method = 'lv',
+#     max_dist = 5,
+#     ignore_case = TRUE,
+#     distance_col = 'distance') %>%
+#   select(key.x, key.y, distance, state, party_simple)
 
 candidates %>%
   ## Fuzzy join to grab twitter handles from ballotpedia
   stringdist_join(
-    select(ballotpedia, twitter, ballotpedia, key),
-    by = 'key', # suffix = c('','_ballotpedia'),
-    method = 'lv')
+    select(ballotpedia, key, state, party_simple),
+    by = 'key',
+    mode = 'inner',
+    method = 'lv',
+    max_dist = 4,
+    ignore_case = TRUE,
+    distance_col = 'distance') %>%
+  filter(state.x == state.y, 
+         party_simple.x == party_simple.y) %>%
+  select(key.x, key.y, distance, 
+         state.x, state.y, 
+         party_simple.x, party_simple.y)
 ```
 
 Join
