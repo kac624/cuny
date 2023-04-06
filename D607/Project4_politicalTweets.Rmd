@@ -79,12 +79,105 @@ candidates <- map(response, function(x) x$results) %>%
   select(-.)
 
 candidates %>% head()
+
+og_candidates <- candidates
 ```
 
 ## Twitter IDs for candidates
 
-https://github.com/unitedstates/congress-legislators
 https://ballotpedia.org/List_of_congressional_candidates_in_the_2022_elections
+
+```{r, message = FALSE}
+ballotpedia <- read_csv('data/ballotpedia_scrape2022.csv')
+
+ballotpedia <- ballotpedia[!duplicated(ballotpedia),] %>%
+  filter(twitter != '[]') %>%
+  mutate(district = if_else(is.na(district), '00', sprintf("%02d", district)),
+         state = str_replace_all(state, '_', ' '),
+         twitter_name = str_extract_all(twitter, '(?<=twitter.com/)\\w+(?=\')'))
+
+# ballotpedia %>%
+#   mutate(twitter_name = str_extract_all(twitter, '(?<=twitter.com/)\\w+(?=\')')) %>%
+#   unnest_longer(twitter_name)
+
+ballotpedia
+
+og_ballotpedia <- ballotpedia
+```
+
+https://www.rdocumentation.org/packages/stringdist/versions/0.9.10/topics/stringdist-metrics
+
+```{r}
+candidates <- og_candidates
+ballotpedia <- og_ballotpedia
+
+candidates <- candidates %>%
+  mutate(party_simple = case_when(party == 'REPUBLICAN PARTY' ~ 'Republican',
+                                  party == 'DEMOCRATIC PARTY' ~ 'Democrat',
+                                  TRUE ~ 'Other'),
+         key = case_when(!str_detect(name,',') ~ name,
+                          TRUE ~ str_c(str_extract(name, '(?<=, ).*'), ' ',
+                                       str_extract(name, '.*(?=,)'))) %>%
+           str_remove_all(str_c(
+             '(MS\\.|MRS\\.|MR\\.|DR\\.|JR\\.|JR|SR\\.|III|II|',
+             '\\b[A-Z]\\.\\b|\\b[A-Z]\\b|É|[0-9])')) %>%
+           str_remove_all('[[:punct:]]') %>%
+           str_replace_all('  ', ' ') %>%
+           trimws() %>%
+           tolower(),
+         key = str_c(str_extract(key, '^[A-Za-z]+'), ' ',
+                 str_extract(key, ' [A-Za-z]+$')))
+
+ballotpedia <- ballotpedia %>%
+  mutate(state = state.abb[match(state,state.name)],
+         party_simple = case_when(party == 'Republican Party' ~ 'Republican',
+                                  party == 'Democratic Party' ~ 'Democrat',
+                                  TRUE ~ 'Other'),
+         key = str_remove_all(name, '(III|II|Jr\\.|Sr\\.|\\b[A-Z]\\.\\b|é)') %>%
+           str_remove_all('[[:punct:]]') %>%
+           str_replace_all('  ', ' ') %>%
+           trimws() %>%
+           tolower(),
+         key = str_c(str_extract(key, '^[A-Za-z]+'), ' ',
+                 str_extract(key, ' [A-Za-z]+$')))
+
+candidates[is.na(candidates)] <- ''
+ballotpedia[is.na(ballotpedia)] <- ''
+
+## Fuzzy join to grab twitter handles from ballotpedia
+fuzzy <- candidates %>%
+  stringdist_join(
+    select(ballotpedia, key, state, party_simple, district, twitter_name),
+    by = 'key',
+    mode = 'inner',
+    method = 'lv',
+    max_dist = 5,
+    ignore_case = TRUE,
+    distance_col = 'distance') %>%
+  filter(state.x == state.y, 
+         party_simple.x == party_simple.y,
+         district.x == district.y)
+
+fuzzy %>%
+  filter(distance > 3) %>%
+  arrange(key.x)
+
+# kalena bruce	kyle labrue	MO	Republican
+# carlos gimenez	carlos garin	FL	Republican	28
+# thuy lowe	tuan le	FL	Republican
+# john beatty	john henley	VA	Republican
+
+candidates <- candidates %>%
+  left_join(select(fuzzy, key.x, twitter_name),
+            by = c('key' = 'key.x'),
+            keep = FALSE) 
+
+# %>%
+#   unnest_longer(twitter_name, keep_empty = TRUE) %>%
+#   filter(!is.na(twitter_name))
+```
+
+https://github.com/unitedstates/congress-legislators
 https://www.propublica.org/datastore/dataset/politicians-tracked-by-politwoops
 
 ```{r, message = FALSE}
@@ -93,146 +186,49 @@ congress_history <- read_csv('https://theunitedstates.io/congress-legislators/le
 
 congress <- rbind(congress_current, congress_history)
 
-ballotpedia <- read_csv('data/ballotpedia_scrape2022.csv')
-
 poliwoops = read_csv('https://s3.amazonaws.com/pp-projects-static/politwoops/active_accounts.csv')
-```
-
-https://www.rdocumentation.org/packages/stringdist/versions/0.9.10/topics/stringdist-metrics
-
-```{r}
-for (i in colnames(ballotpedia)) {
-  ballotpedia[is.na(ballotpedia[i]), ] %>%
-    print()
-}
-
-ballotpedia$party_simple %>% unique()
-
-og_candidates <- candidates
-og_ballotpedia <- ballotpedia
-```
-
-
-```{r}
-candidates <- og_candidates
-ballotpedia <- og_ballotpedia
-
-candidates[is.na(candidates)] <- ''
-ballotpedia[is.na(ballotpedia)] <- ''
-
-candidates <- candidates %>%
-  mutate(party_simple = case_when(party == 'REPUBLICAN PARTY' ~ 'Republican',
-                                  party == 'DEMOCRATIC PARTY' ~ 'Democrat',
-                                  TRUE ~ 'Other'),
-         last_name = str_extract(candidates$name, '.*(?=,)'),
-         first_name = str_extract(candidates$name, '(?<=, ).*'),
-         name = str_c(first_name, ' ',last_name)) %>%
-  replace(is.na(.), '') %>%
-  # mutate(key = str_c(state, party_simple, 
-  #                    str_replace_all(name, fixed(' '), '')) %>%
-  #          tolower() %>% trimws() %>% 
-  #          str_remove_all('[[:punct:]]'))
-  mutate(key = str_remove_all(name, fixed(' ')) %>%
-           str_remove_all('[[:punct:]]') %>%
-           tolower() %>% trimws()) %>%
-  select(-last_name, -first_name)
-
-ballotpedia <- ballotpedia %>%
-  mutate(state = state.abb[match(state,state.name)],
-         party_simple = case_when(party == 'Republican Party' ~ 'Republican',
-                                  party == 'Democratic Party' ~ 'Democrat',
-                                  TRUE ~ 'Other')) %>%
-  replace(is.na(.), '') %>%
-  # mutate(key = str_c(state, party_simple, 
-  #                    str_replace_all(name, fixed(' '), '')) %>%
-  #          tolower() %>% trimws() %>% 
-  #          str_remove_all('[[:punct:]]'))
-  mutate(key = str_remove_all(name, fixed(' ')) %>%
-           str_remove_all('[[:punct:]]') %>%
-           tolower() %>% trimws())
-
-# candidates
-# ballotpedia
-# 
-# candidates[candidates$key == 'ut republican tim aalders', ]
-# ballotpedia[ballotpedia$key == 'ut republican timothy noel aalders', ]
-# 
-# candidates %>%
-#   left_join(
-#     ballotpedia %>%
-#       select(twitter, ballotpedia, key),
-#     by = 'key', suffix = c('.x', '.y'),
-#     keep = TRUE) %>%
-#   select(key.x, key.y, twitter, party, state)
-
-# candidates %>%
-#   ## Fuzzy join to grab twitter handles from ballotpedia
-#   stringdist_join(
-#     select(ballotpedia, twitter, state, party_simple),
-#     by = 'key',
-#     mode = 'inner',
-#     method = 'lv',
-#     max_dist = 5,
-#     ignore_case = TRUE,
-#     distance_col = 'distance') %>%
-#   select(key.x, key.y, distance, state, party_simple)
-
-candidates %>%
-  ## Fuzzy join to grab twitter handles from ballotpedia
-  stringdist_join(
-    select(ballotpedia, key, state, party_simple),
-    by = 'key',
-    mode = 'inner',
-    method = 'lv',
-    max_dist = 4,
-    ignore_case = TRUE,
-    distance_col = 'distance') %>%
-  filter(state.x == state.y, 
-         party_simple.x == party_simple.y) %>%
-  select(key.x, key.y, distance, 
-         state.x, state.y, 
-         party_simple.x, party_simple.y)
 ```
 
 Join
 
 ```{r}
-candidates_twitter <- candidates %>%
+candidates <- candidates %>%
   ## Join with IDs from congress data
   left_join(
-    select(congress, twitter_id, bioguide_id, fec_ids),
+    select(congress, bioguide_id, fec_ids, twitter_id),
     by = c('fec_id' = 'fec_ids'), suffix = c('','_congress'), keep = FALSE) %>%
   ## Join with IDs from poliwoops data based on bioguide ID
   left_join(
-    select(poliwoops, twitter_id, bioguide_id) %>%
+    select(poliwoops, bioguide_id, twitter_id) %>%
       filter(!is.na(bioguide_id)),
     by = 'bioguide_id', suffix = c('','_poliw_bio'), keep = FALSE) %>%
   ## Join with IDs from poliwoops data based on fec ID
   left_join(
-    select(poliwoops, twitter_id, fec_candidate_id) %>%
+    select(poliwoops, fec_candidate_id, twitter_id) %>%
       filter(!is.na(fec_candidate_id)), 
-    by = c('fec_id' = 'fec_candidate_id'), suffix = c('','_poliw_fec'), keep = FALSE)%>%
-  ## Fill in twitter_id col to allow filtering
-  mutate(twitter_id = case_when(
-    !is.na(twitter_id) ~ twitter_id,
-    !is.na(twitter_id_poliw_fec) ~ twitter_id_poliw_fec,
-    !is.na(twitter_id_poliw_bio) ~ twitter_id_poliw_bio)) %>%
-  filter(!is.na(twitter_id)) %>%
-  ## Convert IDs to list, then unnest to long format
+    by = c('fec_id' = 'fec_candidate_id'), suffix = c('','_poliw_fec'), keep = FALSE) # %>%
+
+## Convert IDs to list, then unnest to long format
+candidates <- candidates %>%
   unite(twitter_id, twitter_id, twitter_id_poliw_fec, twitter_id_poliw_bio, 
-        sep = ',', na.rm = TRUE) %>% 
+        sep = ',', na.rm = TRUE) %>%
   mutate(twitter_id = str_split(as.character(twitter_id), ",")) %>%
-  unnest(twitter_id)
+  unnest_longer(twitter_id, keep_empty = TRUE)
 
-## Remove dupes
-candidates_twitter <- candidates_twitter[!duplicated(candidates_twitter), ]
+## Remove dupes, then unnest twitter_name to long
+candidates <- candidates[!duplicated(candidates), ] %>%
+  unnest_longer(twitter_name, keep_empty = TRUE)
 
-candidates_twitter
+candidates %>%
+  filter(twitter_name != '' | twitter_id != '') %>%
+  select(name) %>% unique() %>% nrow()
+
+candidates
 ```
 
 
 ```{r}
-write_csv(candidates_twitter, paste0('data/candidates',year,'.csv'))
+write_csv(candidates, paste0('data/candidates',year,'.csv'))
 ```
 
 
