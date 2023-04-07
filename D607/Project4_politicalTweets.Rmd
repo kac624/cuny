@@ -96,10 +96,6 @@ ballotpedia <- ballotpedia[!duplicated(ballotpedia),] %>%
          state = str_replace_all(state, '_', ' '),
          twitter_name = str_extract_all(twitter, '(?<=twitter.com/)\\w+(?=\')'))
 
-# ballotpedia %>%
-#   mutate(twitter_name = str_extract_all(twitter, '(?<=twitter.com/)\\w+(?=\')')) %>%
-#   unnest_longer(twitter_name)
-
 ballotpedia
 
 og_ballotpedia <- ballotpedia
