@@ -1,0 +1,212 @@
+---
+title: "Fuzzy Join Vignette"
+author: "Keith Colella"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, message = FALSE}
+library(tidyverse)
+library(fuzzyjoin)
+```
+
+## Overview
+
+This vignette will introduce the `fuzzyjoin` package, which enables joining of two datasets based on imperfect matches. This package is very helpful for combining data with*out* unique keys.
+
+We will use data related to candidates running in the 2022 election for the House of Representatives. Specifically, we'll aim to join data from the Federal Election Committee (FEC) with data scraped from the Ballotpedia website. While the FEC data has a unique key (the FEC ID) for each candidate, the Ballotpedia data does *not*. So, we will need to rely primarily on candidate names to perform matches.
+
+Candidate names, however, are not consistent across both sources. As we will see, names sometime include middle names and suffixes (e.g. Jr.) but other times do not. Some candidates are listed according to a nickname (Bill versus William) or initials (Jonathan Taylor versus JT). As a result, using names as a unique key would fail to capture many matches. If the names are relatively close, however, we can use fuzzy joins to get the job done!
+
+## Data
+
+Our first dataset comes from the FEC API (https://api.open.fec.gov/developers/), listing all federally registered House candidates in the 2022 election cycle. I prepared the data ahead of time for simplicity, so we can just read it in here.
+
+```{r}
+fec <- read_csv('input_data/fec_house_candidates_2022.csv')
+
+glimpse(fec)
+```
+
+Our second dataset comes from Ballotpedia, a nonprofit online political encyclopedia. As above, I prepared the data ahead of time (see https://github.com/kac624/cuny/blob/main/D607/ballotpediaScrape.ipynb), so we can simply read it in here.
+
+```{r}
+ballotpedia <- read_csv('input_data/ballotpedia_scrape2022.csv')
+
+glimpse(ballotpedia)
+```
+
+We can already see some significant differences between the names across the two datasets. Let's look at one specific example to illustrate these differences.
+
+```{r}
+fec %>%
+  filter(str_detect(name, 'ELLZEY')) %>%
+  select(name, state, district, party)
+
+ballotpedia %>%
+  filter(str_detect(name, 'Ellzey')) %>%
+  select(name, state, district, party)
+```
+
+In the FEC data, the Republican candidate for the 6th district of Texas is listed as John Kevin Ellzey Sr., but in the Ballotpedia data, he is listed as Jake Ellzey. We can use the party, state and district fields to guide our join, but ultimately, we'll need to rely on imperfect name matches to connect these two datasets.
+
+## Cleaning and Prep
+
+First, we'll do some cleaning on the state and district fields of the Ballotpedia data so that it matches the format of the FEC data. We'll also remove duplicate rows in the Ballotpedia data.
+
+```{r}
+ballotpedia <- ballotpedia[!duplicated(ballotpedia),] %>%
+  mutate(district = if_else(is.na(district), '00', sprintf("%02d", district)),
+         state = str_replace_all(state, '_', ' '))
+
+head(ballotpedia)
+```
+
+We'll do some additional cleaning to get the party and name columns as close as possible. For the party column, we'll simplify things by listing party as one of three options: Republican, Democrat or Other. For the name column, we'll actually create a new column (named `key`) with all lowercase letters and a number of "noisy" items removed (punctuation, suffixes, prefixes and duplicate spaces). Removing this noise will support more accurate matches in the fuzzy join.
+
+```{r}
+fec <- fec %>%
+  mutate(party_simple = case_when(party == 'REPUBLICAN PARTY' ~ 'Republican',
+                                  party == 'DEMOCRATIC PARTY' ~ 'Democrat',
+                                  TRUE ~ 'Other'),
+         key = case_when(!str_detect(name,',') ~ name,
+                          TRUE ~ str_c(str_extract(name, '(?<=, ).*'), ' ',
+                                       str_extract(name, '.*(?=,)'))) %>%
+           str_remove_all(str_c(
+             '(MS\\.|MRS\\.|MR\\.|DR\\.|JR\\.|JR|SR\\.|III|II|',
+             '\\b[A-Z]\\.\\b|\\b[A-Z]\\b|É|[0-9])')) %>%
+           str_remove_all('[[:punct:]]') %>%
+           str_replace_all('  ', ' ') %>%
+           trimws() %>%
+           tolower(),
+         key = str_c(str_extract(key, '^[A-Za-z]+'),
+                 str_extract(key, ' [A-Za-z]+$')))
+
+ballotpedia <- ballotpedia %>%
+  mutate(state = state.abb[match(state,state.name)],
+         party_simple = case_when(party == 'Republican Party' ~ 'Republican',
+                                  party == 'Democratic Party' ~ 'Democrat',
+                                  TRUE ~ 'Other'),
+         key = str_remove_all(name, '(III|II|Jr\\.|Sr\\.|\\b[A-Z]\\.\\b|é)') %>%
+           str_remove_all('[[:punct:]]') %>%
+           str_replace_all('  ', ' ') %>%
+           trimws() %>%
+           tolower(),
+         key = str_c(str_extract(key, '^[A-Za-z]+'),
+                 str_extract(key, ' [A-Za-z]+$')))
+
+fec[is.na(fec)] <- ''
+ballotpedia[is.na(ballotpedia)] <- ''
+
+fec$key[1:5]
+ballotpedia$key[1:5]
+```
+
+With our names cleaned, we can now try our first fuzzy join! While the `fuzzyjoin` package offers a number of functions, we'll focus on the `stringdist_join` function, which uses imperfect string matches. For this example, we want to compare the number of matches using different fuzzy parameters, so we'll set the join mode to `inner` (this parameter takes the typical join types, such as `left`, `right` and `full`).
+
+The most critical arguments are `method` and `max_dist`. The `method` argument determines the mathematical approach for identifying matches. The various options are all detailed in documentation for the `stringdist` package (see https://search.r-project.org/CRAN/refmans/stringdist/html/stringdist-metrics.html). We'll use the `lv` option for now, which corresponds to Levenshtein distance, a function that counts the number of deletions, insertions and substitutions necessary to turn string `b` into string `a`.
+
+The `max_dist` argument serves as a threshold for how *fuzzy* we want our matches to be. A higher `max_dist` means that more dissimilar strings will still count as matches. Conversely, a lower `max_dist` will result in only strings that are very similar counting as matches. We add the `distance_col` argument to create a new column that details the distance of the two strings matched. We'll set this to 3 for now.
+
+```{r}
+fuzzy1 <- fec %>%
+  stringdist_join(
+    select(ballotpedia, name, key),
+    by = 'key',
+    mode = 'inner',
+    method = 'lv',
+    max_dist = 3,
+    ignore_case = TRUE,
+    distance_col = 'distance')
+
+nrow(fuzzy1)
+
+fuzzy1 %>%
+  filter(distance > 2) %>%
+  select(name.x, key.x, name.y, key.y) %>%
+  arrange(key.x) %>%
+  head(10)
+```
+
+We see nearly 3000 matches, which significantly exceeds the total number of observations in the Ballotpedia data. Moreover, when we view the matches with the greatest distance (3), we see some erroneous matches. Aaron Bean has matched with both Arron Jay and Aaron Lee.
+
+So, let's try again, but with a lower threshold, setting `max_dist` to 1.
+
+```{r}
+fuzzy2 <- fec %>%
+  stringdist_join(
+    select(ballotpedia, name, key),
+    by = 'key',
+    mode = 'inner',
+    method = 'lv',
+    max_dist = 1,
+    ignore_case = TRUE,
+    distance_col = 'distance')
+
+nrow(fuzzy2)
+
+fuzzy2 %>%
+  select(name.x, key.x, name.y, key.y) %>%
+  arrange(key.x) %>%
+  head(10)
+```
+
+With a lower threshold these matches appear more accurate. However, we also appear to fail to match a number of candidates, as our joined dataframe has only ~2000 rows, compared to 2289 in the Ballotpedia dataset.
+
+Perhaps there is a middle ground? We can increase the threshold again, but this time use "helper columns" to get rid of erroneous matches. Specifically, we can use the state, district and party columns to further refine our join. Once the join is complete, we then filter for those rows in which these three columns match.
+
+```{r}
+fuzzy3 <- fec %>%
+  stringdist_join(
+    select(ballotpedia, name, key, state, district, party_simple),
+    by = 'key',
+    mode = 'inner',
+    method = 'lv',
+    max_dist = 3,
+    ignore_case = TRUE,
+    distance_col = 'distance') %>%
+  filter(state.x == state.y,
+         district.x == district.y, 
+         party_simple.x == party_simple.y)
+
+nrow(fuzzy3)
+
+fuzzy3 %>%
+  filter(distance > 2) %>%
+  select(name.x, key.x, name.y, key.y) %>%
+  arrange(key.x) %>%
+  head(10)
+```
+
+We see now that even our most distance matches appear accurate. The distance allows for names that diverge significantly in terms of formatting to still be matched. However, we still only have ~2000 matches, so we're missing just under 300 candidates. What if we increase the threshold further, while still using our helper columns?
+
+```{r}
+fuzzy4 <- fec %>%
+  stringdist_join(
+    select(ballotpedia, name, key, state, district, party_simple),
+    by = 'key',
+    mode = 'inner',
+    method = 'lv',
+    max_dist = 6,
+    ignore_case = TRUE,
+    distance_col = 'distance') %>%
+  filter(state.x == state.y,
+         district.x == district.y, 
+         party_simple.x == party_simple.y)
+
+nrow(fuzzy4)
+
+fuzzy4 %>%
+  filter(distance > 4) %>%
+  select(name.x, key.x, name.y, key.y) %>%
+  arrange(key.x) %>%
+  head(10)
+```
+
+Finally, we've gotten very close to a full match for all 2289 candidates in the Ballotpedia data. Moreover, even our most distant matches (those above 4) appear accurate. We do, however, see one match that appears inaccurate: Brian Beal has matched with Tim Beck.
+
+We could continue to tweak our join criteria to refine this join, but ultimately, we need to aim for a "sweet spot" where we feel comfortable with the accuracy of our matches without losing meaningful data. That requires iteration, detailed review of results, and some degree of judgment.
+
+## Conclusion
+
+I hope this vignette has demonstrated the value of the `fuzzyjoin` package, especially when dealing with unstructured / scraped data. The package offers many more functions, so opportunities abound for extension of this vignette!
