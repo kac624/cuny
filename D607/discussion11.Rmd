@@ -14,20 +14,46 @@ Your task is to analyze an existing recommender system that you find interesting
 3. Include specific recommendations about how to improve the site's recommendation capabilities going forward. 
 4. Create your report using an R Markdown file, and create a discussion thread with a link to the GitHub repo where your Markdown file notebook resides.  You are not expected to need to write code for this discussion assignment.
 
-### Scenario Design Analysis
+## Intro
 
-1. Who are your target users?
-2. What are their key goals?
-3. How can you help them accomplish these goals?
+Today we'll analyze TikTok's recommendation system. For those who are unfamiliar, TikTok's recommendation algorithm is central to the app. Users have two options when using the app: (i) a "Following" section limited to accounts the user follows, and (ii) a "For You" section in which any video on the platform may be recommended. The term "Recommendation" is used a bit loosely here, as whenever the user finishes a video and swipes, the next video (i.e. the "recommendation") automatically begins playing. Users can swipe to skip the video, or continue watching.
 
-### Reverse Engineering
+## Scenario Design Analysis
 
+1. Who are your target users?  
+Anyone and everyone. According the TikTok themselves, the app now has 150 million users in the US alone (1). The app contains content related to just about every topic under the sun: politics, travel, science, arts, gaming, fashion, comedy...you name it!
 
+2. What are their key goals?  
+In a word: "Infotainment". Users aim primarily to be entertained, but this can vary widely. Users may also aim to learn, catch up on news, keep up with friends, and more.
 
-### Possible Improvements
+3. How can you help them accomplish these goals?  
+The app aims to meet these needs with its recommendation algorithm. By serving users videos based on the interests they've expressed on the app (intentionally or otherwise), TikTok aims to meet any of the needs mentioned above.
 
+## Reverse Engineering
 
+As noted above, TikTok's algorithm is central to its success, so full details are not readily available. There are, however, some high level details, including from TikTok itself.
 
-### Conclusion
+According to the company (2), the algorithm considers three primary categories of factors: (i) interactions with videos, including likes, follows and comments, (ii) video metadata, such as sounds and hashtags, and (iii) device settings, such as location and language (though this third factor is less important).
 
+A 2021 article from The Batch (3) (which in turn sourced information from the New York Times (4)) provides a slightly more technical assessment of the recommendation system. In summary, the above factors are used to provide a user score for each video, similar to a rating. As a user watches more videos, they generate more video ratings. These ratings are then used to train a machine learning model that predicts the score of future videos. Those videos with the highest predicted score are then served to the user's feed.
 
+What is most unclear to me is how TikTok identifies the sample of videos on which to generate predicted scores (i.e. the "test" dataset). The sheer volume of videos on the platform indicates that any attempt to rank all videos would, clearly, be too computationally intensive for every single simultaneously active user. I would guess that they narrow down the population of videos ranked by the model based on metadata (e.g. hastags) and creators (based on follows, or similarity to creators the user follows).
+
+## Possible Improvements
+
+In terms of improvements, there are a lot of ways to think about it. I would first think of ways to improve the recommendation system to minimizes harm in a broader, societal sense, but that does not necessarily align to the company's goal of maintaining daily active users. This goal serves as another way to "improve" the app from the company's perspective, but again, these two types of improvements may conflict.
+
+In terms of improvements that benefit society at large, there is a lot to say, but I would highlight two things. First is the app's addictive quality. There is myriad reporting (and a fair share of anecdotal experiences) that detail users mindlessly scrolling for hours on end. The app will sometimes serve videos reminding users to take a break after a long session, but it is unclear how effective those warnings are. Second is the app's tendency to serve videos based on negative emotions (fear, anger, prejudice), as they tend to elicit greater responses in terms of interaction. This tendency can send users down paths of increasingly extreme videos, reinforcing hateful or dangerous notions. According to TikTok (2), they have implemented changes to increase the diversity of recommended videos and avoid this "echo chamber" effect, but again, it is unclear how effective these changes are.
+
+I will also note that these problems are not unique to TikTok. In fact, most large social media platforms deal with similar problems. Both of these issues, however, appear more pronounced on TikTok.
+
+## Conclusion
+
+TikTok's success can be largely attributed to its recomendation algorithm. However, as noted by Julian McAuley, professor of computer science at University of California San Diego (3), "There seems to be some perception...that they’ve cracked some magic code for recommendation, but most of what I’ve seen seems pretty normal." The recommendation system does not appear to be wildly different from other recommenders. What sets it apart, perhaps, is its efficiency and effectiveness.
+
+## Sources
+
+(1) https://newsroom.tiktok.com/en-us/150-m-us-users  
+(2) https://newsroom.tiktok.com/en-us/how-tiktok-recommends-videos-for-you  
+(3) https://www.deeplearning.ai/the-batch/issue-122/  
+(4) https://www.nytimes.com/2021/12/05/business/media/tiktok-algorithm.html
