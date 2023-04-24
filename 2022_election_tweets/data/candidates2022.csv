@@ -15,7 +15,7 @@ H2NH01254,"ACCIARD, JULIAN MARC",NH,01,REPUBLICAN PARTY,House,Challenger,P,Repub
 H2CA18171,"ACEVEDO-ARREGUIN, LUIS",CA,18,DEMOCRATIC PARTY,House,Challenger,P,Democrat,luis  acevedoarreguin,NA,NA,
 H2FL10218,"ACHENBACH, JACK JOSEPH",FL,10,DEMOCRATIC PARTY,House,Open seat,C,Democrat,jack  achenbach,JackAchenbach,NA,
 H2UT02431,"ACHESON, PHELAN DOUGLAS",UT,02,INDEPENDENT,House,Challenger,N,Other,phelan  acheson,NA,NA,
-H2NC05165,"ACKERMAN, MICHAEL STEPHAN",NC,05,REPUBLICAN PARTY,House,Challenger,C,Republican,michael  ackerman,NA,NA,
+H2NC05165,"ACKERMAN, MICHAEL STEPHAN",NC,05,REPUBLICAN PARTY,House,Challenger,C,Republican,michael  ackerman,AckermanForNC,NA,
 H4NC12100,"ADAMS, ALMA SHEALEY",NC,12,DEMOCRATIC PARTY,House,Incumbent,N,Democrat,alma  adams,RepAdams,A000370,2916086925
 H4NC12100,"ADAMS, ALMA SHEALEY",NC,12,DEMOCRATIC PARTY,House,Incumbent,N,Democrat,alma  adams,AlmaforCongress,A000370,2916086925
 H4NC12100,"ADAMS, ALMA SHEALEY",NC,12,DEMOCRATIC PARTY,House,Incumbent,N,Democrat,alma  adams,RepAdams,A000370,2147483647
@@ -33,7 +33,7 @@ H0KS03236,"ADKINS, AMANDA",KS,03,REPUBLICAN PARTY,House,Challenger,P,Republican,
 H2VA07212,"ADKINS, GARY GENE",VA,07,REPUBLICAN PARTY,House,Challenger,N,Republican,gary  adkins,NA,NA,
 H2NV02536,"AFZAL, JOSEPH EDWARD",NV,02,DEMOCRATIC PARTY,House,Challenger,N,Democrat,joseph  afzal,JoeyAfzal,NA,
 H2OH05054,"AGAN, JEFFREY JOHN MR. JR",OH,05,DEMOCRATIC PARTY,House,Challenger,N,Democrat,jeffrey  agan,NA,NA,
-H2NY11165,"AGODA-KOUSSEMA, KOMI L.T. DR.",NY,11,DEMOCRATIC PARTY,House,Challenger,P,Democrat,komi  agodakoussema,NA,NA,
+H2NY11165,"AGODA-KOUSSEMA, KOMI L.T. DR.",NY,11,DEMOCRATIC PARTY,House,Challenger,P,Democrat,komi  agodakoussema,Agoda4SIBK,NA,
 H2AK00374,"AGUAYO, DENNIS W. ""DENNY""",AK,00,NONPARTISAN,House,Open seat,N,Other,dennis  aguayo,NA,NA,
 H0FL04140,"AGUILAR, ERICK JAVIER",FL,04,REPUBLICAN PARTY,House,Challenger,P,Republican,erick  aguilar,ErickAguilarJAX,NA,
 H2CA31125,"AGUILAR, PETE",CA,33,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,pete  aguilar,RepPeteAguilar,A000371,3018670151
@@ -55,7 +55,7 @@ H4NC02127,"AIKEN, CLAYTON CLAY",NC,04,DEMOCRATIC PARTY,House,Open seat,P,Democra
 H2NC01255,"AIKEN, WILLIAM",NC,01,REPUBLICAN PARTY,House,Open seat,P,Republican,william  aiken,NA,NA,
 H0HI02213,"AKANA, JOSEPH",HI,02,REPUBLICAN PARTY,House,Challenger,P,Republican,joseph  akana,Joe_Akana,NA,
 H2NY05118,"AKHLAGHY, NADER",NY,05,PEACE AND FREEDOM PARTY,House,Challenger,N,Other,nader  akhlaghy,NA,NA,
-H2OR04152,"AL-ABDRABBUH, SAMI",OR,04,DEMOCRATIC PARTY,House,Open seat,P,Democrat,sami  alabdrabbuh,NA,NA,
+H2OR04152,"AL-ABDRABBUH, SAMI",OR,04,DEMOCRATIC PARTY,House,Open seat,P,Democrat,sami  alabdrabbuh,SamiOregon,NA,
 H2FL11166,"ALCANTARA, CHRISTOPHER MANUEL",FL,11,NO PARTY AFFILIATION,House,Challenger,N,Other,christopher  alcantara,NA,NA,
 H6NH02089,"ALCIERE, TOM",NH,01,REPUBLICAN PARTY,House,Challenger,N,Republican,tom  alciere,TomAlciere,NA,
 H2AL01200,"ALCORN, PETER DAVID",AL,01,REPUBLICAN PARTY,House,Challenger,N,Republican,peter  alcorn,NA,NA,
@@ -65,7 +65,7 @@ H2WI02199,"ALEXANDER, DOUGLAS",WI,02,INDEPENDENT,House,Challenger,N,Other,dougla
 H2OH11300,"ALEXANDER, MARTIN",OH,06,DEMOCRATIC PARTY,House,Challenger,N,Democrat,martin  alexander,NA,NA,
 H2MO07127,"ALEXANDER, SAM DR",MO,07,REPUBLICAN PARTY,House,Open seat,C,Republican,sam  alexander,NA,NA,
 H2NJ02193,"ALEXANDER, TIMOTHY C",NJ,02,DEMOCRATIC PARTY,House,Challenger,P,Democrat,timothy  alexander,talexander_NJ02,NA,
-H2MI04260,"ALFONSO, JOSEPH",MI,04,DEMOCRATIC PARTY,House,,N,Democrat,joseph  alfonso,AlfonsoforMI4,NA,
+H2MI04260,"ALFONSO, JOSEPH",MI,04,DEMOCRATIC PARTY,House,Challenger,N,Democrat,joseph  alfonso,AlfonsoforMI4,NA,
 H2MO04207,"ALFORD, MARK",MO,04,REPUBLICAN PARTY,House,Incumbent,C,Republican,mark  alford,RepMarkAlford,A000379,
 H2MO04207,"ALFORD, MARK",MO,04,REPUBLICAN PARTY,House,Incumbent,C,Republican,mark  alford,markalfordkc,A000379,
 H2NC06098,"ALLAM, NIDA",NC,04,DEMOCRATIC PARTY,House,Challenger,P,Democrat,nida  allam,NidaAllam,NA,
@@ -98,7 +98,7 @@ H2VA02072,"ALTMAN, LARRY THOMAS III",VA,02,REPUBLICAN PARTY,House,Challenger,C,R
 H2TX15146,"ALVARADO, ELIZA DR.",TX,15,DEMOCRATIC PARTY,House,Challenger,C,Democrat,eliza  alvarado,NA,NA,
 H2TX22134,"ALVAREZ, ANDREW RUBEN",TX,09,REPUBLICAN PARTY,House,Challenger,N,Republican,andrew  alvarez,NA,NA,
 H2GA10174,"ALVEY, ANDREW",GA,10,REPUBLICAN PARTY,House,Open seat,N,Republican,andrew  alvey,NA,NA,
-H4AS00036,"AMATA, AUMUA",AS,00,REPUBLICAN PARTY,House,Incumbent,N,Republican,aumua  amata,NA,R000600,3026622545
+H4AS00036,"AMATA, AUMUA",AS,00,REPUBLICAN PARTY,House,Incumbent,C,Republican,aumua  amata,NA,R000600,3026622545
 H2CA23148,"AMATO, BRUNO",CA,23,DEMOCRATIC PARTY,House,Challenger,C,Democrat,bruno  amato,NA,NA,
 H2AK00556,"AMBROSE, DAVID",AK,00,WRITE-IN,House,Challenger,N,Other,david  ambrose,NA,NA,
 H2MI11265,"AMBROSE, MARK",MI,11,REPUBLICAN PARTY,House,Challenger,P,Republican,mark  ambrose,VoteMarkAmbrose,NA,
@@ -113,15 +113,15 @@ H0VA11127,"ANANTATMULA, MANGA",VA,11,REPUBLICAN PARTY,House,Challenger,C,Republi
 H2MO02169,"ANDERS, BOB",MO,02,INDEPENDENT,House,Challenger,N,Other,bob  anders,NA,NA,
 H2CO07196,"ANDERSEN, CARL E",CO,07,REPUBLICAN PARTY,House,Open seat,C,Republican,carl  andersen,NA,NA,
 H2AZ06312,"ANDERSON, BYRON AVERY",AZ,06,DEMOCRATIC PARTY,House,Challenger,N,Democrat,byron  anderson,NA,NA,
-H2WA09172,"ANDERSON, DAVID",WA,09,INDEPENDENT,House,Challenger,N,Other,david  anderson,NA,NA,
-H2WA09206,"ANDERSON, DAVID",WA,09,INDEPENDENT,House,Challenger,N,Other,david  anderson,NA,NA,
-H2TX35102,"ANDERSON, DAVID LEE JR",TX,21,DEMOCRATIC PARTY,House,Challenger,P,Democrat,david  anderson,NA,NA,
+H2WA09172,"ANDERSON, DAVID",WA,09,INDEPENDENT,House,Challenger,N,Other,david  anderson,DLAndersonJrTX,NA,
+H2WA09206,"ANDERSON, DAVID",WA,09,INDEPENDENT,House,Challenger,N,Other,david  anderson,DLAndersonJrTX,NA,
+H2TX35102,"ANDERSON, DAVID LEE JR",TX,21,DEMOCRATIC PARTY,House,Challenger,P,Democrat,david  anderson,DLAndersonJrTX,NA,
 H2VA07170,"ANDERSON, DERRICK",VA,07,REPUBLICAN PARTY,House,Challenger,P,Republican,derrick  anderson,DerrickforVA,NA,
 H2FL20316,"ANDERSON, DWIGHT A MR",FL,20,DEMOCRATIC PARTY,House,Open seat,N,Democrat,dwight  anderson,NA,NA,
 H2VA01108,"ANDERSON, JESSICA",VA,01,DEMOCRATIC PARTY,House,,N,Democrat,jessica  anderson,NA,NA,
 H0OH07104,"ANDERSON, JOHN DAVID",OH,06,REPUBLICAN PARTY,House,Challenger,N,Republican,john  anderson,NA,NA,
-H2AL02158,"ANDERSON, TERRELL",AL,02,DEMOCRATIC PARTY,House,,N,Democrat,terrell  anderson,NA,NA,
-H2NJ11228,"ANDERSON, TOBY",NJ,11,REPUBLICAN PARTY,House,Challenger,P,Republican,toby  anderson,NA,NA,
+H2AL02158,"ANDERSON, TERRELL",AL,02,DEMOCRATIC PARTY,House,Challenger,N,Democrat,terrell  anderson,NA,NA,
+H2NJ11228,"ANDERSON, TOBY",NJ,11,REPUBLICAN PARTY,House,Challenger,P,Republican,toby  anderson,TobyAndersonNJ,NA,
 H2MN01314,"ANDERSON, WARREN LEE",MN,01,DEMOCRATIC-FARMER-LABOR,House,Challenger,N,Other,warren  anderson,NA,NA,
 H2SC01127,"ANDREWS, ANNIE DR.",SC,01,DEMOCRATIC PARTY,House,Challenger,P,Democrat,annie  andrews,AnnieAndrewsMD,NA,
 H2KY05193,"ANDREWS, JEANETTE",KY,05,REPUBLICAN PARTY,House,Challenger,N,Republican,jeanette  andrews,JAndrews1stGen,NA,
@@ -137,22 +137,27 @@ H2NJ06244,"ANTISELL, ERIC",NJ,06,OTHER,House,Challenger,N,Other,eric  antisell,N
 H2TX14214,"ANTONELLI, JEFF",TX,14,DEMOCRATIC PARTY,House,Challenger,P,Democrat,jeff  antonelli,NA,NA,
 H2NY01141,"ANTONUCCI, NICHOLAS",NY,01,DEMOCRATIC PARTY,House,Open seat,P,Democrat,nicholas  antonucci,NA,NA,
 H0FL19163,"AQUINO, DARREN DIONE MR.",FL,25,REPUBLICAN PARTY,House,Challenger,P,Republican,darren  aquino,NA,NA,
-H2TX35185,"ARAGONA, JENAI",TX,35,REPUBLICAN PARTY,House,Challenger,P,Republican,jenai  aragona,NA,NA,
-H0CA22102,"ARBALLO, PHIL",CA,13,DEMOCRATIC PARTY,House,Challenger,N,Democrat,phil  arballo,NA,NA,
+H2TX35185,"ARAGONA, JENAI",TX,35,REPUBLICAN PARTY,House,Challenger,P,Republican,jenai  aragona,jenaih,NA,
+H0CA22102,"ARBALLO, PHIL",CA,13,DEMOCRATIC PARTY,House,Challenger,C,Democrat,phil  arballo,NA,NA,
 H0IA01174,"ARENHOLZ, ASHLEY HINSON",IA,02,REPUBLICAN PARTY,House,Incumbent,C,Republican,ashley  arenholz,NA,H001091,1340783304304410624
 H0IA01174,"ARENHOLZ, ASHLEY HINSON",IA,02,REPUBLICAN PARTY,House,Incumbent,C,Republican,ashley  arenholz,NA,H001091,18189966
 H2KY38012,"ARGYLE, MARK MR",KY,38,INDEPENDENT CONSERVATIVE DEMOCRATIC,House,Challenger,N,Other,mark  argyle,NA,NA,
 H2FL21140,"ARIANAS, PETER STEVEN",FL,22,REPUBLICAN PARTY,House,Challenger,P,Republican,peter  arianas,peter_arianas,NA,
-H0TX16106,"ARMENDARIZ-JACKSON, IRENE",TX,16,REPUBLICAN PARTY,House,Challenger,P,Republican,irene  armendarizjackson,NA,NA,
+H0TX16106,"ARMENDARIZ-JACKSON, IRENE",TX,16,REPUBLICAN PARTY,House,Challenger,P,Republican,irene  armendarizjackson,ArmendarizDis16,NA,
+H0TX16106,"ARMENDARIZ-JACKSON, IRENE",TX,16,REPUBLICAN PARTY,House,Challenger,P,Republican,irene  armendarizjackson,amazingurl09,NA,
 H2AK00267,"ARMSTRONG, JAY R",AK,00,WRITE-IN,House,Open seat,N,Other,jay  armstrong,NA,NA,
-H8ND00096,"ARMSTRONG, KELLY",ND,00,REPUBLICAN PARTY,House,Incumbent,C,Republican,kelly  armstrong,NA,A000377,1080515866255593472
-H8ND00096,"ARMSTRONG, KELLY",ND,00,REPUBLICAN PARTY,House,Incumbent,C,Republican,kelly  armstrong,NA,A000377,964996994623311872
-H2NJ09149,"ARMSTRONG, SEAN ARMSTRONG",NJ,09,LIBERTARIAN PARTY,House,Challenger,N,Other,sean  armstrong,NA,NA,
+H8ND00096,"ARMSTRONG, KELLY",ND,00,REPUBLICAN PARTY,House,Incumbent,C,Republican,kelly  armstrong,RepArmstrongND,A000377,1080515866255593472
+H8ND00096,"ARMSTRONG, KELLY",ND,00,REPUBLICAN PARTY,House,Incumbent,C,Republican,kelly  armstrong,Armstrong_ND,A000377,1080515866255593472
+H8ND00096,"ARMSTRONG, KELLY",ND,00,REPUBLICAN PARTY,House,Incumbent,C,Republican,kelly  armstrong,armstrong_km,A000377,1080515866255593472
+H8ND00096,"ARMSTRONG, KELLY",ND,00,REPUBLICAN PARTY,House,Incumbent,C,Republican,kelly  armstrong,RepArmstrongND,A000377,964996994623311872
+H8ND00096,"ARMSTRONG, KELLY",ND,00,REPUBLICAN PARTY,House,Incumbent,C,Republican,kelly  armstrong,Armstrong_ND,A000377,964996994623311872
+H8ND00096,"ARMSTRONG, KELLY",ND,00,REPUBLICAN PARTY,House,Incumbent,C,Republican,kelly  armstrong,armstrong_km,A000377,964996994623311872
+H2NJ09149,"ARMSTRONG, SEAN ARMSTRONG",NJ,09,LIBERTARIAN PARTY,House,Challenger,N,Other,sean  armstrong,sarmcast,NA,
 H2CO00043,"ARNOLD, JAMES G",CO,00,REPUBLICAN PARTY,House,Challenger,N,Republican,james  arnold,NA,NA,
 H8WA08080,"ARNOLD, KEITH",WA,08,DEMOCRATIC PARTY,House,Challenger,N,Democrat,keith  arnold,NA,NA,
 H2MI10127,"ARRAF, HUWAIDA",MI,10,DEMOCRATIC PARTY,House,Challenger,P,Democrat,huwaida  arraf,huwaida4mi,NA,
 H2MI10127,"ARRAF, HUWAIDA",MI,10,DEMOCRATIC PARTY,House,Challenger,P,Democrat,huwaida  arraf,huwaidaarraf,NA,
-H2TX23140,"ARREDONDO-LYNCH, ALMA G DR. D.D.S.",TX,23,REPUBLICAN PARTY,House,Challenger,P,Republican,alma  arredondolynch,NA,NA,
+H2TX23140,"ARREDONDO-LYNCH, ALMA G DR. D.D.S.",TX,23,REPUBLICAN PARTY,House,Challenger,P,Republican,alma  arredondolynch,arredondo_lynch,NA,
 H6TX19099,"ARRINGTON, JODEY",TX,19,REPUBLICAN PARTY,House,Incumbent,N,Republican,jodey  arrington,RepArrington,A000375,816284664658874368
 H6TX19099,"ARRINGTON, JODEY",TX,19,REPUBLICAN PARTY,House,Incumbent,N,Republican,jodey  arrington,JodeyArrington,A000375,816284664658874368
 H6TX19099,"ARRINGTON, JODEY",TX,19,REPUBLICAN PARTY,House,Incumbent,N,Republican,jodey  arrington,RepArrington,A000375,3609064098
@@ -222,8 +227,8 @@ H0TN01191,"BAKER, RICHARD",TN,01,INDEPENDENT,House,Challenger,N,Other,richard  b
 H2GA14127,"BAKER, RONALD D MR SR",GA,14,DEMOCRATIC PARTY,House,Challenger,N,Democrat,ronald  baker,NA,NA,
 H2CA48111,"BALASINSKI, KRZYSZTOF CHRIS",CA,48,INDEPENDENT,House,Challenger,N,Other,krzysztof  balasinski,NA,NA,
 H2FL18096,"BALDERRAMOS ROBINSON, CORINNA",FL,21,DEMOCRATIC PARTY,House,Challenger,P,Democrat,corinna  robinson,CorinnaRobinson,NA,
-H8OH12180,"BALDERSON, WILLIAM TROY",OH,12,REPUBLICAN PARTY,House,Incumbent,N,Republican,william  balderson,NA,B001306,1037341536592310272
-H8OH12180,"BALDERSON, WILLIAM TROY",OH,12,REPUBLICAN PARTY,House,Incumbent,N,Republican,william  balderson,NA,B001306,603083228
+H8OH12180,"BALDERSON, WILLIAM TROY",OH,12,REPUBLICAN PARTY,House,Incumbent,C,Republican,william  balderson,NA,B001306,1037341536592310272
+H8OH12180,"BALDERSON, WILLIAM TROY",OH,12,REPUBLICAN PARTY,House,Incumbent,C,Republican,william  balderson,NA,B001306,603083228
 H2VT01076,"BALINT, REBECCA 'BECCA'",VT,00,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,rebecca  balint,RepBeccaB,B001318,1606115178210365440
 H2VT01076,"BALINT, REBECCA 'BECCA'",VT,00,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,rebecca  balint,beccabalintvt,B001318,1606115178210365440
 H2VT01076,"BALINT, REBECCA 'BECCA'",VT,00,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,rebecca  balint,RepBeccaB,B001318,1210894642465501184
@@ -240,20 +245,19 @@ H0IL11128,"BANSAL, KRISHNA K",IL,11,REPUBLICAN PARTY,House,Challenger,N,Republic
 H0FL19106,"BANYAI, CINDY LYN",FL,19,DEMOCRATIC PARTY,House,Challenger,P,Democrat,cindy  banyai,Cindy_Banyai_FL,NA,
 H0OR01152,"BARAJAS, RICARDO",OR,06,DEMOCRATIC PARTY,House,Open seat,N,Democrat,ricardo  barajas,RIckyBarajas4OR,NA,
 H2MA02093,"BARASSI, NICHOLAS",MA,02,REPUBLICAN PARTY,House,Challenger,N,Republican,nicholas  barassi,NA,NA,
-H2NC04168,"BARBOUR, DEVAN IV",NC,13,REPUBLICAN PARTY,House,Challenger,N,Republican,devan  barbour,NA,NA,
+H2NC04168,"BARBOUR, DEVAN IV",NC,13,REPUBLICAN PARTY,House,Challenger,C,Republican,devan  barbour,NA,NA,
 H2MO05378,"BARHAM, JERRY",MO,05,REPUBLICAN PARTY,House,Challenger,P,Republican,jerry  barham,NA,NA,
 H2OK02281,"BARKER, GUY STUART",OK,02,REPUBLICAN PARTY,House,Open seat,P,Republican,guy  barker,GuySBarker,NA,
-H2NJ03266,"BARKER, JOHN",NJ,02,REPUBLICAN PARTY,House,Challenger,N,Republican,john  barker,NA,NA,
-H2CA00096,"BARKLEY, MICHAEL JAMES MR.",CA,05,DEMOCRATIC PARTY,House,Challenger,N,Democrat,michael  barkley,mjbarkl,NA,
+H2NJ03266,"BARKER, JOHN",NJ,02,REPUBLICAN PARTY,House,Challenger,N,Republican,john  barker,Donate2Barker,NA,
+H2CA00096,"BARKLEY, MICHAEL JAMES MR.",CA,05,DEMOCRATIC PARTY,House,Challenger,C,Democrat,michael  barkley,mjbarkl,NA,
 H2WI01134,"BARMAN, CHARLES E.",WI,01,OTHER,House,Challenger,N,Other,charles  barman,NA,NA,
 H2FL09210,"BARNARD, ALYCIA",FL,09,REPUBLICAN PARTY,House,Challenger,N,Republican,alycia  barnard,NA,NA,
-H2IN09258,"BARNES-ISRAEL, STU",IN,09,REPUBLICAN PARTY,House,Open seat,P,Republican,stu  barnesisrael,NA,NA,
+H2IN09258,"BARNES-ISRAEL, STU",IN,09,REPUBLICAN PARTY,House,Open seat,P,Republican,stu  barnesisrael,stuforindiana,NA,
 H0AZ07082,"BARNETT, JOSH",AZ,01,REPUBLICAN PARTY,House,Challenger,P,Republican,josh  barnett,BarnettforAZ,NA,
 H8TX03081,"BARONE, ROGER RICHARD MR.",TX,03,REPUBLICAN PARTY,House,Open seat,N,Republican,roger  barone,NA,NA,
 H2CA50182,"BAROSAY, MARI MS",CA,50,DEMOCRATIC PARTY,House,Challenger,N,Democrat,mari  barosay,NA,NA,
 H6CA44103,"BARRAGAN, NANETTE",CA,44,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,nanette  barragan,NA,B001300,816833925456789504
 H6CA44103,"BARRAGAN, NANETTE",CA,44,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,nanette  barragan,NA,B001300,303633791
-H2MI07123,"BARRETT, THOMAS MORE",MI,07,REPUBLICAN PARTY,House,Challenger,P,Republican,thomas  barrett,SenTomBarrett,NA,
 H2MI07123,"BARRETT, THOMAS MORE",MI,07,REPUBLICAN PARTY,House,Challenger,P,Republican,thomas  barrett,barrettbrigade1,NA,
 H0KY06104,"BARR, GARLAND ANDY",KY,06,REPUBLICAN PARTY,House,Incumbent,C,Republican,garland  barr,RepAndyBarr,B001282,1089334250
 H0KY06104,"BARR, GARLAND ANDY",KY,06,REPUBLICAN PARTY,House,Incumbent,C,Republican,garland  barr,barrforcongress,B001282,1089334250
@@ -278,7 +282,7 @@ H2CA36470,"BATTERSBY, MITCHELL A",CA,36,DEMOCRATIC PARTY,House,Challenger,N,Demo
 H2CA47196,"BAUGH, SCOTT",CA,47,REPUBLICAN PARTY,House,Challenger,N,Republican,scott  baugh,ScottRBaugh,NA,
 H2NH01262,"BAXTER, TIM",NH,01,REPUBLICAN PARTY,House,Challenger,P,Republican,tim  baxter,TimBaxterNH,NA,
 H2CA14188,"BEACH, EMILY",CA,15,DEMOCRATIC PARTY,House,Open seat,C,Democrat,emily  beach,EmilyBeach650,NA,
-H2NC11155,"BEACH-FERRARA, JASMINE",NC,11,DEMOCRATIC PARTY,House,Challenger,P,Democrat,jasmine  beachferrara,NA,NA,
+H2NC11155,"BEACH-FERRARA, JASMINE",NC,11,DEMOCRATIC PARTY,House,Challenger,P,Democrat,jasmine  beachferrara,JBeachFerrara,NA,
 H4IN04032,"BEACHY, PHILLIP D",IN,03,DEMOCRATIC PARTY,House,Challenger,N,Democrat,phillip  beachy,NA,NA,
 H2AK00440,"BEAL, BRIAN T.",AK,00,,House,Open seat,N,Other,brian  beal,NA,NA,
 H2FL04211,"BEAN, AARON P.",FL,04,REPUBLICAN PARTY,House,Incumbent,N,Republican,aaron  bean,RepAaronBean,B001314,1604927550081359872
@@ -292,7 +296,6 @@ H2OH03125,"BEATTY, JOYCE",OH,03,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,joyc
 H2OH03125,"BEATTY, JOYCE",OH,03,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,joyce  beatty,JoyceBeatty,B001281,582070020
 H2TX37066,"BEAUBOUEF, RICHARD QUINTON",TX,37,DEMOCRATIC PARTY,House,Open seat,N,Democrat,richard  beaubouef,NA,NA,
 H2NV03161,"BECKER, APRIL",NV,03,REPUBLICAN PARTY,House,Challenger,P,Republican,april  becker,voteaprilbecker,NA,
-H2AZ07195,"BECKER, NINA",AZ,07,REPUBLICAN PARTY,House,Challenger,N,Republican,nina  becker,NA,NA,
 H8NV02137,"BECK, JOEL",NV,02,REPUBLICAN PARTY,House,Challenger,N,Republican,joel  beck,JBeck4Congress,NA,
 H2TX24155,"BECKLEY, MICHELLE",TX,24,DEMOCRATIC PARTY,House,Challenger,P,Democrat,michelle  beckley,NA,NA,
 H2AK00457,"BECK, TIM",AK,00,,House,Open seat,N,Other,tim  beck,NA,NA,
@@ -340,10 +343,10 @@ H6MI01226,"BERGMAN, JOHN",MI,01,REPUBLICAN PARTY,House,Incumbent,N,Republican,jo
 H0TN09061,"BERGMANN, CHARLOTTE",TN,09,REPUBLICAN PARTY,House,Challenger,P,Republican,charlotte  bergmann,ElectBergmann,NA,
 H2TX22167,"BERG, MATTHEW RICHARD MR.",TX,22,DEMOCRATIC PARTY,House,Challenger,P,Democrat,matthew  berg,NA,NA,
 H2FL23245,"BERK, JEFFREY",FL,23,REPUBLICAN PARTY,House,Challenger,N,Republican,jeffrey  berk,NA,NA,
-H2MN05182,"BERMAN, JOHN",MN,05,REPUBLICAN PARTY,House,Challenger,N,Republican,john  berman,NA,NA,
 H2MN07154,"BERMAN, JOHN",MN,07,REPUBLICAN PARTY,House,Challenger,N,Republican,john  berman,NA,NA,
-H2MN06222,"BERMAN, JOHN",MN,06,REPUBLICAN PARTY,House,Challenger,N,Republican,john  berman,NA,NA,
+H2MN05182,"BERMAN, JOHN",MN,05,REPUBLICAN PARTY,House,Challenger,N,Republican,john  berman,NA,NA,
 H2MN01215,"BERMAN, JOHN",MN,01,REPUBLICAN PARTY,House,Open seat,N,Republican,john  berman,NA,NA,
+H2MN06222,"BERMAN, JOHN",MN,06,REPUBLICAN PARTY,House,Challenger,N,Republican,john  berman,NA,NA,
 H2FL42013,"BERNSTEIN, ERIC MR",FL,42,INDEPENDENT CONSERVATIVE DEMOCRATIC,House,Challenger,N,Other,eric  bernstein,NA,NA,
 H2MO02219,"BERRY, PAUL III",MO,02,REPUBLICAN PARTY,House,Challenger,N,Republican,paul  berry,PBIII4USA,NA,
 H2FL15118,"BERTGES, BRIAN JOHN MR.",FL,15,NO PARTY AFFILIATION,House,Challenger,N,Other,brian  bertges,NA,NA,
@@ -367,7 +370,7 @@ H6AZ05083,"BIGGS, ANDY",AZ,05,REPUBLICAN PARTY,House,Incumbent,C,Republican,andy
 H6AZ05083,"BIGGS, ANDY",AZ,05,REPUBLICAN PARTY,House,Incumbent,C,Republican,andy  biggs,andybiggs4az,B001302,816652616625168384
 H6AZ05083,"BIGGS, ANDY",AZ,05,REPUBLICAN PARTY,House,Incumbent,C,Republican,andy  biggs,RepAndyBiggsAZ,B001302,702601370344402944
 H6AZ05083,"BIGGS, ANDY",AZ,05,REPUBLICAN PARTY,House,Incumbent,C,Republican,andy  biggs,andybiggs4az,B001302,702601370344402944
-H2CA50190,"BILASH, TIMOTHY DANIEL DR. M.D.",CA,50,DEMOCRATIC PARTY,House,Challenger,N,Democrat,timothy  bilash,NA,NA,
+H2CA50190,"BILASH, TIMOTHY DANIEL DR. M.D.",CA,50,DEMOCRATIC PARTY,House,Challenger,C,Democrat,timothy  bilash,NA,NA,
 H6FL09070,"BILIRAKIS, GUS M",FL,12,REPUBLICAN PARTY,House,Incumbent,C,Republican,gus  bilirakis,RepGusBilirakis,B001257,26051676
 H6FL09070,"BILIRAKIS, GUS M",FL,12,REPUBLICAN PARTY,House,Incumbent,C,Republican,gus  bilirakis,Bilirakis,B001257,26051676
 H6FL09070,"BILIRAKIS, GUS M",FL,12,REPUBLICAN PARTY,House,Incumbent,C,Republican,gus  bilirakis,RepGusBilirakis,B001257,95236960
@@ -464,7 +467,6 @@ H2FL13253,"BRADDOCK, WILL",FL,13,REPUBLICAN PARTY,House,Open seat,N,Republican,w
 H2FL14269,"BRADLEY, CHRISTOPHER",FL,14,DEMOCRATIC PARTY,House,Challenger,P,Democrat,christopher  bradley,CBradleyFL,NA,
 H6TX08100,"BRADY, KEVIN",TX,08,REPUBLICAN PARTY,House,Incumbent,P,Republican,kevin  brady,NA,B000755,19926675
 H2MN01207,"BRAKEBILL-HACKE, SARAH MS.",MN,01,DEMOCRATIC-FARMER-LABOR,House,Open seat,P,Other,sarah  brakebillhacke,NA,NA,
-H2HI02599,"BRANCO, PATRICK PIHANA",HI,02,DEMOCRATIC PARTY,House,Open seat,C,Democrat,patrick  branco,repbranco,NA,
 H2HI02599,"BRANCO, PATRICK PIHANA",HI,02,DEMOCRATIC PARTY,House,Open seat,C,Democrat,patrick  branco,VoteBrancoHI,NA,
 H2CA15128,"BRANDT, DAVID MR",CA,15,INDEPENDENT,House,Challenger,N,Other,david  brandt,NA,NA,
 H8OK04094,"BRANNON, MARY",OK,04,DEMOCRATIC PARTY,House,Challenger,N,Democrat,mary  brannon,electbrannon,NA,
@@ -488,7 +490,7 @@ H8NY22151,"BRINDISI, ANTHONY",NY,22,DEMOCRATIC PARTY,House,Challenger,N,Democrat
 H8CA47078,"BRISCOE, JOHN",CA,42,REPUBLICAN PARTY,House,Challenger,P,Republican,john  briscoe,johnfbriscoe,NA,
 H2LA24010,"BRISTOL, ELIJAH MR",LA,24,INDEPENDENT CONSERVATIVE DEMOCRATIC,House,Challenger,N,Other,elijah  bristol,NA,NA,
 H2NY29084,"BRITANY, ARTHUR MR",NY,29,INDEPENDENT CONSERVATIVE DEMOCRATIC,House,Challenger,N,Other,arthur  britany,NA,NA,
-H2CA04148,"BROCK, MATTHEW",CA,04,REPUBLICAN PARTY,House,,N,Republican,matthew  brock,NA,NA,
+H2CA04148,"BROCK, MATTHEW",CA,04,REPUBLICAN PARTY,House,Challenger,N,Republican,matthew  brock,NA,NA,
 H2NV01298,"BROG, DAVID",NV,01,REPUBLICAN PARTY,House,Challenger,C,Republican,david  brog,brogfornevada,NA,
 H2FL02140,"BROOKS, LINDA SUSAN MS.",FL,02,NO PARTY AFFILIATION,House,Challenger,C,Other,linda  brooks,NA,NA,
 H0AL05163,"BROOKS, MO",AL,05,REPUBLICAN PARTY,House,Incumbent,P,Republican,mo  brooks,NA,B001274,237299871
@@ -563,8 +565,8 @@ H2MO07143,"BURLISON, ERIC",MO,07,REPUBLICAN PARTY,House,Incumbent,N,Republican,e
 H2CO03278,"BURNETT, DEBORA LYNN",CO,03,DEMOCRATIC PARTY,House,Challenger,C,Democrat,debora  burnett,NA,NA,
 H2MA04115,"BURNS, EMILY",MA,04,REPUBLICAN PARTY,House,Challenger,P,Republican,emily  burns,NA,NA,
 H2NY23160,"BURNS, GEORGE H MR",NY,23,REPUBLICAN PARTY,House,Open seat,N,Republican,george  burns,NA,NA,
-H2SC04147,"BURNS, MARK",SC,04,REPUBLICAN PARTY,House,Challenger,P,Republican,mark  burns,NA,NA,
-H2NH00025,"BURNS, ROBERT ANDREW MR.",NH,02,REPUBLICAN PARTY,House,Challenger,P,Republican,robert  burns,NA,NA,
+H2SC04147,"BURNS, MARK",SC,04,REPUBLICAN PARTY,House,Challenger,P,Republican,mark  burns,pastormarkburns,NA,
+H2NH00025,"BURNS, ROBERT ANDREW MR.",NH,02,REPUBLICAN PARTY,House,Challenger,P,Republican,robert  burns,BurnsForNH,NA,
 H0NC11217,"BURRIL, MATTHEW",NC,11,REPUBLICAN PARTY,House,Challenger,C,Republican,matthew  burril,burril4congress,NA,
 H2MN14010,"BURR, MARK MR",MN,14,INDEPENDENT CONSERVATIVE DEMOCRATIC,House,Challenger,N,Other,mark  burr,NA,NA,
 H2TX08265,"BURROWS, CANDICE CUNNINGHAM MS",TX,08,REPUBLICAN PARTY,House,Open seat,N,Republican,candice  burrows,NA,NA,
@@ -692,10 +694,10 @@ H2TX35144,"CASAR, GREG",TX,35,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,greg  
 H2TX35144,"CASAR, GREG",TX,35,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,greg  casar,GregCasar,C001131,1499512178013057024
 H2TX35144,"CASAR, GREG",TX,35,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,greg  casar,RepCasar,C001131,1683515731
 H2TX35144,"CASAR, GREG",TX,35,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,greg  casar,GregCasar,C001131,1683515731
-H2HI02128,"CASE, EDWARD",HI,01,DEMOCRATIC PARTY,House,Incumbent,N,Democrat,edward  case,RepEdCase,C001055,1081350574589833216
-H2HI02128,"CASE, EDWARD",HI,01,DEMOCRATIC PARTY,House,Incumbent,N,Democrat,edward  case,EdCaseHawaii,C001055,1081350574589833216
-H2HI02128,"CASE, EDWARD",HI,01,DEMOCRATIC PARTY,House,Incumbent,N,Democrat,edward  case,RepEdCase,C001055,21737536
-H2HI02128,"CASE, EDWARD",HI,01,DEMOCRATIC PARTY,House,Incumbent,N,Democrat,edward  case,EdCaseHawaii,C001055,21737536
+H2HI02128,"CASE, EDWARD",HI,01,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,edward  case,RepEdCase,C001055,1081350574589833216
+H2HI02128,"CASE, EDWARD",HI,01,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,edward  case,EdCaseHawaii,C001055,1081350574589833216
+H2HI02128,"CASE, EDWARD",HI,01,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,edward  case,RepEdCase,C001055,21737536
+H2HI02128,"CASE, EDWARD",HI,01,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,edward  case,EdCaseHawaii,C001055,21737536
 H6TX14132,"CASEY, KEITH",TX,14,REPUBLICAN PARTY,House,Challenger,N,Republican,keith  casey,NA,NA,
 H2TN03243,"CASEY, SANDY FOR",TN,03,REPUBLICAN PARTY,House,Challenger,C,Republican,sandy  casey,NA,NA,
 H2NJ11194,"CASHA, LAWRENCE A",NJ,11,REPUBLICAN PARTY,House,Challenger,C,Republican,lawrence  casha,NA,NA,
@@ -721,8 +723,8 @@ H2TX35011,"CASTRO, JOAQUIN",TX,20,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,jo
 H2TX35011,"CASTRO, JOAQUIN",TX,20,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,joaquin  castro,JoaquinCastrotx,C001091,323440720
 H2TX35011,"CASTRO, JOAQUIN",TX,20,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,joaquin  castro,Castro4Congress,C001091,323440720
 H2TX12101,"CATALA, RYAN JOSHUA",TX,12,REPUBLICAN PARTY,House,Challenger,C,Republican,ryan  catala,ryanjcatala,NA,
-H2TX08299,"CATER, CORBIN ZANE",TX,08,INDEPENDENT,House,Open seat,N,Other,corbin  cater,NA,NA,
 H2TX16268,"CATER, CORBIN ZANE",TX,16,INDEPENDENT,House,Challenger,N,Other,corbin  cater,NA,NA,
+H2TX08299,"CATER, CORBIN ZANE",TX,08,INDEPENDENT,House,Open seat,N,Other,corbin  cater,NA,NA,
 H2TX00148,"CATHEY, CAITLIN CREE",TX,00,DEMOCRATIC PARTY,House,Challenger,N,Democrat,caitlin  cathey,NA,NA,
 H2NJ12135,"CATUCCI, NICHOLAS JOSEPH",NJ,12,REPUBLICAN PARTY,House,Challenger,N,Republican,nicholas  catucci,NA,NA,
 H2FL07172,"CAVAGNA, JOSEPH",FL,07,REPUBLICAN PARTY,House,Open seat,C,Republican,joseph  cavagna,NA,NA,
@@ -753,15 +755,18 @@ H2SC06118,"CHAPMAN, JOHN",SC,06,REPUBLICAN PARTY,House,Challenger,N,Republican,j
 H2VA11214,"CHAPPELL, MATTHEW LOUIS",VA,11,REPUBLICAN PARTY,House,Challenger,P,Republican,matthew  chappell,Matt4VA11,NA,
 H0WA01124,"CHARTRAND, DEREK",WA,01,REPUBLICAN PARTY,House,Challenger,N,Republican,derek  chartrand,ChartrandFor,NA,
 H2VA07204,"CHASE, AMANDA FREEMAN",VA,07,REPUBLICAN PARTY,House,Challenger,C,Republican,amanda  chase,NA,NA,
-H2OR05209,"CHAVEZ-DEREMER, LORI",OR,05,REPUBLICAN PARTY,House,Incumbent,N,Republican,lori  chavezderemer,NA,C001135,1583530102297600000
-H2OR05209,"CHAVEZ-DEREMER, LORI",OR,05,REPUBLICAN PARTY,House,Incumbent,N,Republican,lori  chavezderemer,NA,C001135,4833263702
+H2OR05209,"CHAVEZ-DEREMER, LORI",OR,05,REPUBLICAN PARTY,House,Incumbent,C,Republican,lori  chavezderemer,RepLCD,C001135,1583530102297600000
+H2OR05209,"CHAVEZ-DEREMER, LORI",OR,05,REPUBLICAN PARTY,House,Incumbent,C,Republican,lori  chavezderemer,Lchavezderemer,C001135,1583530102297600000
+H2OR05209,"CHAVEZ-DEREMER, LORI",OR,05,REPUBLICAN PARTY,House,Incumbent,C,Republican,lori  chavezderemer,RepLCD,C001135,4833263702
+H2OR05209,"CHAVEZ-DEREMER, LORI",OR,05,REPUBLICAN PARTY,House,Incumbent,C,Republican,lori  chavezderemer,Lchavezderemer,C001135,4833263702
 H2GA04201,"CHAVEZ, JONATHAN",GA,04,REPUBLICAN PARTY,House,Challenger,N,Republican,jonathan  chavez,chavez4congress,NA,
 H2IL03170,"CHEHADE, IYMEN",IL,03,DEMOCRATIC PARTY,House,Challenger,P,Democrat,iymen  chehade,iymen4congress,NA,
 H6WY00159,"CHENEY, ELIZABETH MRS.",WY,00,REPUBLICAN PARTY,House,Incumbent,P,Republican,elizabeth  cheney,NA,C001109,816719802328715264
 H6WY00159,"CHENEY, ELIZABETH MRS.",WY,00,REPUBLICAN PARTY,House,Incumbent,P,Republican,elizabeth  cheney,NA,C001109,98471035
 H2NY19135,"CHENEY, JAMIE",NY,19,DEMOCRATIC PARTY,House,Challenger,C,Democrat,jamie  cheney,NA,NA,
-H2CA39136,"CHEN, JAY",CA,45,DEMOCRATIC PARTY,House,Challenger,P,Democrat,jay  chen,jfchen,NA,
-H8FL20032,"CHERFILUS-MCCORMICK, SHEILA",FL,20,DEMOCRATIC PARTY,House,Incumbent,N,Democrat,sheila  cherfilusmccormick,NA,C001127,988942485828308992
+H2CA39136,"CHEN, JAY",CA,45,DEMOCRATIC PARTY,House,Challenger,C,Democrat,jay  chen,jfchen,NA,
+H8FL20032,"CHERFILUS-MCCORMICK, SHEILA",FL,20,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,sheila  cherfilusmccormick,CongresswomanSC,C001127,988942485828308992
+H8FL20032,"CHERFILUS-MCCORMICK, SHEILA",FL,20,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,sheila  cherfilusmccormick,Sheila4Congress,C001127,988942485828308992
 H2FL22148,"CHESS, STEVEN",FL,23,REPUBLICAN PARTY,House,Challenger,C,Republican,steven  chess,Chess4Congress,NA,
 H2NM01342,"CHICK, CAMERON ALTON MR. SR",NM,01,INDEPENDENT,House,Challenger,N,Other,cameron  chick,NA,NA,
 H2NM01375,"CHICK, CAMERON SR.",NM,01,INDEPENDENT,House,Challenger,N,Other,cameron  chick,NA,NA,
@@ -799,8 +804,8 @@ H2NH14018,"CLAREMONT, MATHEW MR",NH,14,INDEPENDENT CONSERVATIVE DEMOCRATIC,House
 H2ID25019,"CLAREMONT, PETER FORDHAM MR",ID,25,INDEPENDENT CONSERVATIVE DEMOCRATIC,House,Challenger,N,Other,peter  claremont,NA,NA,
 H2NC09225,"CLARK, BEN",NC,09,DEMOCRATIC PARTY,House,Challenger,N,Democrat,ben  clark,BenClarkNC,NA,
 H2MI04286,"CLARK, CURTIS",MI,04,U.S. TAXPAYERS PARTY,House,Challenger,N,Other,curtis  clark,NA,NA,
-H0TN09111,"CLARK, DENNIS JEFFREY",TN,09,INDEPENDENT,House,Challenger,N,Other,dennis  clark,NA,NA,
-H2FL25083,"CLARK, DREW-MONTEZ DR.",FL,20,REPUBLICAN PARTY,House,Challenger,P,Republican,drewmontez  clark,NA,NA,
+H0TN09111,"CLARK, DENNIS JEFFREY",TN,09,INDEPENDENT,House,Challenger,N,Other,dennis  clark,dennisdacomic,NA,
+H2FL25083,"CLARK, DREW-MONTEZ DR.",FL,20,REPUBLICAN PARTY,House,Challenger,P,Republican,drewmontez  clark,drewmontezclark,NA,
 H2ID29011,"CLARKE, GEORGE NATHANIEL MR",ID,29,INDEPENDENT CONSERVATIVE DEMOCRATIC,House,Challenger,N,Other,george  clarke,NA,NA,
 H4NY11138,"CLARKE, YVETTE D",NY,09,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,yvette  clarke,RepYvetteClarke,C001067,240812994
 H4NY11138,"CLARKE, YVETTE D",NY,09,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,yvette  clarke,VoteYvette,C001067,240812994
@@ -871,7 +876,7 @@ H2TX25319,"COLLIER, SCOTT",TX,25,INDEPENDENT,House,Challenger,C,Other,scott  col
 H0MD02255,"COLLIER, SCOTT M",MD,07,REPUBLICAN PARTY,House,Challenger,N,Republican,scott  collier,oneunitedvoice,NA,
 H2TX08273,"COLLINS, CHRISTIAN",TX,08,REPUBLICAN PARTY,House,Open seat,C,Republican,christian  collins,collinsfortx,NA,
 H0TX32087,"COLLINS, GENEVIEVE D",TX,32,REPUBLICAN PARTY,House,Challenger,N,Republican,genevieve  collins,NA,NA,
-H2IL01315,"COLLINS, JACQUELINE",IL,01,DEMOCRATIC PARTY,House,Open seat,P,Democrat,jacqueline  collins,senatorjacqui,NA,
+H2IL01315,"COLLINS, JACQUELINE",IL,01,DEMOCRATIC PARTY,House,Open seat,P,Democrat,jacqueline  collins,NA,NA,
 H2FL14251,"COLLINS, JAY",FL,15,REPUBLICAN PARTY,House,Challenger,P,Republican,jay  collins,NA,NA,
 H0CA43108,"COLLINS, JOE E III",CA,36,REPUBLICAN PARTY,House,Challenger,P,Republican,joe  collins,joeecollins3,NA,
 H0IL07167,"COLLINS, KINA ISIS",IL,07,DEMOCRATIC PARTY,House,Challenger,P,Democrat,kina  collins,KinaCollinsIL,NA,
@@ -887,7 +892,7 @@ H6KY01110,"COMER, JAMES",KY,01,REPUBLICAN PARTY,House,Incumbent,C,Republican,jam
 H6KY01110,"COMER, JAMES",KY,01,REPUBLICAN PARTY,House,Incumbent,C,Republican,james  comer,JamesComer,C001108,1274852794206388224
 H6KY01110,"COMER, JAMES",KY,01,REPUBLICAN PARTY,House,Incumbent,C,Republican,james  comer,RepJamesComer,C001108,838462994
 H6KY01110,"COMER, JAMES",KY,01,REPUBLICAN PARTY,House,Incumbent,C,Republican,james  comer,JamesComer,C001108,838462994
-H2KY02125,"COMPTON, WILLIAM DAKOTA",KY,02,DEMOCRATIC PARTY,House,,N,Democrat,william  compton,Compton4KY2022,NA,
+H2KY02125,"COMPTON, WILLIAM DAKOTA",KY,02,DEMOCRATIC PARTY,House,Challenger,N,Democrat,william  compton,Compton4KY2022,NA,
 H2TX35243,"CONDICT, BILL",TX,35,REPUBLICAN PARTY,House,Challenger,N,Republican,bill  condict,NA,NA,
 H2OH02077,"CONDIT, JR., JIM",OH,02,REPUBLICAN PARTY,House,Challenger,N,Republican,jim  condit,JimConditJr,NA,
 H2IL06090,"CONFORTI, NIKI",IL,06,REPUBLICAN PARTY,House,Challenger,P,Republican,niki  conforti,Niki_Conforti,NA,
@@ -1166,7 +1171,7 @@ H0FL19080,"DEUTCH, THEODORE ELIOT",FL,22,DEMOCRATIC PARTY,House,Incumbent,P,Demo
 H2VA09085,"DEVAUGHAN, TAYSHA",VA,09,DEMOCRATIC PARTY,House,Challenger,P,Democrat,taysha  devaughan,dev4congress,NA,
 H2PA05116,"DEVAUGHN-GOODWIN, ALFEIA DEVAUGHN-GOOD",PA,05,REPUBLICAN PARTY,House,Challenger,N,Republican,alfeia  devaughngoodwin,NA,NA,
 H2MN01322,"DEVOE, RICK",MN,01,DEMOCRATIC-FARMER-LABOR,House,Challenger,C,Other,rick  devoe,NA,NA,
-H0NY03083,"DEVOLDER-SANTOS, GEORGE ANTHONY",NY,03,REPUBLICAN PARTY,House,Incumbent,C,Republican,george  devoldersantos,NA,S001222,
+H0NY03083,"DEVOLDER-SANTOS, GEORGE ANTHONY",NY,03,REPUBLICAN PARTY,House,Incumbent,C,Republican,george  devoldersantos,RepSantosNY03,S001222,
 H2KY03180,"DEVORE, ROBERT LEWIS MR. JR.",KY,03,REPUBLICAN PARTY,House,Open seat,N,Republican,robert  devore,NA,NA,
 H2CA20144,"DEWELL, BEN",CA,20,DEMOCRATIC PARTY,House,Challenger,N,Democrat,ben  dewell,ca20th,NA,
 H2CA20144,"DEWELL, BEN",CA,20,DEMOCRATIC PARTY,House,Challenger,N,Democrat,ben  dewell,benldewell,NA,
@@ -1176,8 +1181,10 @@ H2TX37074,"DIACOGIANNIS, JEREMIAH DAVID",TX,37,REPUBLICAN PARTY,House,Open seat,
 H2FL13220,"DIAMOND, BEN",FL,13,DEMOCRATIC PARTY,House,Open seat,P,Democrat,ben  diamond,NA,NA,
 H2NY44018,"DIAMOND, GAYLE RACHEL",NY,44,INDEPENDENT CONSERVATIVE DEMOCRATIC,House,Challenger,N,Other,gayle  diamond,NA,NA,
 H2OK49019,"DIAMOND, GILBERT MR",OK,49,INDEPENDENT CONSERVATIVE DEMOCRATIC,House,Challenger,N,Other,gilbert  diamond,NA,NA,
-H2FL25018,"DIAZ-BALART, MARIO",FL,26,REPUBLICAN PARTY,House,Incumbent,N,Republican,mario  diazbalart,NA,D000600,37094727
-H2FL25018,"DIAZ-BALART, MARIO",FL,26,REPUBLICAN PARTY,House,Incumbent,N,Republican,mario  diazbalart,NA,D000600,374816353
+H2FL25018,"DIAZ-BALART, MARIO",FL,26,REPUBLICAN PARTY,House,Incumbent,N,Republican,mario  diazbalart,MarioDB,D000600,37094727
+H2FL25018,"DIAZ-BALART, MARIO",FL,26,REPUBLICAN PARTY,House,Incumbent,N,Republican,mario  diazbalart,MarioDBCamp,D000600,37094727
+H2FL25018,"DIAZ-BALART, MARIO",FL,26,REPUBLICAN PARTY,House,Incumbent,N,Republican,mario  diazbalart,MarioDB,D000600,374816353
+H2FL25018,"DIAZ-BALART, MARIO",FL,26,REPUBLICAN PARTY,House,Incumbent,N,Republican,mario  diazbalart,MarioDBCamp,D000600,374816353
 H2TX30269,"DIAZ, LIZBETH",TX,30,REPUBLICAN PARTY,House,Open seat,N,Republican,lizbeth  diaz,NA,NA,
 H0VA09121,"DICKERSON, CAMERON D.",VA,09,DEMOCRATIC PARTY,House,Challenger,N,Democrat,cameron  dickerson,NA,NA,
 H0PA18097,"DICKINSON, GERALD",PA,12,DEMOCRATIC PARTY,House,Open seat,N,Democrat,gerald  dickinson,JerrySDickinson,NA,
@@ -1207,9 +1214,9 @@ H2AL05193,"DONNELL, DEXTER",AL,05,REPUBLICAN PARTY,House,Open seat,N,Republican,
 H2CO03211,"DONOVAN, KERRY",CO,03,DEMOCRATIC PARTY,House,Challenger,P,Democrat,kerry  donovan,NA,NA,
 H4MI09109,"DONOVAN, MICHELLE R.E.",MI,09,REPUBLICAN PARTY,House,Challenger,N,Republican,michelle  donovan,Michelle4MI,NA,
 H4MI09109,"DONOVAN, MICHELLE R.E.",MI,09,REPUBLICAN PARTY,House,Challenger,N,Republican,michelle  donovan,CannabisDivaESQ,NA,
+H2IL12163,"DOOFENSHMIRTZ, HEINZ R DR.",IL,12,DEMOCRATIC PARTY,House,Challenger,N,Democrat,heinz  doofenshmirtz,NA,NA,
 H2IL12155,"DOOFENSHMIRTZ, HEINZ R DR.",IL,12,DEMOCRATIC PARTY,House,Challenger,N,Democrat,heinz  doofenshmirtz,NA,NA,
 H2IL12171,"DOOFENSHMIRTZ, HEINZ R DR.",IL,12,DEMOCRATIC PARTY,House,Challenger,N,Democrat,heinz  doofenshmirtz,NA,NA,
-H2IL12163,"DOOFENSHMIRTZ, HEINZ R DR.",IL,12,DEMOCRATIC PARTY,House,Challenger,N,Democrat,heinz  doofenshmirtz,NA,NA,
 H2IL12189,"DOOFENSHMIRTZ, HEINZ R DR.",IL,12,DEMOCRATIC PARTY,House,Challenger,N,Democrat,heinz  doofenshmirtz,NA,NA,
 H2NY10167,"DOOLEY, PATRICK EDWARD MR.",NY,10,DEMOCRATIC PARTY,House,Challenger,N,Democrat,patrick  dooley,NA,NA,
 H2FL21090,"DORILAS, ROD MR.",FL,22,REPUBLICAN PARTY,House,Challenger,P,Republican,rod  dorilas,roddorilas,NA,
@@ -1234,15 +1241,17 @@ H2CA31174,"DUFFY, JENNIFER",CA,31,DEMOCRATIC PARTY,House,Challenger,N,Democrat,j
 H4LA01147,"DUGAS, LEE ANN",LA,01,DEMOCRATIC PARTY,House,Challenger,N,Democrat,lee  dugas,NA,NA,
 H2FL07164,"DUKE, BRADY",FL,07,REPUBLICAN PARTY,House,Open seat,P,Republican,brady  duke,BradyDukeFL,NA,
 H2FL07164,"DUKE, BRADY",FL,07,REPUBLICAN PARTY,House,Open seat,P,Republican,brady  duke,BradyDuke7,NA,
-H0SC03077,"DUNCAN, JEFFREY D MR.",SC,03,REPUBLICAN PARTY,House,Incumbent,C,Republican,jeffrey  duncan,NA,D000615,240393970
-H0SC03077,"DUNCAN, JEFFREY D MR.",SC,03,REPUBLICAN PARTY,House,Incumbent,C,Republican,jeffrey  duncan,NA,D000615,21048033
+H0SC03077,"DUNCAN, JEFFREY D MR.",SC,03,REPUBLICAN PARTY,House,Incumbent,C,Republican,jeffrey  duncan,RepJeffDuncan,D000615,240393970
+H0SC03077,"DUNCAN, JEFFREY D MR.",SC,03,REPUBLICAN PARTY,House,Incumbent,C,Republican,jeffrey  duncan,Duncan4Congress,D000615,240393970
+H0SC03077,"DUNCAN, JEFFREY D MR.",SC,03,REPUBLICAN PARTY,House,Incumbent,C,Republican,jeffrey  duncan,RepJeffDuncan,D000615,21048033
+H0SC03077,"DUNCAN, JEFFREY D MR.",SC,03,REPUBLICAN PARTY,House,Incumbent,C,Republican,jeffrey  duncan,Duncan4Congress,D000615,21048033
 H4TX18112,"DUNCAN, VINCE",TX,18,INDEPENDENT,House,Challenger,N,Other,vince  duncan,duncanvince23,NA,
 H6FL02208,"DUNN, NEAL PATRICK MD, FACS",FL,02,REPUBLICAN PARTY,House,Incumbent,C,Republican,neal  md,DrNealDunnFL2,D000628,815952318487298048
 H6FL02208,"DUNN, NEAL PATRICK MD, FACS",FL,02,REPUBLICAN PARTY,House,Incumbent,C,Republican,neal  md,DunnCampaign,D000628,815952318487298048
 H6FL02208,"DUNN, NEAL PATRICK MD, FACS",FL,02,REPUBLICAN PARTY,House,Incumbent,C,Republican,neal  md,DrNealDunnFL2,D000628,3433189197
 H6FL02208,"DUNN, NEAL PATRICK MD, FACS",FL,02,REPUBLICAN PARTY,House,Incumbent,C,Republican,neal  md,DunnCampaign,D000628,3433189197
 H2WA08208,"DUNN, REAGAN B",WA,08,REPUBLICAN PARTY,House,Challenger,C,Republican,reagan  dunn,NA,NA,
-H2SC07215,"DUNN, TOM",SC,07,REPUBLICAN PARTY,House,Challenger,C,Republican,tom  dunn,NA,NA,
+H2SC07215,"DUNN, TOM",SC,07,REPUBLICAN PARTY,House,Challenger,C,Republican,tom  dunn,tomricesc7,NA,
 H2TX01161,"DUNN, VICTOR D",TX,01,DEMOCRATIC PARTY,House,Open seat,N,Democrat,victor  dunn,NA,NA,
 H2MS04332,"DUPREE, JOHNNY L.",MS,04,DEMOCRATIC PARTY,House,Challenger,P,Democrat,johnny  dupree,johnnyldupree,NA,
 H2SD00142,"DUPREL, COLLIN",SD,00,LIBERTARIAN PARTY,House,Challenger,N,Other,collin  duprel,NA,NA,
@@ -1264,8 +1273,8 @@ H2NC14050,"EDWARDS, CHUCK",NC,11,REPUBLICAN PARTY,House,Incumbent,C,Republican,c
 H2NC14050,"EDWARDS, CHUCK",NC,11,REPUBLICAN PARTY,House,Incumbent,C,Republican,chuck  edwards,ChuckEdwards4NC,E000246,838404430793953280
 H2MD04356,"EDWARDS, DONNA F",MD,04,DEMOCRATIC PARTY,House,Open seat,C,Democrat,donna  edwards,DonnaFEdwards,NA,
 H2FL07297,"EDWARDS, TED",FL,07,REPUBLICAN PARTY,House,Open seat,C,Republican,ted  edwards,NA,NA,
-H0NY26068,"EGRIU, EMIN",NY,26,DEMOCRATIC PARTY,House,Challenger,P,Democrat,emin  egriu,Egriu,NA,
-H2PA01099,"EHASZ, ASHLEY",PA,01,DEMOCRATIC PARTY,House,Challenger,P,Democrat,ashley  ehasz,ashley_ehasz,NA,
+H0NY26068,"EGRIU, EMIN",NY,26,DEMOCRATIC PARTY,House,Challenger,P,Democrat,emin  egriu,NA,NA,
+H2PA01099,"EHASZ, ASHLEY",PA,01,DEMOCRATIC PARTY,House,Challenger,N,Democrat,ashley  ehasz,ashley_ehasz,NA,
 H2AL05201,"EHRLE, DOUGLAS EUGENE",AL,05,REPUBLICAN PARTY,House,Open seat,N,Republican,douglas  ehrle,NA,NA,
 H8FL01107,"EHR, PHILLIP CHARLES",FL,01,DEMOCRATIC PARTY,House,Challenger,C,Democrat,phillip  ehr,NA,NA,
 H2TX29121,"EJIGU, LULITE",TX,29,REPUBLICAN PARTY,House,Challenger,N,Republican,lulite  ejigu,NA,NA,
@@ -1298,7 +1307,7 @@ H4MN06087,"EMMER, THOMAS EARL JR.",MN,06,REPUBLICAN PARTY,House,Incumbent,C,Repu
 H4MN06087,"EMMER, THOMAS EARL JR.",MN,06,REPUBLICAN PARTY,House,Incumbent,C,Republican,thomas  emmer,RepTomEmmer,E000294,72431423
 H4MN06087,"EMMER, THOMAS EARL JR.",MN,06,REPUBLICAN PARTY,House,Incumbent,C,Republican,thomas  emmer,tomemmer,E000294,72431423
 H2CA04155,"ENGDAHL, ANDREW DAVID",CA,04,DEMOCRATIC PARTY,House,Challenger,N,Democrat,andrew  engdahl,AndrewEngdahl,NA,
-H2AZ02311,"ENGEL, KIRSTEN",AZ,06,DEMOCRATIC PARTY,House,Challenger,P,Democrat,kirsten  engel,EngelForArizona,NA,
+H2AZ02311,"ENGEL, KIRSTEN",AZ,06,DEMOCRATIC PARTY,House,Challenger,N,Democrat,kirsten  engel,NA,NA,
 H2IL19069,"ENGLAND, BRIGHTON MR",IL,19,INDEPENDENT CONSERVATIVE DEMOCRATIC,House,Challenger,N,Other,brighton  england,NA,NA,
 H2VA02056,"ENGQUIST, THEODORE",VA,03,REPUBLICAN PARTY,House,Challenger,C,Republican,theodore  engquist,TedEngquist,NA,
 H2VA07188,"ENNIS, CRAIG EDWARD MR",VA,07,REPUBLICAN PARTY,House,Challenger,N,Republican,craig  ennis,NA,NA,
@@ -1327,8 +1336,10 @@ H2NY13096,"ESPAILLAT, ADRIANO",NY,13,DEMOCRATIC PARTY,House,Incumbent,C,Democrat
 H2NY13096,"ESPAILLAT, ADRIANO",NY,13,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,adriano  espaillat,EspaillatNY,E000297,182217410
 H8OH03098,"ESRATI, DAVID",OH,10,DEMOCRATIC PARTY,House,Challenger,P,Democrat,david  esrati,Esrati,NA,
 H2MI11240,"ESSHAKI, ERIC",MI,10,REPUBLICAN PARTY,House,Challenger,P,Republican,eric  esshaki,NA,NA,
-H8KS04112,"ESTES, RON",KS,04,REPUBLICAN PARTY,House,Incumbent,C,Republican,ron  estes,NA,E000298,854715071116849152
-H8KS04112,"ESTES, RON",KS,04,REPUBLICAN PARTY,House,Incumbent,C,Republican,ron  estes,NA,E000298,722555010588872704
+H8KS04112,"ESTES, RON",KS,04,REPUBLICAN PARTY,House,Incumbent,C,Republican,ron  estes,RepRonEstes,E000298,854715071116849152
+H8KS04112,"ESTES, RON",KS,04,REPUBLICAN PARTY,House,Incumbent,C,Republican,ron  estes,RonEstesKS,E000298,854715071116849152
+H8KS04112,"ESTES, RON",KS,04,REPUBLICAN PARTY,House,Incumbent,C,Republican,ron  estes,RepRonEstes,E000298,722555010588872704
+H8KS04112,"ESTES, RON",KS,04,REPUBLICAN PARTY,House,Incumbent,C,Republican,ron  estes,RonEstesKS,E000298,722555010588872704
 H2CA05103,"ESTRADA, JOHN ANTHONY",CA,05,REPUBLICAN PARTY,House,Challenger,N,Republican,john  estrada,NA,NA,
 H2CA22223,"ESTRADA, JOHN ANTHONY",CA,22,REPUBLICAN PARTY,House,Challenger,N,Republican,john  estrada,NA,NA,
 H2KY06191,"ETTER, SCOTT",KY,06,DEMOCRATIC PARTY,House,Challenger,N,Democrat,scott  etter,NA,NA,
@@ -1343,13 +1354,14 @@ H6PA02171,"EVANS, DWIGHT",PA,03,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,dwig
 H2GA06164,"EVANS, JAKE",GA,06,REPUBLICAN PARTY,House,Challenger,C,Republican,jake  evans,JakeEvansGA,NA,
 H2GA06164,"EVANS, JAKE",GA,06,REPUBLICAN PARTY,House,Challenger,C,Republican,jake  evans,jakeevans11,NA,
 H2IL11173,"EVANS, JERRY",IL,11,REPUBLICAN PARTY,House,Challenger,C,Republican,jerry  evans,JerryEvans2020,NA,
-H2ID01176,"EVANS, JOE MR.",ID,01,LIBERTARIAN PARTY,House,Challenger,N,Other,joe  evans,NA,NA,
+H2ID01176,"EVANS, JOE MR.",ID,01,LIBERTARIAN PARTY,House,Challenger,N,Other,joe  evans,idjoe4congress,NA,
+H2ID01176,"EVANS, JOE MR.",ID,01,LIBERTARIAN PARTY,House,Challenger,N,Other,joe  evans,joerevans,NA,
 H2AK01067,"EVANS, SHANNON SCOTT MR.",AK,00,REPUBLICAN PARTY,House,Challenger,N,Republican,shannon  evans,NA,NA,
 H2TX18165,"EVERGREEN, CASSIUS MARCELLOUS",TX,18,DEMOCRATIC PARTY,House,Challenger,N,Democrat,cassius  evergreen,NA,NA,
 H2MN01355,"EWING, J.R.",MN,01,REPUBLICAN PARTY,House,Challenger,N,Republican,,NA,NA,
-H2MS04258,"EZELL, WALTER MICHAEL",MS,04,REPUBLICAN PARTY,House,Incumbent,N,Republican,walter  ezell,RepEzell,E000235,1602788004749344768
-H2MS04258,"EZELL, WALTER MICHAEL",MS,04,REPUBLICAN PARTY,House,Incumbent,N,Republican,walter  ezell,MikeEzellMS,E000235,1602788004749344768
-H2MS04258,"EZELL, WALTER MICHAEL",MS,04,REPUBLICAN PARTY,House,Incumbent,N,Republican,walter  ezell,MikeEzell11,E000235,1602788004749344768
+H2MS04258,"EZELL, WALTER MICHAEL",MS,04,REPUBLICAN PARTY,House,Incumbent,C,Republican,walter  ezell,RepEzell,E000235,1602788004749344768
+H2MS04258,"EZELL, WALTER MICHAEL",MS,04,REPUBLICAN PARTY,House,Incumbent,C,Republican,walter  ezell,MikeEzellMS,E000235,1602788004749344768
+H2MS04258,"EZELL, WALTER MICHAEL",MS,04,REPUBLICAN PARTY,House,Incumbent,C,Republican,walter  ezell,MikeEzell11,E000235,1602788004749344768
 H8FL26062,"FAAS, SOURAYA",FL,28,LIBERTARIAN PARTY,House,Open seat,N,Other,souraya  faas,NA,NA,
 H2IL08153,"FAHEEM, MOHAMMED",IL,08,DEMOCRATIC PARTY,House,Challenger,P,Democrat,mohammed  faheem,NA,NA,
 H2FL20324,"FAIN, SHELLEY",FL,20,WRITE-IN,House,Open seat,N,Other,shelley  fain,shelley_fain,NA,
@@ -1459,7 +1471,7 @@ H2NY49017,"FORSYTH, HIRAM MR",NY,49,INDEPENDENT CONSERVATIVE DEMOCRATIC,House,Ch
 H4NE01064,"FORTENBERRY, JEFFREY L. HONORABLE",NE,01,REPUBLICAN PARTY,House,Incumbent,P,Republican,jeffrey  fortenberry,supportfortNE,F000449,
 H2NY14128,"FORTE, TINA",NY,14,REPUBLICAN PARTY,House,Challenger,P,Republican,tina  forte,TinaForteUSA,NA,
 H2GA13103,"FORT, VINCENT",GA,13,DEMOCRATIC PARTY,House,Challenger,P,Democrat,vincent  fort,NA,NA,
-H0VA02183,"FOSTER, DAVID B.",VA,01,INDEPENDENT,House,Challenger,N,Other,david  foster,NA,NA,
+H0VA02183,"FOSTER, DAVID B.",VA,01,INDEPENDENT,House,Challenger,N,Other,david  foster,rsvptruth,NA,
 H8IL14067,"FOSTER, G. WILLIAM (BILL)",IL,11,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,william  foster,RepBillFoster,NA,1080509366
 H8IL14067,"FOSTER, G. WILLIAM (BILL)",IL,11,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,william  foster,Foster4Congress,NA,1080509366
 H8IL14067,"FOSTER, G. WILLIAM (BILL)",IL,11,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,william  foster,RepBillFoster,NA,188403766
@@ -1480,7 +1492,7 @@ H2TX28099,"FOWLER, STEVEN",TX,28,REPUBLICAN PARTY,House,Challenger,C,Republican,
 H2GA34018,"FOWLER, TIMOTHY MR",GA,34,INDEPENDENT CONSERVATIVE DEMOCRATIC,House,Challenger,N,Other,timothy  fowler,NA,NA,
 H2RI02176,"FOX, JOY",RI,02,DEMOCRATIC PARTY,House,Open seat,C,Democrat,joy  fox,JoyFoxRI,NA,
 H2CA16167,"FOX, RICHARD DR.",CA,16,REPUBLICAN PARTY,House,Challenger,C,Republican,richard  fox,NA,NA,
-H0WV03193,"FOX-SPENCER, BELINDA",WV,01,INDEPENDENT,House,Challenger,N,Other,belinda  foxspencer,NA,NA,
+H0WV03193,"FOX-SPENCER, BELINDA",WV,01,INDEPENDENT,House,Challenger,N,Other,belinda  foxspencer,bfoxspencer,NA,
 H2PA18226,"FOX, STEPHANIE",PA,18,DEMOCRATIC PARTY,House,Open seat,N,Democrat,stephanie  fox,NA,NA,
 H4NC05146,"FOXX, VIRGINIA ANN",NC,05,REPUBLICAN PARTY,House,Incumbent,C,Republican,virginia  foxx,virginiafoxx,F000450,16256269
 H4NC05146,"FOXX, VIRGINIA ANN",NC,05,REPUBLICAN PARTY,House,Incumbent,C,Republican,virginia  foxx,foxxforcongress,F000450,16256269
@@ -1499,7 +1511,7 @@ H0FL15104,"FRANKLIN, SCOTT MR.",FL,18,REPUBLICAN PARTY,House,Incumbent,C,Republi
 H0FL15104,"FRANKLIN, SCOTT MR.",FL,18,REPUBLICAN PARTY,House,Incumbent,C,Republican,scott  franklin,RepFranklin,F000472,1247958910025203712
 H0FL15104,"FRANKLIN, SCOTT MR.",FL,18,REPUBLICAN PARTY,House,Incumbent,C,Republican,scott  franklin,ScottFranklinFL,F000472,1247958910025203712
 H2NC03152,"FRANKO, CHRISTOPHER J",NC,03,DEMOCRATIC PARTY,House,Challenger,N,Democrat,christopher  franko,NA,NA,
-H2FL21108,"FRANZESE, DANIEL JOHN",FL,22,REPUBLICAN PARTY,House,Challenger,P,Republican,daniel  franzese,danforfl,NA,
+H2FL21108,"FRANZESE, DANIEL JOHN",FL,22,REPUBLICAN PARTY,House,Challenger,C,Republican,daniel  franzese,danforfl,NA,
 H2NY23152,"FRATTO, MARIO",NY,24,REPUBLICAN PARTY,House,Open seat,P,Republican,mario  fratto,MarioFratto,NA,
 H8CA18095,"FREDRICH, JOHN KARL",CA,16,NONE,House,Challenger,N,Other,john  fredrich,NA,NA,
 H2KY54019,"FREDRICK, ADMIRAL MR",KY,54,INDEPENDENT CONSERVATIVE DEMOCRATIC,House,Challenger,N,Other,admiral  fredrick,NA,NA,
@@ -1527,10 +1539,10 @@ H2SC07280,"FRY, RUSSELL",SC,07,REPUBLICAN PARTY,House,Incumbent,C,Republican,rus
 H8OH11141,"FUDGE, MARCIA L.",OH,11,DEMOCRATIC PARTY,House,Incumbent,N,Democrat,marcia  fudge,NA,F000455,153486399
 H2NY06165,"FUENTES-PADILLA, CHRISTOPHER ROBBIN MR",NY,06,LIBERTARIAN PARTY,House,Challenger,N,Other,christopher  fuentespadilla,NA,NA,
 H2FL22213,"FUGATE, DEMETRIUS",FL,22,REPUBLICAN PARTY,House,Challenger,N,Republican,demetrius  fugate,NA,NA,
-H8ID01124,"FULCHER, RUSSELL",ID,01,REPUBLICAN PARTY,House,Incumbent,N,Republican,russell  fulcher,RepRussFulcher,F000469,1078741899572240384
-H8ID01124,"FULCHER, RUSSELL",ID,01,REPUBLICAN PARTY,House,Incumbent,N,Republican,russell  fulcher,RussFulcher,F000469,1078741899572240384
-H8ID01124,"FULCHER, RUSSELL",ID,01,REPUBLICAN PARTY,House,Incumbent,N,Republican,russell  fulcher,RepRussFulcher,F000469,172944579
-H8ID01124,"FULCHER, RUSSELL",ID,01,REPUBLICAN PARTY,House,Incumbent,N,Republican,russell  fulcher,RussFulcher,F000469,172944579
+H8ID01124,"FULCHER, RUSSELL",ID,01,REPUBLICAN PARTY,House,Incumbent,C,Republican,russell  fulcher,RepRussFulcher,F000469,1078741899572240384
+H8ID01124,"FULCHER, RUSSELL",ID,01,REPUBLICAN PARTY,House,Incumbent,C,Republican,russell  fulcher,RussFulcher,F000469,1078741899572240384
+H8ID01124,"FULCHER, RUSSELL",ID,01,REPUBLICAN PARTY,House,Incumbent,C,Republican,russell  fulcher,RepRussFulcher,F000469,172944579
+H8ID01124,"FULCHER, RUSSELL",ID,01,REPUBLICAN PARTY,House,Incumbent,C,Republican,russell  fulcher,RussFulcher,F000469,172944579
 H2TX02383,"FULFORD, ROBIN DAWN",TX,02,DEMOCRATIC PARTY,House,Challenger,P,Democrat,robin  fulford,RobinFulfordTX,NA,
 H2TX02383,"FULFORD, ROBIN DAWN",TX,02,DEMOCRATIC PARTY,House,Challenger,P,Democrat,robin  fulford,robindfulford,NA,
 H2WV01136,"FULLER, SCOTT ALLEN MR",WV,01,REPUBLICAN PARTY,House,Challenger,P,Republican,scott  fuller,NA,NA,
@@ -1594,15 +1606,15 @@ H8TX29052,"GARCIA, SYLVIA R",TX,29,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,s
 H8TX29052,"GARCIA, SYLVIA R",TX,29,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,sylvia  garcia,LaCongresista,G000587,1080587263132733440
 H8TX29052,"GARCIA, SYLVIA R",TX,29,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,sylvia  garcia,RepSylviaGarcia,G000587,40557819
 H8TX29052,"GARCIA, SYLVIA R",TX,29,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,sylvia  garcia,LaCongresista,G000587,40557819
-H8TX16125,"GARCIA-URESTE, ALIA",TX,23,REPUBLICAN PARTY,House,Challenger,C,Republican,alia  garciaureste,NA,NA,
-H2FL04146,"GARNER-LOPEZ, LEIGHA LUNA",FL,05,REPUBLICAN PARTY,House,Challenger,C,Republican,leigha  garnerlopez,NA,NA,
+H8TX16125,"GARCIA-URESTE, ALIA",TX,23,REPUBLICAN PARTY,House,Challenger,C,Republican,alia  garciaureste,Alia4USCongress,NA,
+H2FL04146,"GARNER-LOPEZ, LEIGHA LUNA",FL,05,REPUBLICAN PARTY,House,Challenger,C,Republican,leigha  garnerlopez,RealLunaLopez,NA,
 H2KS21010,"GARRETT, FRANK DUNCAN MR",KS,21,REPUBLICAN PARTY,House,Challenger,N,Republican,frank  garrett,NA,NA,
 H2MI12206,"GARRETT, MYKALE",MI,12,DEMOCRATIC PARTY,House,Challenger,P,Democrat,mykale  garrett,LathrupKelly,NA,
 H2CA15144,"GARRITY, JAMES",CA,15,UNAFFILIATED,House,Challenger,N,Other,james  garrity,NA,NA,
 H2AZ04226,"GARTRELL, JACOB",AZ,04,REPUBLICAN PARTY,House,Challenger,N,Republican,jacob  gartrell,NA,NA,
 H2TX15161,"GARZA, JULIO",TX,15,DEMOCRATIC PARTY,House,Challenger,N,Democrat,julio  garza,NA,NA,
 H6TX29072,"GARZA, JULIO",TX,29,REPUBLICAN PARTY,House,Challenger,P,Republican,julio  garza,NA,NA,
-H8TX21331,"GARZA, MAURO EVERETT MR.",TX,34,REPUBLICAN PARTY,House,Challenger,N,Republican,mauro  garza,NA,NA,
+H8TX21331,"GARZA, MAURO EVERETT MR.",TX,34,REPUBLICAN PARTY,House,Challenger,C,Republican,mauro  garza,NA,NA,
 H2TX34162,"GARZA, ROCHELLE",TX,34,DEMOCRATIC PARTY,House,Challenger,C,Democrat,rochelle  garza,NA,NA,
 H2NC11205,"GASH, ERIC",NC,11,DEMOCRATIC PARTY,House,Challenger,P,Democrat,eric  gash,NA,NA,
 H2NY16081,"GASHI, VEDAT",NY,16,DEMOCRATIC PARTY,House,Challenger,P,Democrat,vedat  gashi,LegislatorGashi,NA,
@@ -1611,7 +1623,7 @@ H2NC03095,"GASKINS, BARBARA D MS.",NC,03,DEMOCRATIC PARTY,House,Challenger,P,Dem
 H2NH18027,"GATES, DAVID MR",NH,18,INDEPENDENT CONSERVATIVE DEMOCRATIC,House,Challenger,N,Other,david  gates,NA,NA,
 H2CA33196,"GATES, DERRICK ROLLIN",CA,36,REPUBLICAN PARTY,House,Challenger,P,Republican,derrick  gates,Derrick_R_Gates,NA,
 H2GA06198,"GATEWOOD, BYRON",GA,06,REPUBLICAN PARTY,House,Challenger,C,Republican,byron  gatewood,GatewoodforGA,NA,
-H2OH09171,"GAVARONE, THERESA",OH,09,REPUBLICAN PARTY,House,Challenger,P,Republican,theresa  gavarone,theresagavarone,NA,
+H2OH09171,"GAVARONE, THERESA",OH,09,REPUBLICAN PARTY,House,Challenger,P,Republican,theresa  gavarone,NA,NA,
 H2MI13279,"GAY-DAGNOGO, SHERRY J",MI,13,DEMOCRATIC PARTY,House,Challenger,P,Democrat,sherry  gaydagnogo,NA,NA,
 H2TX24148,"GAY, DERRIK",TX,24,DEMOCRATIC PARTY,House,Challenger,C,Democrat,derrik  gay,derrikgay,NA,
 H2TX05220,"GEARING, CHARLES M.",TX,05,DEMOCRATIC PARTY,House,Challenger,C,Democrat,charles  gearing,NA,NA,
@@ -1729,8 +1741,8 @@ H2OK02273,"GORDON, PAMELA SMITH",OK,02,REPUBLICAN PARTY,House,Open seat,C,Republ
 H0OH11098,"GORE, LAVERNE",OH,11,REPUBLICAN PARTY,House,Challenger,P,Republican,laverne  gore,NA,NA,
 H2AL04097,"GORE, RHONDA",AL,04,DEMOCRATIC PARTY,House,Challenger,N,Democrat,rhonda  gore,NA,NA,
 H2NV02569,"GORMAN, GEROLD LEE",NV,02,DEMOCRATIC PARTY,House,Challenger,N,Democrat,gerold  gorman,NA,NA,
-H0CA20122,"GORMAN, JEFF",CA,19,REPUBLICAN PARTY,House,Challenger,P,Republican,jeff  gorman,JeffGormanMRY,NA,
-H0CA20122,"GORMAN, JEFF",CA,19,REPUBLICAN PARTY,House,Challenger,P,Republican,jeff  gorman,GormanCongress,NA,
+H0CA20122,"GORMAN, JEFF",CA,19,REPUBLICAN PARTY,House,Challenger,N,Republican,jeff  gorman,JeffGormanMRY,NA,
+H0CA20122,"GORMAN, JEFF",CA,19,REPUBLICAN PARTY,House,Challenger,N,Republican,jeff  gorman,GormanCongress,NA,
 H2OH07217,"GORMAN, LYNN CAROL",OH,13,INDEPENDENT,House,Challenger,N,Other,lynn  gorman,NA,NA,
 H2CA07125,"GORMAN, MARK EDWARD",CA,06,DEMOCRATIC PARTY,House,Challenger,N,Democrat,mark  gorman,MarkGorman4CA06,NA,
 H2TN03219,"GORMAN, MARY",TN,03,DEMOCRATIC PARTY,House,Challenger,P,Democrat,mary  gorman,Meg4Congress,NA,
@@ -1769,13 +1781,13 @@ H2VT01068,"GRAY, MOLLY",VT,00,DEMOCRATIC PARTY,House,Open seat,P,Democrat,molly 
 H6TX01261,"GRAY, PHIL",TX,30,LIBERTARIAN PARTY,House,Open seat,N,Other,phil  gray,NA,NA,
 H6FL08213,"GRAYSON, ALAN MARK",FL,10,DEMOCRATIC PARTY,House,Open seat,P,Democrat,alan  grayson,AlanGrayson,G000556,
 H6FL09187,"GRAYSON, DENA MD, PHD MD, PHD",FL,08,DEMOCRATIC PARTY,House,Challenger,N,Democrat,dena  md,NA,NA,
+H2AZ08185,"GRAYSON, RICHARD",AZ,08,DEMOCRATIC PARTY,House,Challenger,N,Democrat,richard  grayson,NA,NA,
+H2OK02265,"GRAYSON, RICHARD",OK,02,DEMOCRATIC PARTY,House,Open seat,N,Democrat,richard  grayson,NA,NA,
+H2OK03131,"GRAYSON, RICHARD",OK,03,DEMOCRATIC PARTY,House,Challenger,N,Democrat,richard  grayson,NA,NA,
 H2OK04154,"GRAYSON, RICHARD",OK,04,DEMOCRATIC PARTY,House,Challenger,N,Democrat,richard  grayson,NA,NA,
 H2AZ09233,"GRAYSON, RICHARD",AZ,09,WRITE-IN,House,Challenger,N,Other,richard  grayson,NA,NA,
-H2OK02265,"GRAYSON, RICHARD",OK,02,DEMOCRATIC PARTY,House,Open seat,N,Democrat,richard  grayson,NA,NA,
-H2AZ08185,"GRAYSON, RICHARD",AZ,08,DEMOCRATIC PARTY,House,Challenger,N,Democrat,richard  grayson,NA,NA,
-H2OK03131,"GRAYSON, RICHARD",OK,03,DEMOCRATIC PARTY,House,Challenger,N,Democrat,richard  grayson,NA,NA,
 H2ID02208,"GRAYSON, RICHARD HOSS",ID,02,DEMOCRATIC PARTY,House,Challenger,N,Democrat,richard  grayson,NA,NA,
-H2NJ04223,"GRAY, STEVEN SCOTT MR.",NJ,04,REPUBLICAN PARTY,House,Challenger,C,Republican,steven  gray,NA,NA,
+H2NJ04223,"GRAY, STEVEN SCOTT MR.",NJ,04,REPUBLICAN PARTY,House,Challenger,C,Republican,steven  gray,SteveGrayNJ4,NA,
 H2FL10226,"GRAY, TERENCE R MR. I",FL,10,DEMOCRATIC PARTY,House,Open seat,C,Democrat,terence  gray,TerenceGray4FL,NA,
 H4TX09095,"GREEN, ALEXANDER",TX,09,DEMOCRATIC PARTY,House,Incumbent,N,Democrat,alexander  green,NA,G000553,156333623
 H4TX09095,"GREEN, ALEXANDER",TX,09,DEMOCRATIC PARTY,House,Incumbent,N,Democrat,alexander  green,NA,G000553,327625079
@@ -1788,7 +1800,7 @@ H0GA06192,"GREENE, MARJORIE TAYLOR MRS.",GA,14,REPUBLICAN PARTY,House,Incumbent,
 H0GA06192,"GREENE, MARJORIE TAYLOR MRS.",GA,14,REPUBLICAN PARTY,House,Incumbent,C,Republican,marjorie  greene,RepMTG,G000596,826065164504006656
 H2CT21021,"GREENFORD, MOSES MR",CT,21,INDEPENDENT CONSERVATIVE DEMOCRATIC,House,Challenger,N,Other,moses  greenford,NA,NA,
 H2IL11181,"GREEN, GRACE KELLY MS.",IL,11,REPUBLICAN PARTY,House,Challenger,N,Republican,grace  green,NA,NA,
-H2IN01172,"GREEN, JENNIFER-RUTH",IN,01,REPUBLICAN PARTY,House,Challenger,P,Republican,jenniferruth  green,NA,NA,
+H2IN01172,"GREEN, JENNIFER-RUTH",IN,01,REPUBLICAN PARTY,House,Challenger,P,Republican,jenniferruth  green,JenRuthGreen,NA,
 H2FL08139,"GREEN, KAREN REV. DR.",FL,07,DEMOCRATIC PARTY,House,Open seat,P,Democrat,karen  green,KarenforFlorida,NA,
 H2FL08139,"GREEN, KAREN REV. DR.",FL,07,DEMOCRATIC PARTY,House,Open seat,P,Democrat,karen  green,drkarengreen,NA,
 H8TN07076,"GREEN, MARK DR.",TN,07,REPUBLICAN PARTY,House,Incumbent,C,Republican,mark  green,RepMarkGreen,G000590,1080477288955826176
@@ -1812,8 +1824,8 @@ H2AK00465,"GRIFFIN, KARYN",AK,00,,House,Open seat,N,Other,karyn  griffin,NA,NA,
 H2MD03200,"GRIFFIN, LANCE ALAN",MD,03,REPUBLICAN PARTY,House,Challenger,C,Republican,lance  griffin,NA,NA,
 H0CA33158,"GRIFFIN, MORRIS F",CA,44,DEMOCRATIC PARTY,House,Challenger,N,Democrat,morris  griffin,NA,NA,
 H2MS03169,"GRIFFIN, THOMAS",MS,03,REPUBLICAN PARTY,House,Challenger,N,Republican,thomas  griffin,NA,NA,
-H0VA09055,"GRIFFITH, H MORGAN",VA,09,REPUBLICAN PARTY,House,Incumbent,N,Republican,morgan  griffith,NA,G000568,234057152
-H0VA09055,"GRIFFITH, H MORGAN",VA,09,REPUBLICAN PARTY,House,Incumbent,N,Republican,morgan  griffith,NA,G000568,130714799
+H0VA09055,"GRIFFITH, H MORGAN",VA,09,REPUBLICAN PARTY,House,Incumbent,C,Republican,morgan  griffith,NA,G000568,234057152
+H0VA09055,"GRIFFITH, H MORGAN",VA,09,REPUBLICAN PARTY,House,Incumbent,C,Republican,morgan  griffith,NA,G000568,130714799
 H2CA47162,"GRIFFITH, WILLIAM",CA,47,DEMOCRATIC PARTY,House,Challenger,N,Democrat,william  griffith,NA,NA,
 H0GA01029,"GRIGGS, JOYCE MARIE",GA,01,DEMOCRATIC PARTY,House,Challenger,P,Democrat,joyce  griggs,JoyceGriggs2022,NA,
 H2AZ07070,"GRIJALVA, RAUL M",AZ,07,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,raul  grijalva,NA,G000551,28602948
@@ -1839,10 +1851,10 @@ H2MO02201,"GUNBY, PATRICIA WASHBURN",MO,02,DEMOCRATIC PARTY,House,Challenger,C,D
 H4NJ01118,"GUSTAFSON, CLAIRE H.",NJ,01,REPUBLICAN PARTY,House,Challenger,P,Republican,claire  gustafson,ClaireGForNJRep,NA,
 H2CA50232,"GUSTAFSON, COREY",CA,50,REPUBLICAN PARTY,House,Challenger,C,Republican,corey  gustafson,CoreyCA50,NA,
 H2OH16077,"GUSTAFSON EWING, REGINA ANNE",OH,07,INDEPENDENT,House,Open seat,N,Other,regina  ewing,NA,NA,
-H8KY02031,"GUTHRIE, S. BRETT HON.",KY,02,REPUBLICAN PARTY,House,Incumbent,N,Republican,brett  guthrie,RepGuthrie,G000558,1908143071
-H8KY02031,"GUTHRIE, S. BRETT HON.",KY,02,REPUBLICAN PARTY,House,Incumbent,N,Republican,brett  guthrie,brettguthrie,G000558,1908143071
-H8KY02031,"GUTHRIE, S. BRETT HON.",KY,02,REPUBLICAN PARTY,House,Incumbent,N,Republican,brett  guthrie,RepGuthrie,G000558,114607567
-H8KY02031,"GUTHRIE, S. BRETT HON.",KY,02,REPUBLICAN PARTY,House,Incumbent,N,Republican,brett  guthrie,brettguthrie,G000558,114607567
+H8KY02031,"GUTHRIE, S. BRETT HON.",KY,02,REPUBLICAN PARTY,House,Incumbent,C,Republican,brett  guthrie,RepGuthrie,G000558,1908143071
+H8KY02031,"GUTHRIE, S. BRETT HON.",KY,02,REPUBLICAN PARTY,House,Incumbent,C,Republican,brett  guthrie,brettguthrie,G000558,1908143071
+H8KY02031,"GUTHRIE, S. BRETT HON.",KY,02,REPUBLICAN PARTY,House,Incumbent,C,Republican,brett  guthrie,RepGuthrie,G000558,114607567
+H8KY02031,"GUTHRIE, S. BRETT HON.",KY,02,REPUBLICAN PARTY,House,Incumbent,C,Republican,brett  guthrie,brettguthrie,G000558,114607567
 H2NC11270,"GUTIERREZ, MARCO",NC,11,DEMOCRATIC PARTY,House,Challenger,N,Democrat,marco  gutierrez,NA,NA,
 H2CA31158,"GUTIERREZ, REX DALE ALEXANDER",CA,31,REPUBLICAN PARTY,House,Challenger,P,Republican,rex  gutierrez,NA,NA,
 H2PA15115,"GUYETT, MATTHEW M",PA,15,REPUBLICAN PARTY,House,Challenger,N,Republican,matthew  guyett,NA,NA,
@@ -1910,7 +1922,7 @@ H8TX13130,"HARMON, MARK DESMOND",TX,02,DEMOCRATIC PARTY,House,Challenger,N,Democ
 H2TN02120,"HARMON, MARK DESMOND DR.",TN,02,DEMOCRATIC PARTY,House,Challenger,P,Democrat,mark  harmon,Harmon4Congress,NA,
 H2AZ09258,"HARPER, JACK",AZ,09,WRITE-IN,House,Challenger,N,Other,jack  harper,NA,NA,
 H2TX04140,"HARPER, JOHN EDWARD SR.",TX,04,REPUBLICAN PARTY,House,Challenger,C,Republican,john  harper,NA,NA,
-H2TX03282,"HARP, SUZANNE CASSIMATIS",TX,03,REPUBLICAN PARTY,House,Open seat,P,Republican,suzanne  harp,RealSuzanneHarp,NA,
+H2TX03282,"HARP, SUZANNE CASSIMATIS",TX,03,REPUBLICAN PARTY,House,Open seat,P,Republican,suzanne  harp,NA,NA,
 H2NC13243,"HARRIGAN, PAT",NC,14,UNKNOWN,House,Open seat,P,Other,pat  harrigan,NA,NA,
 H8MD01094,"HARRIS, ANDREW P",MD,01,REPUBLICAN PARTY,House,Incumbent,N,Republican,andrew  harris,RepAndyHarrisMD,H001052,960962340
 H8MD01094,"HARRIS, ANDREW P",MD,01,REPUBLICAN PARTY,House,Incumbent,N,Republican,andrew  harris,Harris4Congress,H001052,960962340
@@ -1921,7 +1933,8 @@ H2FL24045,"HARRIS, KEVIN COREY",FL,24,DEMOCRATIC PARTY,House,Challenger,P,Democr
 H2TX26200,"HARRISON, RAVEN",TX,26,REPUBLICAN PARTY,House,Challenger,C,Republican,raven  harrison,raven4congress,NA,
 H2CA10210,"HARRISON, SEAN",CA,10,REPUBLICAN PARTY,House,Challenger,N,Republican,sean  harrison,NA,NA,
 H8MD07091,"HARRIS, THOMAS E. ""PINKSTON""",MD,03,REPUBLICAN PARTY,House,Challenger,N,Republican,thomas  harris,NA,NA,
-H2OK05169,"HARRIS-TILL, JOSHUA",OK,05,DEMOCRATIC PARTY,House,Challenger,P,Democrat,joshua  harristill,NA,NA,
+H2OK05169,"HARRIS-TILL, JOSHUA",OK,05,DEMOCRATIC PARTY,House,Challenger,P,Democrat,joshua  harristill,JHTforCongress,NA,
+H2OK05169,"HARRIS-TILL, JOSHUA",OK,05,DEMOCRATIC PARTY,House,Challenger,P,Democrat,joshua  harristill,JHarrisTill,NA,
 H2MO01187,"HARSHAW, RONALD",MO,01,DEMOCRATIC PARTY,House,Challenger,N,Democrat,ronald  harshaw,HarshawForMO1,NA,
 H0TN01118,"HARSHBARGER, DIANA",TN,01,REPUBLICAN PARTY,House,Incumbent,C,Republican,diana  harshbarger,RepHarshbarger,H001086,1345787285179162624
 H0TN01118,"HARSHBARGER, DIANA",TN,01,REPUBLICAN PARTY,House,Incumbent,C,Republican,diana  harshbarger,DHarshbargerTN1,H001086,1345787285179162624
@@ -1930,7 +1943,7 @@ H2TN08077,"HART, JAMES",TN,08,INDEPENDENT,House,Challenger,N,Other,james  hart,N
 H2FL09152,"HARTPENCE, KENNETH JAMES",FL,18,REPUBLICAN PARTY,House,Challenger,N,Republican,kenneth  hartpence,KennyHartpence,NA,
 H2UT02480,"HARTWICK, STEVE",UT,02,DEMOCRATIC PARTY,House,Challenger,N,Democrat,steve  hartwick,NA,NA,
 H0MO04086,"HARTZLER, VICKY",MO,04,REPUBLICAN PARTY,House,Incumbent,P,Republican,vicky  hartzler,NA,H001053,237763317
-H0AL02202,"HARVEY-HALL, PHYLLIS",AL,02,DEMOCRATIC PARTY,House,Challenger,P,Democrat,phyllis  harveyhall,NA,NA,
+H0AL02202,"HARVEY-HALL, PHYLLIS",AL,02,DEMOCRATIC PARTY,House,Challenger,P,Democrat,phyllis  harveyhall,PhyllisDHHall,NA,
 H2KY02133,"HARVEY, STEPHEN G MR.",KY,02,REPUBLICAN PARTY,House,Challenger,N,Republican,stephen  harvey,NA,NA,
 H2MI03213,"HARVEY, TERRANCE JAMES",MI,03,NONE,House,Challenger,N,Other,terrance  harvey,NA,NA,
 H2TN05404,"HARWELL, BETH",TN,05,REPUBLICAN PARTY,House,Open seat,P,Republican,beth  harwell,BethHarwellTN,NA,
@@ -1938,7 +1951,7 @@ H2IA03101,"HASSO, NICOLE",IA,03,REPUBLICAN PARTY,House,Challenger,P,Republican,n
 H2FL23021,"HASTINGS, ALCEE L",FL,20,DEMOCRATIC PARTY,House,Incumbent,P,Democrat,alcee  hastings,NA,H000324,
 H2MN01140,"HASTINGS, MICHAEL MARK MR ERETH",MN,01,REPUBLICAN PARTY,House,Open seat,N,Republican,michael  hastings,NA,NA,
 H2GA10208,"HATCHER, PHYLLIS D",GA,10,DEMOCRATIC PARTY,House,Open seat,P,Democrat,phyllis  hatcher,NA,NA,
-H2IL11264,"HATHAWAY-ALTMAN, SUSAN",IL,11,REPUBLICAN PARTY,House,Challenger,P,Republican,susan  hathawayaltman,NA,NA,
+H2IL11264,"HATHAWAY-ALTMAN, SUSAN",IL,11,REPUBLICAN PARTY,House,Challenger,P,Republican,susan  hathawayaltman,susan4congress,NA,
 H2AR02095,"HATHAWAY, QUINTESSA DR.",AR,02,DEMOCRATIC PARTY,House,Challenger,N,Democrat,quintessa  hathaway,DrQHathaway,NA,
 H2ND01014,"HAUGEN, MARK",ND,00,DEMOCRATIC PARTY,House,Challenger,C,Democrat,mark  haugen,haugenforhouse,NA,
 H2IL13195,"HAUSMAN, MATT",IL,13,REPUBLICAN PARTY,House,Challenger,P,Republican,matt  hausman,MattHausman13,NA,
@@ -1960,7 +1973,7 @@ H2GA14135,"HAYGOOD, WALTER JAMES",GA,14,REPUBLICAN PARTY,House,Challenger,P,Repu
 H2AR03283,"HAYS, LAUREN",AR,03,DEMOCRATIC PARTY,House,Challenger,P,Democrat,lauren  hays,NA,NA,
 H2FL13287,"HAYSLETT, KEVIN",FL,13,REPUBLICAN PARTY,House,Open seat,P,Republican,kevin  hayslett,KevinHayslettFL,NA,
 H0NC06241,"HAYWOOD, JOSEPH",NC,06,REPUBLICAN PARTY,House,Challenger,P,Republican,joseph  haywood,1Haywood,NA,
-H2NJ03258,"HEALEY, ROBERT JR",NJ,03,REPUBLICAN PARTY,House,Challenger,P,Republican,robert  healey,NA,NA,
+H2NJ03258,"HEALEY, ROBERT JR",NJ,03,REPUBLICAN PARTY,House,Challenger,P,Republican,robert  healey,BobHealey4NJ,NA,
 H2CO05240,"HEATON, ANDREW DAVID",CO,05,REPUBLICAN PARTY,House,Challenger,P,Republican,andrew  heaton,Heaton4Colorado,NA,
 H2OH05070,"HEBERLING, MARTIN MATHIAS MR. III",OH,05,DEMOCRATIC PARTY,House,Challenger,C,Democrat,martin  heberling,heberling3,NA,
 H2IL11165,"HEEG, ANDREA",IL,11,REPUBLICAN PARTY,House,Challenger,N,Republican,andrea  heeg,andreaheeg,NA,
@@ -1991,8 +2004,8 @@ H2NY14144,"HERNANDEZ, MIGUEL MR.",NY,14,REPUBLICAN PARTY,House,Challenger,N,Repu
 H2CA18163,"HERNANDEZ, PETER",CA,18,REPUBLICAN PARTY,House,Challenger,N,Republican,peter  hernandez,NA,NA,
 H8OK01157,"HERN, KEVIN",OK,01,REPUBLICAN PARTY,House,Incumbent,C,Republican,kevin  hern,repkevinhern,H001082,1067818539179024384
 H8OK01157,"HERN, KEVIN",OK,01,REPUBLICAN PARTY,House,Incumbent,C,Republican,kevin  hern,krhern,H001082,1067818539179024384
-H8NM02156,"HERRELL, STELLA YVETTE",NM,02,REPUBLICAN PARTY,House,Challenger,N,Republican,stella  herrell,Yvette4congress,H001084,1344416719260016640
-H8NM02156,"HERRELL, STELLA YVETTE",NM,02,REPUBLICAN PARTY,House,Challenger,N,Republican,stella  herrell,Yvette4congress,H001084,898787903609765888
+H8NM02156,"HERRELL, STELLA YVETTE",NM,02,REPUBLICAN PARTY,House,Challenger,N,Republican,stella  herrell,NA,H001084,1344416719260016640
+H8NM02156,"HERRELL, STELLA YVETTE",NM,02,REPUBLICAN PARTY,House,Challenger,N,Republican,stella  herrell,NA,H001084,898787903609765888
 H0WA03187,"HERRERA BEUTLER, JAIME",WA,03,REPUBLICAN PARTY,House,Incumbent,P,Republican,jaime  beutler,JaimeForUSRep,H001056,97963837
 H0WA03187,"HERRERA BEUTLER, JAIME",WA,03,REPUBLICAN PARTY,House,Incumbent,P,Republican,jaime  beutler,JaimeForUSRep,H001056,242926427
 H2GA01249,"HERRING, WADE WILKES MR. II",GA,01,DEMOCRATIC PARTY,House,Challenger,P,Democrat,wade  herring,wadeherringga1,NA,
@@ -2050,7 +2063,6 @@ H2NC13110,"HOLDING, GEORGE E MR.",NC,02,REPUBLICAN PARTY,House,,N,Republican,geo
 H2FL10291,"HOLIC, JASON KYLE",FL,10,NONE,House,Open seat,C,Other,jason  holic,HolicCongress,NA,
 H2FL10291,"HOLIC, JASON KYLE",FL,10,NONE,House,Open seat,C,Other,jason  holic,jholic,NA,
 H6IN06024,"HOLLAND, GEORGE THOMAS",IN,06,DEMOCRATIC PARTY,House,Challenger,N,Democrat,george  holland,NA,NA,
-H2MI13246,"HOLLIER, ADAM",MI,13,DEMOCRATIC PARTY,House,Challenger,P,Democrat,adam  hollier,Adamant4Detroit,NA,
 H2MI13246,"HOLLIER, ADAM",MI,13,DEMOCRATIC PARTY,House,Challenger,P,Democrat,adam  hollier,adamant4detroit,NA,
 H6IN09176,"HOLLINGSWORTH, TREY",IN,09,REPUBLICAN PARTY,House,Incumbent,P,Republican,trey  hollingsworth,NA,H001074,811986281177772032
 H2PA11114,"HOLLISTER, ROBERT MICHAEL III",PA,11,DEMOCRATIC PARTY,House,Challenger,P,Democrat,robert  hollister,Hollister4PA,NA,
@@ -2063,7 +2075,7 @@ H2AZ08169,"HOLMES, JAMES THOMAS",AZ,08,DEMOCRATIC PARTY,House,Challenger,N,Democ
 H2FL20159,"HOLNESS, DALE V.C. MR.",FL,20,DEMOCRATIC PARTY,House,Challenger,N,Democrat,dale  holness,HolnessD9,NA,
 H2NY10316,"HOLTZMAN, ELIZABETH",NY,10,DEMOCRATIC PARTY,House,Challenger,P,Democrat,elizabeth  holtzman,RepHoltzman,NA,
 H2FL22205,"HOLZHAUER, HAVA",FL,23,DEMOCRATIC PARTY,House,Challenger,P,Democrat,hava  holzhauer,HavaHolzhauer,NA,
-H2NC11247,"HONEYCUTT, RODNEY HOMER",NC,11,REPUBLICAN PARTY,House,Challenger,C,Republican,rodney  honeycutt,NA,NA,
+H2NC11247,"HONEYCUTT, RODNEY HOMER",NC,11,REPUBLICAN PARTY,House,Challenger,C,Republican,rodney  honeycutt,cuttforcongress,NA,
 H2TN04274,"HOOD, GERALD W. MR III",TN,04,REPUBLICAN PARTY,House,Challenger,N,Republican,gerald  hood,NA,NA,
 H2MS04290,"HOOK, LOUIS CHARLES DR.",MS,04,REPUBLICAN PARTY,House,Challenger,N,Republican,louis  hook,NA,NA,
 H2MI12198,"HOOPER, JAMES D",MI,12,REPUBLICAN PARTY,House,Challenger,N,Republican,james  hooper,WeRAmericans1st,NA,
@@ -2139,8 +2151,8 @@ H2UT04072,"HUNSAKER, JAKE",UT,04,REPUBLICAN PARTY,House,Challenger,P,Republican,
 H2PA03129,"HUNT, ALEXANDRA",PA,03,DEMOCRATIC PARTY,House,Challenger,C,Democrat,alexandra  hunt,NA,NA,
 H2GA02189,"HUNT, JEREMY",GA,02,REPUBLICAN PARTY,House,Challenger,P,Republican,jeremy  hunt,thejeremyhunt,NA,
 H2TX12085,"HUNT, TREY JOSEPH",TX,12,DEMOCRATIC PARTY,House,Challenger,P,Democrat,trey  hunt,VoteHunt2022,NA,
-H0TX07170,"HUNT, WESLEY",TX,38,REPUBLICAN PARTY,House,Incumbent,C,Republican,wesley  hunt,NA,H001095,1602751001756311552
-H0TX07170,"HUNT, WESLEY",TX,38,REPUBLICAN PARTY,House,Incumbent,C,Republican,wesley  hunt,NA,H001095,1112744620247662592
+H0TX07170,"HUNT, WESLEY",TX,38,REPUBLICAN PARTY,House,Incumbent,C,Republican,wesley  hunt,WesleyHuntTX,H001095,1602751001756311552
+H0TX07170,"HUNT, WESLEY",TX,38,REPUBLICAN PARTY,House,Incumbent,C,Republican,wesley  hunt,WesleyHuntTX,H001095,1112744620247662592
 H2NY02115,"HUQ, MD MUZIBUL DR MD",NY,04,DEMOCRATIC PARTY,House,Challenger,P,Democrat,md  huq,MuzibulDr,NA,
 H2WI03106,"HURLESS, DENISE LYNN RN",WI,03,REPUBLICAN PARTY,House,Open seat,N,Republican,denise  hurless,NA,NA,
 H8NV02129,"HURLEY, JESSE DOUGLAS",NV,02,REPUBLICAN PARTY,House,Challenger,N,Republican,jesse  hurley,NA,NA,
@@ -2170,7 +2182,7 @@ H2TX03316,"IVANOVSKIS, JEREMY DANIEL",TX,03,REPUBLICAN PARTY,House,Open seat,P,R
 H2MD04315,"IVEY, GLENN",MD,04,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,glenn  ivey,RepGlennIvey,I000058,1610111693836664832
 H2MD04315,"IVEY, GLENN",MD,04,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,glenn  ivey,RepGlennIvey,I000058,3081969927
 H2GA04193,"IVY, SURREA MRS.",GA,04,REPUBLICAN PARTY,House,Challenger,N,Republican,surrea  ivy,NA,NA,
-H2CA14204,"IYER, STEVE",CA,14,REPUBLICAN PARTY,House,Open seat,P,Republican,steve  iyer,Iyer4Congress,NA,
+H2CA14204,"IYER, STEVE",CA,14,REPUBLICAN PARTY,House,Challenger,N,Republican,steve  iyer,Iyer4Congress,NA,
 H2OR06025,"JACKSON, DERRY AL MR SR",OR,06,DEMOCRATIC PARTY,House,Open seat,N,Democrat,derry  jackson,NA,NA,
 H2AZ09134,"JACKSON, JANA JACKSON",AZ,09,REPUBLICAN PARTY,House,Challenger,N,Republican,jana  jackson,NA,NA,
 H2NC14076,"JACKSON, JEFF",NC,14,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,jeff  jackson,RepJeffJackson,J000308,
@@ -2188,8 +2200,8 @@ H2MI12180,"JACKSON, SHANELLE",MI,12,DEMOCRATIC PARTY,House,Challenger,N,Democrat
 H0NY27090,"JACOBS, CHRISTOPHER L.",NY,23,REPUBLICAN PARTY,House,Incumbent,P,Republican,christopher  jacobs,NA,J000020,1276232539510919168
 H0NY27090,"JACOBS, CHRISTOPHER L.",NY,23,REPUBLICAN PARTY,House,Incumbent,P,Republican,christopher  jacobs,NA,J000020,1129376438698807296
 H2KS04123,"JACOBS, KYLE",KS,04,INDEPENDENT,House,Challenger,N,Other,kyle  jacobs,NA,NA,
-H2KS04115,"JACOBS, KYLE",KS,04,INDEPENDENT,House,Challenger,N,Other,kyle  jacobs,NA,NA,
 H2KS04131,"JACOBS, KYLE",KS,04,INDEPENDENT,House,Challenger,N,Other,kyle  jacobs,NA,NA,
+H2KS04115,"JACOBS, KYLE",KS,04,INDEPENDENT,House,Challenger,N,Other,kyle  jacobs,NA,NA,
 H2CA26133,"JACOBS, MATTHEW",CA,26,REPUBLICAN PARTY,House,Challenger,P,Republican,matthew  jacobs,mattjacobsca,NA,
 H8CA49074,"JACOBS, SARA",CA,51,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,sara  jacobs,RepSaraJacobs,J000305,1345103905869455360
 H8CA49074,"JACOBS, SARA",CA,51,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,sara  jacobs,SaraJacobsCA,J000305,1345103905869455360
@@ -2245,7 +2257,7 @@ H8SD01055,"JOHNSON, DUSTY",SD,00,REPUBLICAN PARTY,House,Incumbent,C,Republican,d
 H8SD01055,"JOHNSON, DUSTY",SD,00,REPUBLICAN PARTY,House,Incumbent,C,Republican,dusty  johnson,DustyJohnson,J000301,1074782372594413568
 H2TX00015,"JOHNSON, EDDIE BERNICE",TX,30,DEMOCRATIC PARTY,House,Incumbent,P,Democrat,eddie  johnson,NA,J000126,168502762
 H0GA12059,"JOHNSON, ELIZABETH",GA,12,DEMOCRATIC PARTY,House,Challenger,P,Democrat,elizabeth  johnson,NA,NA,
-H8GA10197,"JOHNSON-GREEN, TABITHA",GA,10,DEMOCRATIC PARTY,House,Challenger,P,Democrat,tabitha  johnsongreen,NA,NA,
+H8GA10197,"JOHNSON-GREEN, TABITHA",GA,10,DEMOCRATIC PARTY,House,Challenger,P,Democrat,tabitha  johnsongreen,Tabitha57363624,NA,
 H6GA04129,"JOHNSON, HENRY C. 'HANK'",GA,04,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,henry  johnson,RepHankJohnson,J000288,24745957
 H6GA04129,"JOHNSON, HENRY C. 'HANK'",GA,04,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,henry  johnson,ReElectHank,J000288,24745957
 H6GA04129,"JOHNSON, HENRY C. 'HANK'",GA,04,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,henry  johnson,RepHankJohnson,J000288,97583689
@@ -2317,7 +2329,7 @@ H2MN01330,"KALBERER, GEORGE H",MN,01,DEMOCRATIC-FARMER-LABOR,House,Challenger,N,
 H2FL17106,"KALE, ANDREA DORIA",FL,17,DEMOCRATIC PARTY,House,Challenger,P,Democrat,andrea  kale,AndreaDoriaKale,NA,
 H2OR04103,"KALLOCH, ANDREW",OR,04,DEMOCRATIC PARTY,House,Open seat,C,Democrat,andrew  kalloch,andrewkalloch,NA,
 H2MI11224,"KALLUR, SUMUKH",MI,11,REPUBLICAN PARTY,House,Challenger,N,Republican,sumukh  kallur,NA,NA,
-H2CA37304,"KAMLAGER, SYDNEY",CA,37,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,sydney  kamlager,NA,K000400,
+H2CA37304,"KAMLAGER, SYDNEY",CA,37,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,sydney  kamlager,sydneykamlager,K000400,
 H2CA12232,"KAPLAN, GLENN",CA,12,NO PARTY AFFILIATION,House,Challenger,N,Other,glenn  kaplan,Glenn4congress,NA,
 H2OH09031,"KAPTUR, MARCY HON. M.C.",OH,09,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,marcy  kaptur,RepMarcyKaptur,K000009,581141508
 H2OH09031,"KAPTUR, MARCY HON. M.C.",OH,09,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,marcy  kaptur,Marcy_Kaptur,K000009,581141508
@@ -2392,7 +2404,7 @@ H2FL13261,"KHEIREDDINE, MONEER",FL,13,REPUBLICAN PARTY,House,Open seat,C,Republi
 H2WI05283,"KIDD, JIM KIDD",WI,05,NONE,House,Challenger,N,Other,jim  kidd,NA,NA,
 H2VA02064,"KIGGANS, JENNIFER",VA,02,REPUBLICAN PARTY,House,Incumbent,C,Republican,jennifer  kiggans,RepJenKiggans,K000399,1112745685810589696
 H2VA02064,"KIGGANS, JENNIFER",VA,02,REPUBLICAN PARTY,House,Incumbent,C,Republican,jennifer  kiggans,JenKiggans,K000399,1112745685810589696
-H2NH01296,"KILBANE, MARK",NH,01,REPUBLICAN PARTY,House,Challenger,N,Republican,mark  kilbane,KilbaneWins,NA,
+H2NH01296,"KILBANE, MARK",NH,01,REPUBLICAN PARTY,House,Challenger,N,Republican,mark  kilbane,NA,NA,
 H2OH13223,"KILBOY, MATTHEW",OH,14,DEMOCRATIC PARTY,House,Challenger,P,Democrat,matthew  kilboy,mattkilboy,NA,
 H2CA10202,"KILBRIDE, EUGENE",CA,10,REPUBLICAN PARTY,House,Challenger,N,Republican,eugene  kilbride,NA,NA,
 H2MI05119,"KILDEE, DANIEL T",MI,08,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,daniel  kildee,RepDanKildee,K000380,1045110018
@@ -2409,8 +2421,10 @@ H2WA06129,"KILMER, DEREK",WA,06,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,dere
 H2WA06129,"KILMER, DEREK",WA,06,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,derek  kilmer,RepDerekKilmer,K000381,120518554
 H2WA06129,"KILMER, DEREK",WA,06,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,derek  kilmer,DerekKilmer,K000381,120518554
 H2GA11214,"KILPATRICK, HEATHER",GA,11,DEMOCRATIC PARTY,House,Challenger,P,Democrat,heather  kilpatrick,NA,NA,
-H8NJ03206,"KIM, ANDY",NJ,03,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,andy  kim,NA,K000394,1078771848882593792
-H8NJ03206,"KIM, ANDY",NJ,03,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,andy  kim,NA,K000394,24215154
+H8NJ03206,"KIM, ANDY",NJ,03,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,andy  kim,RepAndyKimNJ,K000394,1078771848882593792
+H8NJ03206,"KIM, ANDY",NJ,03,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,andy  kim,AndyKimNJ,K000394,1078771848882593792
+H8NJ03206,"KIM, ANDY",NJ,03,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,andy  kim,RepAndyKimNJ,K000394,24215154
+H8NJ03206,"KIM, ANDY",NJ,03,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,andy  kim,AndyKimNJ,K000394,24215154
 H2IN24018,"KIMBAL, EZEKIEL MR",IN,24,INDEPENDENT CONSERVATIVE DEMOCRATIC,House,Challenger,N,Other,ezekiel  kimbal,NA,NA,
 H2CA34079,"KIM, DAVID YUNG HO",CA,34,DEMOCRATIC PARTY,House,Challenger,P,Democrat,david  kim,DavidKimForCA,NA,
 H2NY10183,"KIM, ELIZABETH",NY,10,DEMOCRATIC PARTY,House,Challenger,P,Democrat,elizabeth  kim,NA,NA,
@@ -2422,7 +2436,7 @@ H8CA39240,"KIM, YOUNG",CA,40,REPUBLICAN PARTY,House,Incumbent,C,Republican,young
 H6WI03099,"KIND, RONALD JAMES",WI,03,DEMOCRATIC PARTY,House,Incumbent,P,Democrat,ronald  kind,NA,K000188,112740986
 H0IL17083,"KING, ESTHER JOY",IL,17,REPUBLICAN PARTY,House,Open seat,P,Republican,esther  king,esther4congress,NA,
 H0IL17083,"KING, ESTHER JOY",IL,17,REPUBLICAN PARTY,House,Open seat,P,Republican,esther  king,estherjoyking,NA,
-H2NY05126,"KING, PAUL",NY,05,REPUBLICAN PARTY,House,Challenger,P,Republican,paul  king,NA,NA,
+H2NY05126,"KING, PAUL",NY,05,REPUBLICAN PARTY,House,Challenger,P,Republican,paul  king,Paul4USCongress,NA,
 H2OH13280,"KING, SANTANA FRANCISCO",OH,13,REPUBLICAN PARTY,House,Open seat,N,Republican,santana  king,Santanafking,NA,
 H2KS14015,"KINGSLEY, ETHEL MR",KS,14,INDEPENDENT CONSERVATIVE DEMOCRATIC,House,Challenger,N,Other,ethel  kingsley,NA,NA,
 H2FL10275,"KING, WILLIAM",FL,10,REPUBLICAN PARTY,House,Open seat,N,Republican,william  king,NA,NA,
@@ -2437,8 +2451,8 @@ H0MN02134,"KISTNER, TYLER",MN,02,REPUBLICAN PARTY,House,Challenger,P,Republican,
 H0MN02134,"KISTNER, TYLER",MN,02,REPUBLICAN PARTY,House,Challenger,P,Republican,tyler  kistner,tyler_kistner,NA,
 H2SC07165,"KITE, GEORHE WILLIAM",SC,07,REPUBLICAN PARTY,House,Challenger,N,Republican,georhe  kite,NA,NA,
 H2CO01249,"KITTLESON, JOHN C.",CO,01,LIBERTARIAN PARTY,House,Challenger,N,Other,john  kittleson,NA,NA,
-H2NY24150,"KLEE HOOD, SARAH",NY,22,DEMOCRATIC PARTY,House,Challenger,P,Democrat,sarah  hood,SarahKleeHoodNY,NA,
-H2NY24150,"KLEE HOOD, SARAH",NY,22,DEMOCRATIC PARTY,House,Challenger,P,Democrat,sarah  hood,kleehood,NA,
+H2NY24150,"KLEE HOOD, SARAH",NY,22,DEMOCRATIC PARTY,House,Challenger,N,Democrat,sarah  hood,SarahKleeHoodNY,NA,
+H2NY24150,"KLEE HOOD, SARAH",NY,22,DEMOCRATIC PARTY,House,Challenger,N,Democrat,sarah  hood,kleehood,NA,
 H2MO06251,"KLEINMEYER, BRANDON",MO,06,REPUBLICAN PARTY,House,Challenger,N,Republican,brandon  kleinmeyer,NA,NA,
 H2NJ01153,"KLINE, PATRICIA",NJ,01,INDEPENDENT,House,Challenger,P,Other,patricia  kline,NA,NA,
 H2WA04157,"KLIPPERT, BRADLEY",WA,04,REPUBLICAN PARTY,House,Challenger,P,Republican,bradley  klippert,BradKlippert,NA,
@@ -2512,10 +2526,10 @@ H2CA02142,"LAMALFA, DOUG",CA,01,REPUBLICAN PARTY,House,Incumbent,C,Republican,do
 H8PA18181,"LAMB, CONOR",PA,17,DEMOCRATIC PARTY,House,Incumbent,P,Democrat,conor  lamb,NA,L000588,
 H2FL17098,"LAMBERT, DAN",FL,17,DEMOCRATIC PARTY,House,Challenger,N,Democrat,dan  lambert,NA,NA,
 H2MT01144,"LAMB, JOHN",MT,01,LIBERTARIAN PARTY,House,Open seat,N,Other,john  lamb,NA,NA,
-H6CO05159,"LAMBORN, DOUGLAS",CO,05,REPUBLICAN PARTY,House,Incumbent,N,Republican,douglas  lamborn,RepDLamborn,L000564,584012853
-H6CO05159,"LAMBORN, DOUGLAS",CO,05,REPUBLICAN PARTY,House,Incumbent,N,Republican,douglas  lamborn,DougLambornCD5,L000564,584012853
-H6CO05159,"LAMBORN, DOUGLAS",CO,05,REPUBLICAN PARTY,House,Incumbent,N,Republican,douglas  lamborn,RepDLamborn,L000564,583881540
-H6CO05159,"LAMBORN, DOUGLAS",CO,05,REPUBLICAN PARTY,House,Incumbent,N,Republican,douglas  lamborn,DougLambornCD5,L000564,583881540
+H6CO05159,"LAMBORN, DOUGLAS",CO,05,REPUBLICAN PARTY,House,Incumbent,C,Republican,douglas  lamborn,RepDLamborn,L000564,584012853
+H6CO05159,"LAMBORN, DOUGLAS",CO,05,REPUBLICAN PARTY,House,Incumbent,C,Republican,douglas  lamborn,DougLambornCD5,L000564,584012853
+H6CO05159,"LAMBORN, DOUGLAS",CO,05,REPUBLICAN PARTY,House,Incumbent,C,Republican,douglas  lamborn,RepDLamborn,L000564,583881540
+H6CO05159,"LAMBORN, DOUGLAS",CO,05,REPUBLICAN PARTY,House,Incumbent,C,Republican,douglas  lamborn,DougLambornCD5,L000564,583881540
 H2MA28015,"LANCASTER, BRIAN EDWARD MR",MA,28,INDEPENDENT CONSERVATIVE DEMOCRATIC,House,Challenger,N,Other,brian  lancaster,NA,NA,
 H2MD19016,"LANCASTER, JASON MR",MD,19,INDEPENDENT CONSERVATIVE DEMOCRATIC,House,Challenger,N,Other,jason  lancaster,NA,NA,
 H0RI02287,"LANCIA, BOB",RI,02,REPUBLICAN PARTY,House,Open seat,C,Republican,bob  lancia,NA,NA,
@@ -2561,15 +2575,15 @@ H8OH05036,"LATTA, ROBERT EDWARD",OH,05,REPUBLICAN PARTY,House,Incumbent,N,Republ
 H8OH05036,"LATTA, ROBERT EDWARD",OH,05,REPUBLICAN PARTY,House,Incumbent,N,Republican,robert  latta,latta4congress,L000566,15394954
 H8OH05036,"LATTA, ROBERT EDWARD",OH,05,REPUBLICAN PARTY,House,Incumbent,N,Republican,robert  latta,boblatta,L000566,93575832
 H8OH05036,"LATTA, ROBERT EDWARD",OH,05,REPUBLICAN PARTY,House,Incumbent,N,Republican,robert  latta,latta4congress,L000566,93575832
-H0KS02188,"LATURNER, JAKE",KS,02,REPUBLICAN PARTY,House,Incumbent,N,Republican,jake  laturner,RepLaTurner,L000266,1345850704800468992
-H0KS02188,"LATURNER, JAKE",KS,02,REPUBLICAN PARTY,House,Incumbent,N,Republican,jake  laturner,JakeLaTurner,L000266,1345850704800468992
-H0KS02188,"LATURNER, JAKE",KS,02,REPUBLICAN PARTY,House,Incumbent,N,Republican,jake  laturner,RepLaTurner,L000266,1082329240681492480
-H0KS02188,"LATURNER, JAKE",KS,02,REPUBLICAN PARTY,House,Incumbent,N,Republican,jake  laturner,JakeLaTurner,L000266,1082329240681492480
+H0KS02188,"LATURNER, JAKE",KS,02,REPUBLICAN PARTY,House,Incumbent,C,Republican,jake  laturner,RepLaTurner,L000266,1345850704800468992
+H0KS02188,"LATURNER, JAKE",KS,02,REPUBLICAN PARTY,House,Incumbent,C,Republican,jake  laturner,JakeLaTurner,L000266,1345850704800468992
+H0KS02188,"LATURNER, JAKE",KS,02,REPUBLICAN PARTY,House,Incumbent,C,Republican,jake  laturner,RepLaTurner,L000266,1082329240681492480
+H0KS02188,"LATURNER, JAKE",KS,02,REPUBLICAN PARTY,House,Incumbent,C,Republican,jake  laturner,JakeLaTurner,L000266,1082329240681492480
 H2IL16107,"LAUF, CATALINA",IL,11,REPUBLICAN PARTY,House,Open seat,P,Republican,catalina  lauf,CatalinaLauf,NA,
 H2WA03142,"LAUSER, LUCY ESTHER JOAN",WA,03,DEMOCRATIC PARTY,House,Challenger,N,Democrat,lucy  lauser,NA,NA,
 H6WV03117,"LAWHORN, ZANE RENE",WV,01,REPUBLICAN PARTY,House,Challenger,C,Republican,zane  lawhorn,NA,NA,
-H2NY17162,"LAWLER, MICHAEL VINCENT",NY,17,REPUBLICAN PARTY,House,Incumbent,C,Republican,michael  lawler,NA,L000599,1590372047015886848
-H2NY17162,"LAWLER, MICHAEL VINCENT",NY,17,REPUBLICAN PARTY,House,Incumbent,C,Republican,michael  lawler,NA,L000599,260026173
+H2NY17162,"LAWLER, MICHAEL VINCENT",NY,17,REPUBLICAN PARTY,House,Incumbent,C,Republican,michael  lawler,lawler4ny,L000599,1590372047015886848
+H2NY17162,"LAWLER, MICHAEL VINCENT",NY,17,REPUBLICAN PARTY,House,Incumbent,C,Republican,michael  lawler,lawler4ny,L000599,260026173
 H2FL21181,"LAWLOR, CARRIE",FL,22,REPUBLICAN PARTY,House,Challenger,C,Republican,carrie  lawlor,NA,NA,
 H2MI14111,"LAWRENCE, BRENDA LULENAR",MI,14,DEMOCRATIC PARTY,House,Incumbent,P,Democrat,brenda  lawrence,NA,L000581,2147483647
 H2NC12203,"LAWSIN, ROGELIO L",NC,12,REPUBLICAN PARTY,House,Challenger,C,Republican,rogelio  lawsin,NA,NA,
@@ -2657,7 +2671,7 @@ H4CA33119,"LIEU, TED",CA,36,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,ted  lie
 H4CA33119,"LIEU, TED",CA,36,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,ted  lieu,tedlieu,L000582,2147483647
 H4CA33119,"LIEU, TED",CA,36,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,ted  lieu,RepTedLieu,L000582,21059255
 H4CA33119,"LIEU, TED",CA,36,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,ted  lieu,tedlieu,L000582,21059255
-H0CA33216,"LIEW, SARAH SUN DR.",CA,33,REPUBLICAN PARTY,House,Challenger,N,Republican,sarah  liew,NA,NA,
+H0CA33216,"LIEW, SARAH SUN DR.",CA,33,REPUBLICAN PARTY,House,Challenger,C,Republican,sarah  liew,NA,NA,
 H2FL07149,"LIGGETT, JEREMY",FL,07,REPUBLICAN PARTY,House,Open seat,C,Republican,jeremy  liggett,NA,NA,
 H2NY10274,"LI, JIMMY JIANG",NY,10,DEMOCRATIC PARTY,House,Challenger,C,Democrat,jimmy  li,NA,NA,
 H2AZ05165,"LINDBERG, TRAVIS J",AZ,05,INDEPENDENT,House,Challenger,N,Other,travis  lindberg,NA,NA,
@@ -2677,7 +2691,6 @@ H4CA16049,"LOFGREN, ZOE",CA,18,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,zoe  
 H4CA16049,"LOFGREN, ZOE",CA,18,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,zoe  lofgren,ZoeLofgren,L000397,267938462
 H4CA16049,"LOFGREN, ZOE",CA,18,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,zoe  lofgren,RepZoeLofgren,L000397,988858472132415488
 H4CA16049,"LOFGREN, ZOE",CA,18,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,zoe  lofgren,ZoeLofgren,L000397,988858472132415488
-H2CT05222,"LOGAN, GEORGE S",CT,05,REPUBLICAN PARTY,House,Challenger,P,Republican,george  logan,SenGeorgeLogan,NA,
 H2CT05222,"LOGAN, GEORGE S",CT,05,REPUBLICAN PARTY,House,Challenger,P,Republican,george  logan,GSLoganCT,NA,
 H2IL17121,"LOGEMANN, JONATHAN",IL,17,DEMOCRATIC PARTY,House,Open seat,C,Democrat,jonathan  logemann,MrLogemann,NA,
 H2AZ03160,"LOGSDON, JOSHUA",AZ,03,REPUBLICAN PARTY,House,Challenger,N,Republican,joshua  logsdon,NA,NA,
@@ -2718,8 +2731,8 @@ H4OK06056,"LUCAS, FRANK D.",OK,03,REPUBLICAN PARTY,House,Incumbent,C,Republican,
 H2IN01206,"LUCAS, MARTIN",IN,01,REPUBLICAN PARTY,House,Challenger,N,Republican,martin  lucas,votelucas2022,NA,
 H2AZ09241,"LUCIER, DAVID",AZ,09,WRITE-IN,House,Challenger,N,Other,david  lucier,NA,NA,
 H2CA41157,"LUCIO, JOHN MICHAEL",CA,41,REPUBLICAN PARTY,House,Challenger,N,Republican,john  lucio,NA,NA,
-H2NJ10246,"LUDDEN, KENDAL",NJ,10,LIBERAL PARTY,House,Challenger,N,Other,kendal  ludden,NA,NA,
 H2NJ10253,"LUDDEN, KENDAL",NJ,10,LIBERAL PARTY,House,Challenger,N,Other,kendal  ludden,NA,NA,
+H2NJ10246,"LUDDEN, KENDAL",NJ,10,LIBERAL PARTY,House,Challenger,N,Other,kendal  ludden,NA,NA,
 H8MO09153,"LUETKEMEYER, W BLAINE",MO,03,REPUBLICAN PARTY,House,Incumbent,C,Republican,blaine  luetkemeyer,RepBlaine,L000569,1849261916
 H8MO09153,"LUETKEMEYER, W BLAINE",MO,03,REPUBLICAN PARTY,House,Incumbent,C,Republican,blaine  luetkemeyer,LuetkemeyerB,L000569,1849261916
 H2CA25200,"LUEVANOS, RUTH",CA,25,DEMOCRATIC PARTY,House,Challenger,P,Democrat,ruth  luevanos,NA,NA,
@@ -2806,8 +2819,8 @@ H8TX27080,"MAPP, CHRIS",TX,27,REPUBLICAN PARTY,House,Challenger,P,Republican,chr
 H2MI10135,"MARCINKEWCIZ, TONY I",MI,10,REPUBLICAN PARTY,House,Challenger,P,Republican,tony  marcinkewciz,TMarcinkewciz,NA,
 H2FL05218,"MARC, JONATHAN",FL,05,DEMOCRATIC PARTY,House,Challenger,N,Democrat,jonathan  marc,NA,NA,
 H6NJ04174,"MARCUS, JEREMY",NJ,05,LIBERTARIAN PARTY,House,Challenger,N,Other,jeremy  marcus,NA,NA,
-H2PA05082,"MARGUS, ROBERT",PA,05,LIBERTARIAN PARTY,House,Challenger,N,Other,robert  margus,Mxbrvrgvs,NA,
 H2PA05066,"MARGUS, ROBERT",PA,05,DEMOCRATIC PARTY,House,Challenger,N,Democrat,robert  margus,Mxbrvrgvs,NA,
+H2PA05082,"MARGUS, ROBERT",PA,05,LIBERTARIAN PARTY,House,Challenger,N,Other,robert  margus,Mxbrvrgvs,NA,
 H2FL20290,"MARINER, JASON",FL,20,REPUBLICAN PARTY,House,Challenger,P,Republican,jason  mariner,votemariner,NA,
 H2MA02077,"MARINO, LOUIS G",MA,02,REPUBLICAN PARTY,House,Challenger,N,Republican,louis  marino,NA,NA,
 H2MA01210,"MARINO, LOUIS GREGORY",MA,01,REPUBLICAN PARTY,House,Challenger,N,Republican,louis  marino,NA,NA,
@@ -2819,7 +2832,7 @@ H2MI10176,"MARLINGA, CARL",MI,10,DEMOCRATIC PARTY,House,Challenger,P,Democrat,ca
 H2NY10159,"MARON, MAUD",NY,10,DEMOCRATIC PARTY,House,Challenger,P,Democrat,maud  maron,MaudMaron4NYC,NA,
 H2NY10159,"MARON, MAUD",NY,10,DEMOCRATIC PARTY,House,Challenger,P,Democrat,maud  maron,MaudMaron,NA,
 H2NY14136,"MARRERO, EDGARDO R MR.",NY,14,DEMOCRATIC PARTY,House,Challenger,N,Democrat,edgardo  marrero,NA,NA,
-H2CA08214,"MARSHALL, DEREK",CA,23,DEMOCRATIC PARTY,House,,N,Democrat,derek  marshall,DerekMarshallCA,NA,
+H2CA08214,"MARSHALL, DEREK",CA,23,DEMOCRATIC PARTY,House,Challenger,N,Democrat,derek  marshall,DerekMarshallCA,NA,
 H6PA11073,"MARSICANO, MICHAEL",PA,08,REPUBLICAN PARTY,House,Challenger,P,Republican,michael  marsicano,NA,NA,
 H8IL16153,"MARTER, JAMES THOMAS",IL,14,REPUBLICAN PARTY,House,Challenger,P,Republican,james  marter,marter4congress,NA,
 H2MA01228,"MARTILLI, DEAN",MA,01,REPUBLICAN PARTY,House,Challenger,P,Republican,dean  martilli,MartilliforRep,NA,
@@ -2869,7 +2882,7 @@ H2NY20109,"MATTHEWS, COLE FRANCIS MR.",NY,20,DEMOCRATIC PARTY,House,Challenger,N
 H2WA02177,"MATTHEWS, DAN",WA,02,REPUBLICAN PARTY,House,Challenger,P,Republican,dan  matthews,dan2congress,NA,
 H2OR04194,"MATTHEWS, JAKE",OR,04,DEMOCRATIC PARTY,House,Open seat,N,Democrat,jake  matthews,NA,NA,
 H2PA06189,"MAURO, REGINA",PA,06,REPUBLICAN PARTY,House,Challenger,C,Republican,regina  mauro,ReginaMMauro,NA,
-H2VA10224,"MAX, CALEB J MR",VA,10,REPUBLICAN PARTY,House,Challenger,P,Republican,caleb  max,calebmaxva10,NA,
+H2VA10224,"MAX, CALEB J MR",VA,10,REPUBLICAN PARTY,House,Challenger,P,Republican,caleb  max,NA,NA,
 H2AR04166,"MAXWELL, GREGORY",AR,04,LIBERTARIAN PARTY,House,Challenger,N,Other,gregory  maxwell,GregoryMaxwell,NA,
 H2NC12237,"MAXWELL, JOEL",NC,12,REPUBLICAN PARTY,House,Challenger,N,Republican,joel  maxwell,NA,NA,
 H6NH02154,"MAXWELL, MARY",NH,01,REPUBLICAN PARTY,House,Challenger,N,Republican,mary  maxwell,NA,NA,
@@ -2883,7 +2896,7 @@ H2MA06086,"MAY, ROBERT",MA,06,REPUBLICAN PARTY,House,Challenger,P,Republican,rob
 H2NJ11251,"MCANDREW, RUTH",NJ,11,REPUBLICAN PARTY,House,Challenger,N,Republican,ruth  mcandrew,NA,NA,
 H8GA06393,"MCBATH, LUCIA KAY MS.",GA,07,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,lucia  mcbath,RepLucyMcBath,M001208,1082380458976051200
 H8GA06393,"MCBATH, LUCIA KAY MS.",GA,07,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,lucia  mcbath,lucymcbath,M001208,1082380458976051200
-H2SC07272,"MCBRIDE, MARK STRUTHERS",SC,07,REPUBLICAN PARTY,House,Challenger,C,Republican,mark  mcbride,NA,NA,
+H2SC07272,"MCBRIDE, MARK STRUTHERS",SC,07,REPUBLICAN PARTY,House,Challenger,C,Republican,mark  mcbride,MarkMcBrideUS,NA,
 H2AK00432,"MCCABE, ANNE M",AK,00,NONPARTISAN,House,Open seat,N,Other,anne  mccabe,NA,NA,
 H2TX15112,"MCCAFFREY, FRANCIS TIMOTHY MR.",TX,34,REPUBLICAN PARTY,House,Challenger,C,Republican,francis  mccaffrey,FrankCongress,NA,
 H2MO08091,"MCCALLIAN, RANDI MCCALLIAN",MO,08,DEMOCRATIC PARTY,House,Challenger,N,Democrat,randi  mccallian,RandiMcCallian,NA,
@@ -2898,8 +2911,8 @@ H4TX10093,"MCCAUL, MICHAEL",TX,10,REPUBLICAN PARTY,House,Incumbent,C,Republican,
 H4TX10093,"MCCAUL, MICHAEL",TX,10,REPUBLICAN PARTY,House,Incumbent,C,Republican,michael  mccaul,RepMcCaul,M001157,743601590
 H4TX10093,"MCCAUL, MICHAEL",TX,10,REPUBLICAN PARTY,House,Incumbent,C,Republican,michael  mccaul,McCaulforTexas,M001157,743601590
 H2MS01122,"MCCAY, JAMES MARION MR. JR.",MS,01,OTHER,House,Challenger,N,Other,james  mccay,NA,NA,
-H0MI10287,"MCCLAIN, LISA",MI,10,REPUBLICAN PARTY,House,Incumbent,N,Republican,lisa  mcclain,NA,M001136,1344032292432437248
-H0MI10287,"MCCLAIN, LISA",MI,10,REPUBLICAN PARTY,House,Incumbent,N,Republican,lisa  mcclain,NA,M001136,1187551973173796864
+H0MI10287,"MCCLAIN, LISA",MI,10,REPUBLICAN PARTY,House,Incumbent,C,Republican,lisa  mcclain,NA,M001136,1344032292432437248
+H0MI10287,"MCCLAIN, LISA",MI,10,REPUBLICAN PARTY,House,Incumbent,C,Republican,lisa  mcclain,NA,M001136,1187551973173796864
 H2MN01363,"MCCLELLAN, HAROUN",MN,01,OTHER,House,Open seat,N,Other,haroun  mcclellan,HarounMcclellan,NA,
 H8CA04152,"MCCLINTOCK, THOMAS",CA,05,REPUBLICAN PARTY,House,Incumbent,C,Republican,thomas  mcclintock,RepMcClintock,NA,15773898
 H8CA04152,"MCCLINTOCK, THOMAS",CA,05,REPUBLICAN PARTY,House,Incumbent,C,Republican,thomas  mcclintock,tommcclintock,NA,15773898
@@ -2928,9 +2941,7 @@ H2TX08315,"MCDONALD, REECE MASTER",TX,08,WRITE-IN,House,Open seat,N,Other,reece 
 H2TN08176,"MCDONALD, TIMOTHY BERNARD MR",TN,08,DEMOCRATIC PARTY,House,Challenger,N,Democrat,timothy  mcdonald,NA,NA,
 H2KY04238,"MCDOWELL, ALYSSA DARA",KY,04,REPUBLICAN PARTY,House,Challenger,N,Republican,alyssa  mcdowell,NA,NA,
 H6TX24149,"MCDOWELL, JAN",TX,24,DEMOCRATIC PARTY,House,Challenger,P,Democrat,jan  mcdowell,JanForCongress,NA,
-H6VA04061,"MCEACHIN, ASTON DONALD",VA,04,DEMOCRATIC PARTY,House,Incumbent,P,Democrat,aston  mceachin,RepMcEachin,M001200,816181091673448448
 H6VA04061,"MCEACHIN, ASTON DONALD",VA,04,DEMOCRATIC PARTY,House,Incumbent,P,Democrat,aston  mceachin,Donald_McEachin,M001200,816181091673448448
-H6VA04061,"MCEACHIN, ASTON DONALD",VA,04,DEMOCRATIC PARTY,House,Incumbent,P,Democrat,aston  mceachin,RepMcEachin,M001200,459051498
 H6VA04061,"MCEACHIN, ASTON DONALD",VA,04,DEMOCRATIC PARTY,House,Incumbent,P,Democrat,aston  mceachin,Donald_McEachin,M001200,459051498
 H2UT02472,"MCFARLAND, JAY JAYMAC",UT,02,OTHER,House,Challenger,P,Other,jay  mcfarland,JayMcfarland,NA,
 H2OR06140,"MCFARLAND, LARRY D.",OR,06,CONSTITUTION PARTY,House,Challenger,N,Other,larry  mcfarland,NA,NA,
@@ -2966,7 +2977,7 @@ H2FL21173,"MCLAUGHLIN, CHRISTY",FL,23,REPUBLICAN PARTY,House,Challenger,P,Republ
 H2VA05109,"MCLELLAN, THOMAS WARREN",VA,05,DEMOCRATIC PARTY,House,Challenger,C,Democrat,thomas  mclellan,NA,NA,
 H6LA03189,"MCLENDON, GUY",LA,03,LIBERTARIAN PARTY,House,Challenger,N,Other,guy  mclendon,NA,NA,
 H2GA07147,"MCLEOD, DONNA THERESA MS.",GA,07,DEMOCRATIC PARTY,House,Challenger,C,Democrat,donna  mcleod,NA,NA,
-H8OR02161,"MCLEOD-SKINNER, JAMIE",OR,05,DEMOCRATIC PARTY,House,Challenger,P,Democrat,jamie  mcleodskinner,NA,NA,
+H8OR02161,"MCLEOD-SKINNER, JAMIE",OR,05,DEMOCRATIC PARTY,House,Challenger,P,Democrat,jamie  mcleodskinner,jamiefororegon,NA,
 H2GA10158,"MCMAIN, MARC",GA,10,REPUBLICAN PARTY,House,Open seat,C,Republican,marc  mcmain,NA,NA,
 H4WA05077,"MCMORRIS RODGERS, CATHY",WA,05,REPUBLICAN PARTY,House,Incumbent,C,Republican,cathy  rodgers,cathymcmorris,M001159,17976923
 H4WA05077,"MCMORRIS RODGERS, CATHY",WA,05,REPUBLICAN PARTY,House,Incumbent,C,Republican,cathy  rodgers,teamcmr,M001159,17976923
@@ -2983,10 +2994,10 @@ H0TX20124,"MCQUEEN, ELDON DAN",TX,35,REPUBLICAN PARTY,House,Challenger,N,Republi
 H2OH03174,"MEADE, MATTHEW ALLEN",OH,03,DEMOCRATIC PARTY,House,Challenger,P,Democrat,matthew  meade,NA,NA,
 H2OH02127,"MEADOWS, SAMANTHA",OH,02,DEMOCRATIC PARTY,House,Challenger,P,Democrat,samantha  meadows,SMeadows4OH2,NA,
 H2CA21225,"MEDEIROS, ADAM THOMAS MR",CA,21,REPUBLICAN PARTY,House,Challenger,P,Republican,adam  medeiros,NA,NA,
-H2GA05158,"MEDINA, IAN ANTHONY",GA,05,DEMOCRATIC PARTY,House,Challenger,N,Democrat,ian  medina,NA,NA,
-H2NY10118,"MEDINA, IAN ANTHONY",NY,10,DEMOCRATIC PARTY,House,Challenger,N,Democrat,ian  medina,NA,NA,
 H2FL27048,"MEDINA, IAN ANTHONY",FL,27,NO PARTY AFFILIATION,House,Challenger,N,Other,ian  medina,NA,NA,
+H2GA05158,"MEDINA, IAN ANTHONY",GA,05,DEMOCRATIC PARTY,House,Challenger,N,Democrat,ian  medina,NA,NA,
 H2FL25075,"MEDINA, IAN ANTHONY",FL,25,DEMOCRATIC PARTY,House,Challenger,N,Democrat,ian  medina,NA,NA,
+H2NY10118,"MEDINA, IAN ANTHONY",NY,10,DEMOCRATIC PARTY,House,Challenger,N,Democrat,ian  medina,NA,NA,
 H8NY06048,"MEEKS, GREGORY W.",NY,05,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,gregory  meeks,repgregorymeeks,M001137,22812754
 H8NY06048,"MEEKS, GREGORY W.",NY,05,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,gregory  meeks,GregMeeksNYC,M001137,22812754
 H8NY06048,"MEEKS, GREGORY W.",NY,05,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,gregory  meeks,repgregorymeeks,M001137,1092782048157331456
@@ -3005,8 +3016,8 @@ H2PA17137,"MELOY, SEAN",PA,17,DEMOCRATIC PARTY,House,Open seat,C,Democrat,sean  
 H2IA04141,"MELTON, RYAN MICHAEL APPLETON",IA,04,DEMOCRATIC PARTY,House,Challenger,P,Democrat,ryan  melton,melton4iowa,NA,
 H2IL07130,"MENDENHALL, DENARVIS C",IL,07,DEMOCRATIC PARTY,House,Challenger,N,Democrat,denarvis  mendenhall,NA,NA,
 H2CA37338,"MENDOZA, SANDRA",CA,37,DEMOCRATIC PARTY,House,Open seat,P,Democrat,sandra  mendoza,NA,NA,
-H2NJ08232,"MENENDEZ, ROBERT J.",NJ,08,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,robert  menendez,NA,M001226,1603468242852397056
-H2NJ08232,"MENENDEZ, ROBERT J.",NJ,08,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,robert  menendez,NA,M001226,1491892268466413568
+H2NJ08232,"MENENDEZ, ROBERT J.",NJ,08,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,robert  menendez,robmenendez4nj,M001226,1603468242852397056
+H2NJ08232,"MENENDEZ, ROBERT J.",NJ,08,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,robert  menendez,robmenendez4nj,M001226,1491892268466413568
 H2NY06116,"MENG, GRACE",NY,06,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,grace  meng,RepGraceMeng,M001188,1051127714
 H2NY06116,"MENG, GRACE",NY,06,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,grace  meng,Grace4NY,M001188,1051127714
 H2NY06116,"MENG, GRACE",NY,06,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,grace  meng,RepGraceMeng,M001188,571214272
@@ -3035,8 +3046,10 @@ H2CA26166,"MIKHAIL, FADDE",CA,26,REPUBLICAN PARTY,House,Challenger,P,Republican,
 H2WI07081,"MIKKELSON, AUDUN",WI,07,REPUBLICAN PARTY,House,Challenger,N,Republican,audun  mikkelson,NA,NA,
 H8MD06143,"MILLER, ARUNA",MD,06,DEMOCRATIC PARTY,House,Challenger,P,Democrat,aruna  miller,NA,NA,
 H2MI08204,"MILLER, CANDICE MS.",MI,08,REPUBLICAN PARTY,House,Challenger,N,Republican,candice  miller,NA,NA,
-H8WV03097,"MILLER, CAROL DEVINE",WV,01,REPUBLICAN PARTY,House,Incumbent,C,Republican,carol  miller,NA,M001205,1081318716573470720
-H8WV03097,"MILLER, CAROL DEVINE",WV,01,REPUBLICAN PARTY,House,Incumbent,C,Republican,carol  miller,NA,M001205,841994444
+H8WV03097,"MILLER, CAROL DEVINE",WV,01,REPUBLICAN PARTY,House,Incumbent,C,Republican,carol  miller,RepCarolMiller,M001205,1081318716573470720
+H8WV03097,"MILLER, CAROL DEVINE",WV,01,REPUBLICAN PARTY,House,Incumbent,C,Republican,carol  miller,CarolMillerWV,M001205,1081318716573470720
+H8WV03097,"MILLER, CAROL DEVINE",WV,01,REPUBLICAN PARTY,House,Incumbent,C,Republican,carol  miller,RepCarolMiller,M001205,841994444
+H8WV03097,"MILLER, CAROL DEVINE",WV,01,REPUBLICAN PARTY,House,Incumbent,C,Republican,carol  miller,CarolMillerWV,M001205,841994444
 H2IL11157,"MILLER, CASSANDRA TANNER",IL,11,REPUBLICAN PARTY,House,Challenger,P,Republican,cassandra  miller,Cassandra_IL11,NA,
 H0FL20146,"MILLER, ERVAN KATARI",FL,20,REPUBLICAN PARTY,House,Open seat,N,Republican,ervan  miller,NA,NA,
 H2FL26099,"MILLER, KARL KW MR.",FL,28,REPUBLICAN PARTY,House,Challenger,N,Republican,karl  miller,NA,NA,
@@ -3045,10 +3058,12 @@ H0IL15129,"MILLER, MARY",IL,15,REPUBLICAN PARTY,House,Incumbent,C,Republican,mar
 H0IL15129,"MILLER, MARY",IL,15,REPUBLICAN PARTY,House,Incumbent,C,Republican,mary  miller,Miller_Congress,M001211,1343656635907125248
 H2OH16051,"MILLER, MAX",OH,07,REPUBLICAN PARTY,House,Incumbent,N,Republican,max  miller,RepMaxMiller,M001222,1148299267481563136
 H2OH16051,"MILLER, MAX",OH,07,REPUBLICAN PARTY,House,Incumbent,N,Republican,max  miller,MaxMillerOH,M001222,1148299267481563136
-H8IA02043,"MILLER-MEEKS, MARIANNETTE JANE",IA,01,REPUBLICAN PARTY,House,Incumbent,C,Republican,mariannette  millermeeks,NA,M001215,1345807954604412928
-H8IA02043,"MILLER-MEEKS, MARIANNETTE JANE",IA,01,REPUBLICAN PARTY,House,Incumbent,C,Republican,mariannette  millermeeks,NA,M001215,18131106
+H8IA02043,"MILLER-MEEKS, MARIANNETTE JANE",IA,01,REPUBLICAN PARTY,House,Incumbent,C,Republican,mariannette  millermeeks,RepMMM,M001215,1345807954604412928
+H8IA02043,"MILLER-MEEKS, MARIANNETTE JANE",IA,01,REPUBLICAN PARTY,House,Incumbent,C,Republican,mariannette  millermeeks,millermeeks,M001215,1345807954604412928
+H8IA02043,"MILLER-MEEKS, MARIANNETTE JANE",IA,01,REPUBLICAN PARTY,House,Incumbent,C,Republican,mariannette  millermeeks,RepMMM,M001215,18131106
+H8IA02043,"MILLER-MEEKS, MARIANNETTE JANE",IA,01,REPUBLICAN PARTY,House,Incumbent,C,Republican,mariannette  millermeeks,millermeeks,M001215,18131106
 H2TX37033,"MILLER, SARAH",TX,29,REPUBLICAN PARTY,House,Challenger,N,Republican,sarah  miller,NA,NA,
-H2NC07104,"MILLER, STEPHEN",NC,07,DEMOCRATIC PARTY,House,Challenger,C,Democrat,stephen  miller,NA,NA,
+H2NC07104,"MILLER, STEPHEN",NC,07,DEMOCRATIC PARTY,House,Challenger,C,Democrat,stephen  miller,stevemillernc,NA,
 H2TX25327,"MILLER, TRISTAN MILLER MR.",TX,25,UNAFFILIATED,House,Challenger,N,Other,tristan  miller,NA,NA,
 H2AK01034,"MILLIGAN, MIKE",AK,00,DEMOCRATIC PARTY,House,Open seat,N,Democrat,mike  milligan,NA,NA,
 H2IN09225,"MILLIS, TONYA LYNN",IN,09,LIBERTARIAN PARTY,House,Open seat,C,Other,tonya  millis,NA,NA,
@@ -3159,7 +3174,9 @@ H4MA06090,"MOULTON, SETH",MA,06,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,seth
 H0NH01282,"MOWERS, MATT",NH,01,REPUBLICAN PARTY,House,Challenger,P,Republican,matt  mowers,mowers,NA,
 H2VA05125,"MOY, DANIEL ROBERT MR.",VA,05,REPUBLICAN PARTY,House,Challenger,C,Republican,daniel  moy,votedanmoy,NA,
 H2GU01031,"MOYLAN, JAMES C.",GU,00,REPUBLICAN PARTY,House,Incumbent,N,Republican,james  moylan,NA,M001219,
-H0IN01150,"MRVAN, FRANK J.",IN,01,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,frank  mrvan,NA,M001214,1346205046036377600
+H0IN01150,"MRVAN, FRANK J.",IN,01,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,frank  mrvan,RepMrvan,M001214,1346205046036377600
+H0IN01150,"MRVAN, FRANK J.",IN,01,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,frank  mrvan,mrvan4congress,M001214,1346205046036377600
+H0IN01150,"MRVAN, FRANK J.",IN,01,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,frank  mrvan,Fjmrvan,M001214,1346205046036377600
 H2MI13287,"MUA, TONI",MI,13,DEMOCRATIC PARTY,House,Challenger,N,Democrat,toni  mua,NA,NA,
 H2WI03171,"MUELLER, DUSTIN",WI,03,REPUBLICAN PARTY,House,Open seat,N,Republican,dustin  mueller,NA,NA,
 H2NY18129,"MUGULUSI, MOSES R.",NY,18,DEMOCRATIC PARTY,House,Challenger,N,Democrat,moses  mugulusi,Mugulusi4Senate,NA,
@@ -3242,7 +3259,7 @@ H2TX17092,"NELSON, JASON JEREMY 8054031133",TX,17,REPUBLICAN PARTY,House,Challen
 H2GU01049,"NELSON, TELENA C.",GU,00,DEMOCRATIC PARTY,House,Challenger,P,Democrat,telena  nelson,NA,NA,
 H2LA43010,"NESTLEY, BARTHOLOMEW MR",LA,43,INDEPENDENT CONSERVATIVE DEMOCRATIC,House,Challenger,N,Other,bartholomew  nestley,NA,NA,
 H2MT02100,"NEUMANN, CORA",MT,01,DEMOCRATIC PARTY,House,Challenger,P,Democrat,cora  neumann,CoraforMT,NA,
-H0WI03118,"NEUMANN, MARK ALLEN",WI,03,DEMOCRATIC PARTY,House,Open seat,C,Democrat,mark  neumann,NA,NA,
+H0WI03118,"NEUMANN, MARK ALLEN",WI,03,DEMOCRATIC PARTY,House,Open seat,C,Democrat,mark  neumann,DrMark_3rdCD_WI,NA,
 H2NC11163,"NEVAREZ, WENDY MARIE-LIMBAUGH",NC,11,REPUBLICAN PARTY,House,Challenger,C,Republican,wendy  nevarez,WendyforWNC,NA,
 H2CA06184,"NEVENIC, ANNA",CA,41,NONE,House,Challenger,N,Other,anna  nevenic,annactnow,NA,
 H0PA18089,"NEVILLS, DONALD RAYMOND",PA,18,REPUBLICAN PARTY,House,Open seat,N,Republican,donald  nevills,NA,NA,
@@ -3265,7 +3282,7 @@ H2NC14019,"NICKEL, WILEY",NC,13,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,wile
 H2NY01190,"NICK, LALOTA",NY,01,REPUBLICAN PARTY,House,Incumbent,C,Republican,lalota  nick,NA,L000598,1588581125177442304
 H2NY01190,"NICK, LALOTA",NY,01,REPUBLICAN PARTY,House,Incumbent,C,Republican,lalota  nick,NA,L000598,275989559
 H2MO03142,"NICOLOFF, JOSH",MO,03,DEMOCRATIC PARTY,House,Challenger,P,Democrat,josh  nicoloff,NA,NA,
-H2NY10241,"NIOU, YUH-LINE",NY,10,DEMOCRATIC PARTY,House,Challenger,C,Democrat,yuhline  niou,NA,NA,
+H2NY10241,"NIOU, YUH-LINE",NY,10,DEMOCRATIC PARTY,House,Challenger,C,Democrat,yuhline  niou,yuhline,NA,
 H2IN02287,"NISLY, CURT",IN,02,REPUBLICAN PARTY,House,Challenger,C,Republican,curt  nisly,NA,NA,
 H2IL01240,"NIX, DARIUS YOREL DEE",IL,01,DEMOCRATIC PARTY,House,Open seat,N,Democrat,darius  nix,NA,NA,
 H2OR06058,"NOBLE, RON",OR,06,REPUBLICAN PARTY,House,Open seat,P,Republican,ron  noble,NobleForOregon,NA,
@@ -3277,7 +3294,7 @@ H4NJ01084,"NORCROSS, DONALD W",NJ,01,DEMOCRATIC PARTY,House,Incumbent,C,Democrat
 H4NJ01084,"NORCROSS, DONALD W",NJ,01,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,donald  norcross,DonNorcross4NJ,N000188,3122099613
 H4NJ01084,"NORCROSS, DONALD W",NJ,01,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,donald  norcross,DonaldNorcross,N000188,2147483647
 H4NJ01084,"NORCROSS, DONALD W",NJ,01,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,donald  norcross,DonNorcross4NJ,N000188,2147483647
-H2IL01364,"NORINGTON-REAVES, KARIN M",IL,01,DEMOCRATIC PARTY,House,Open seat,C,Democrat,karin  noringtonreaves,NA,NA,
+H2IL01364,"NORINGTON-REAVES, KARIN M",IL,01,DEMOCRATIC PARTY,House,Open seat,C,Democrat,karin  noringtonreaves,votekarin,NA,
 H8SC05158,"NORMAN, RALPH W. JR.",SC,05,REPUBLICAN PARTY,House,Incumbent,N,Republican,ralph  norman,RepRalphNorman,N000190,880480631108644864
 H8SC05158,"NORMAN, RALPH W. JR.",SC,05,REPUBLICAN PARTY,House,Incumbent,N,Republican,ralph  norman,RalphNorman,N000190,880480631108644864
 H8SC05158,"NORMAN, RALPH W. JR.",SC,05,REPUBLICAN PARTY,House,Incumbent,N,Republican,ralph  norman,RepRalphNorman,N000190,61886317
@@ -3310,8 +3327,10 @@ H2CA05129,"OBERT, KELSTEN C",CA,05,REPUBLICAN PARTY,House,Challenger,N,Republica
 H2NY12247,"OBLER, GIL MR.",NY,12,GREEN PARTY,House,Challenger,N,Other,gil  obler,NA,NA,
 H8CA31122,"OBRIEN, COLIN KILPATRICK",CA,36,DEMOCRATIC PARTY,House,Challenger,N,Democrat,colin  obrien,NA,NA,
 H2NJ08240,"OCAMPO GRAJALES, DAVID",NJ,08,DEMOCRATIC PARTY,House,Open seat,C,Democrat,david  grajales,DavidOcampoNJ,NA,
-H8NY15148,"OCASIO-CORTEZ, ALEXANDRIA",NY,14,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,alexandria  ocasiocortez,NA,O000172,1079104563280527360
-H8NY15148,"OCASIO-CORTEZ, ALEXANDRIA",NY,14,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,alexandria  ocasiocortez,NA,O000172,138203134
+H8NY15148,"OCASIO-CORTEZ, ALEXANDRIA",NY,14,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,alexandria  ocasiocortez,RepAOC,O000172,1079104563280527360
+H8NY15148,"OCASIO-CORTEZ, ALEXANDRIA",NY,14,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,alexandria  ocasiocortez,AOC,O000172,1079104563280527360
+H8NY15148,"OCASIO-CORTEZ, ALEXANDRIA",NY,14,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,alexandria  ocasiocortez,RepAOC,O000172,138203134
+H8NY15148,"OCASIO-CORTEZ, ALEXANDRIA",NY,14,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,alexandria  ocasiocortez,AOC,O000172,138203134
 H2NC11221,"O CONNELL, BRUCE",NC,11,REPUBLICAN PARTY,House,Challenger,P,Republican,bruce  connell,Bruce_Oconnell,NA,
 H8OH12297,"O'CONNOR, DANIEL",OH,15,DEMOCRATIC PARTY,House,Challenger,N,Democrat,daniel  connor,NA,NA,
 H2OH12118,"O'CONNOR, DANIEL JAY JR.",OH,15,DEMOCRATIC PARTY,House,Challenger,N,Democrat,daniel  connor,NA,NA,
@@ -3383,12 +3402,12 @@ H0MS04120,"PALAZZO, STEVEN MCCARTY",MS,04,REPUBLICAN PARTY,House,Incumbent,P,Rep
 H2CA03116,"PALETTA, JASON",CA,03,REPUBLICAN PARTY,House,Challenger,C,Republican,jason  paletta,NA,NA,
 H2GA01256,"PALIMENO, JOSEPH",GA,01,DEMOCRATIC PARTY,House,Challenger,N,Democrat,joseph  palimeno,NA,NA,
 H2AK00226,"PALIN, SARAH",AK,00,REPUBLICAN PARTY,House,Open seat,P,Republican,sarah  palin,SarahPalinUSA,NA,
-H8NJ03073,"PALLONE, FRANK JR",NJ,06,DEMOCRATIC PARTY,House,Incumbent,N,Democrat,frank  pallone,FrankPallone,NA,1265423480
-H8NJ03073,"PALLONE, FRANK JR",NJ,06,DEMOCRATIC PARTY,House,Incumbent,N,Democrat,frank  pallone,pallonefornj,NA,1265423480
-H8NJ03073,"PALLONE, FRANK JR",NJ,06,DEMOCRATIC PARTY,House,Incumbent,N,Democrat,frank  pallone,FrankPallone,NA,494196108
-H8NJ03073,"PALLONE, FRANK JR",NJ,06,DEMOCRATIC PARTY,House,Incumbent,N,Democrat,frank  pallone,pallonefornj,NA,494196108
-H8NJ03073,"PALLONE, FRANK JR",NJ,06,DEMOCRATIC PARTY,House,Incumbent,N,Democrat,frank  pallone,FrankPallone,NA,31801993
-H8NJ03073,"PALLONE, FRANK JR",NJ,06,DEMOCRATIC PARTY,House,Incumbent,N,Democrat,frank  pallone,pallonefornj,NA,31801993
+H8NJ03073,"PALLONE, FRANK JR",NJ,06,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,frank  pallone,FrankPallone,NA,1265423480
+H8NJ03073,"PALLONE, FRANK JR",NJ,06,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,frank  pallone,pallonefornj,NA,1265423480
+H8NJ03073,"PALLONE, FRANK JR",NJ,06,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,frank  pallone,FrankPallone,NA,494196108
+H8NJ03073,"PALLONE, FRANK JR",NJ,06,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,frank  pallone,pallonefornj,NA,494196108
+H8NJ03073,"PALLONE, FRANK JR",NJ,06,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,frank  pallone,FrankPallone,NA,31801993
+H8NJ03073,"PALLONE, FRANK JR",NJ,06,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,frank  pallone,pallonefornj,NA,31801993
 H0NJ05174,"PALLOTTA, FRANK",NJ,05,REPUBLICAN PARTY,House,Challenger,P,Republican,frank  pallotta,FrankPallottaNJ,NA,
 H0NJ05174,"PALLOTTA, FRANK",NJ,05,REPUBLICAN PARTY,House,Challenger,P,Republican,frank  pallotta,FTPallotta,NA,
 H2IL13146,"PALMER, DAVID",IL,13,DEMOCRATIC PARTY,House,Challenger,P,Democrat,david  palmer,PalmerforIL,NA,
@@ -3444,15 +3463,15 @@ H2TX32190,"PATTERSON, JACOB MR",TX,32,INDEPENDENT CONSERVATIVE DEMOCRATIC,House,
 H2NY13153,"PATTERSON, ODELL MALCOLM",NY,13,WRITE-IN,House,Challenger,N,Other,odell  patterson,NA,NA,
 H0CA07137,"PATTERSON, ROBERT BUZZ",CA,07,REPUBLICAN PARTY,House,Challenger,P,Republican,robert  patterson,NA,NA,
 H2CA09139,"PATTI, THOMAS",CA,09,REPUBLICAN PARTY,House,Open seat,P,Republican,thomas  patti,NA,NA,
-H0FL13158,"PAULINA LUNA, ANNA",FL,13,REPUBLICAN PARTY,House,Incumbent,N,Republican,anna  luna,RepLuna,L000596,1610230835289923584
-H0FL13158,"PAULINA LUNA, ANNA",FL,13,REPUBLICAN PARTY,House,Incumbent,N,Republican,anna  luna,voteapl,L000596,1610230835289923584
-H0FL13158,"PAULINA LUNA, ANNA",FL,13,REPUBLICAN PARTY,House,Incumbent,N,Republican,anna  luna,realannapaulina,L000596,1610230835289923584
-H0FL13158,"PAULINA LUNA, ANNA",FL,13,REPUBLICAN PARTY,House,Incumbent,N,Republican,anna  luna,RepLuna,L000596,1386669755654934528
-H0FL13158,"PAULINA LUNA, ANNA",FL,13,REPUBLICAN PARTY,House,Incumbent,N,Republican,anna  luna,voteapl,L000596,1386669755654934528
-H0FL13158,"PAULINA LUNA, ANNA",FL,13,REPUBLICAN PARTY,House,Incumbent,N,Republican,anna  luna,realannapaulina,L000596,1386669755654934528
-H0FL13158,"PAULINA LUNA, ANNA",FL,13,REPUBLICAN PARTY,House,Incumbent,N,Republican,anna  luna,RepLuna,L000596,913308968809672704
-H0FL13158,"PAULINA LUNA, ANNA",FL,13,REPUBLICAN PARTY,House,Incumbent,N,Republican,anna  luna,voteapl,L000596,913308968809672704
-H0FL13158,"PAULINA LUNA, ANNA",FL,13,REPUBLICAN PARTY,House,Incumbent,N,Republican,anna  luna,realannapaulina,L000596,913308968809672704
+H0FL13158,"PAULINA LUNA, ANNA",FL,13,REPUBLICAN PARTY,House,Incumbent,C,Republican,anna  luna,RepLuna,L000596,1610230835289923584
+H0FL13158,"PAULINA LUNA, ANNA",FL,13,REPUBLICAN PARTY,House,Incumbent,C,Republican,anna  luna,voteapl,L000596,1610230835289923584
+H0FL13158,"PAULINA LUNA, ANNA",FL,13,REPUBLICAN PARTY,House,Incumbent,C,Republican,anna  luna,realannapaulina,L000596,1610230835289923584
+H0FL13158,"PAULINA LUNA, ANNA",FL,13,REPUBLICAN PARTY,House,Incumbent,C,Republican,anna  luna,RepLuna,L000596,1386669755654934528
+H0FL13158,"PAULINA LUNA, ANNA",FL,13,REPUBLICAN PARTY,House,Incumbent,C,Republican,anna  luna,voteapl,L000596,1386669755654934528
+H0FL13158,"PAULINA LUNA, ANNA",FL,13,REPUBLICAN PARTY,House,Incumbent,C,Republican,anna  luna,realannapaulina,L000596,1386669755654934528
+H0FL13158,"PAULINA LUNA, ANNA",FL,13,REPUBLICAN PARTY,House,Incumbent,C,Republican,anna  luna,RepLuna,L000596,913308968809672704
+H0FL13158,"PAULINA LUNA, ANNA",FL,13,REPUBLICAN PARTY,House,Incumbent,C,Republican,anna  luna,voteapl,L000596,913308968809672704
+H0FL13158,"PAULINA LUNA, ANNA",FL,13,REPUBLICAN PARTY,House,Incumbent,C,Republican,anna  luna,realannapaulina,L000596,913308968809672704
 H2CO08053,"PAYETTE, MATTHEW WILLIAM",CO,08,UNAFFILIATED,House,Open seat,N,Other,matthew  payette,NA,NA,
 H2TX06418,"PAYNE, BILL",TX,06,REPUBLICAN PARTY,House,Challenger,N,Republican,bill  payne,NA,NA,
 H2NJ10154,"PAYNE, DONALD M MR. JR",NJ,10,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,donald  payne,RepDonaldPayne,P000604,1155335864
@@ -3500,8 +3519,8 @@ H2PA04135,"PERRY, SCOTT",PA,10,REPUBLICAN PARTY,House,Incumbent,C,Republican,sco
 H2UT04114,"PETERSEN, JONATHAN L.",UT,04,WRITE-IN,House,Challenger,N,Other,jonathan  petersen,NA,NA,
 H2CA14212,"PETERS, JAMES ANDREW MR. JR",CA,14,DEMOCRATIC PARTY,House,Open seat,N,Democrat,james  peters,Peters2022ffof,NA,
 H2CA39185,"PETERSON, ARTHUR LAVERNE DR",CA,39,REPUBLICAN PARTY,House,Challenger,N,Republican,arthur  peterson,NA,NA,
-H6CA01202,"PETERSON, DAVID",CA,03,DEMOCRATIC PARTY,House,Challenger,N,Democrat,david  peterson,PetersonForCA,NA,
-H2NJ07218,"PETERSON, ERIK",NJ,07,REPUBLICAN PARTY,House,Challenger,C,Republican,erik  peterson,NA,NA,
+H6CA01202,"PETERSON, DAVID",CA,03,DEMOCRATIC PARTY,House,,N,Democrat,david  peterson,PetersonForCA,NA,
+H2NJ07218,"PETERSON, ERIK",NJ,07,REPUBLICAN PARTY,House,Challenger,C,Republican,erik  peterson,NJAsmPeterson,NA,
 H2LA02131,"PETERSON, KAREN CARTER",LA,02,DEMOCRATIC PARTY,House,Challenger,N,Democrat,karen  peterson,NA,NA,
 H2ID01192,"PETERSON, KAYLEE JADE",ID,01,DEMOCRATIC PARTY,House,Challenger,N,Democrat,kaylee  peterson,NA,NA,
 H2MS04324,"PETERSON, KIDRON",MS,04,REPUBLICAN PARTY,House,Challenger,N,Republican,kidron  peterson,NA,NA,
@@ -3547,7 +3566,7 @@ H8ME01120,"PINGREE, CHELLIE M",ME,01,DEMOCRATIC PARTY,House,Incumbent,C,Democrat
 H8ME01120,"PINGREE, CHELLIE M",ME,01,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,chellie  pingree,PingreeForME,NA,1002275817227980800
 H8ME01120,"PINGREE, CHELLIE M",ME,01,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,chellie  pingree,chelliepingree,NA,14984637
 H8ME01120,"PINGREE, CHELLIE M",ME,01,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,chellie  pingree,PingreeForME,NA,14984637
-H2SC01077,"PIPER-LOOMIS, LYNZ",SC,01,REPUBLICAN PARTY,House,Challenger,P,Republican,lynz  piperloomis,NA,NA,
+H2SC01077,"PIPER-LOOMIS, LYNZ",SC,01,REPUBLICAN PARTY,House,Challenger,P,Republican,lynz  piperloomis,LynzPiperLoomis,NA,
 H2IL01380,"PIPPION MCGRIFF, NYKEA",IL,01,DEMOCRATIC PARTY,House,Open seat,P,Democrat,nykea  mcgriff,Nykea4Congress,NA,
 H2IL01380,"PIPPION MCGRIFF, NYKEA",IL,01,DEMOCRATIC PARTY,House,Open seat,P,Democrat,nykea  mcgriff,JustNykea,NA,
 H2MD03184,"PITOCCO, ANTONIO",MD,03,REPUBLICAN PARTY,House,Challenger,P,Republican,antonio  pitocco,antoniopitocco1,NA,
@@ -3567,7 +3586,7 @@ H2SC06159,"POLLARD, AURIOL SONIA",SC,06,REPUBLICAN PARTY,House,Challenger,C,Repu
 H4IN04206,"POLLCHIK, HOWARD JOSEPH",IN,04,DEMOCRATIC PARTY,House,Challenger,N,Democrat,howard  pollchik,NA,NA,
 H2FL27071,"POLO, FRANK",FL,27,REPUBLICAN PARTY,House,Challenger,P,Republican,frank  polo,Polo4Congress,NA,
 H2TX34147,"POLSKY,ESQ., LARRY MARK MR",TX,34,REPUBLICAN PARTY,House,Challenger,N,Republican,larry  polskyesq,NA,NA,
-H2TX32125,"PORRO, JOHN CHARLES MR.",TX,03,REPUBLICAN PARTY,House,Challenger,N,Republican,john  porro,NA,NA,
+H2TX32125,"PORRO, JOHN CHARLES MR.",TX,03,REPUBLICAN PARTY,House,Challenger,C,Republican,john  porro,NA,NA,
 H2ID02232,"PORTER, CHRIS",ID,02,REPUBLICAN PARTY,House,Challenger,N,Republican,chris  porter,NA,NA,
 H2CA33253,"PORTER, JOHN MARK MR",CA,33,REPUBLICAN PARTY,House,Challenger,N,Republican,john  porter,NA,NA,
 H8CA45130,"PORTER, KATHERINE",CA,47,DEMOCRATIC PARTY,House,Incumbent,N,Democrat,katherine  porter,RepKatiePorter,P000618,1.08122283746e+18
@@ -3604,9 +3623,9 @@ H2OR02172,"PRINE, ADAM",OR,02,DEMOCRATIC PARTY,House,Challenger,N,Democrat,adam 
 H2WI03163,"PROVANCE, RUSTIN LEVEM",WI,03,LIBERTARIAN PARTY,House,Open seat,N,Other,rustin  provance,NA,NA,
 H0FL22118,"PRUDEN, JAMES L.",FL,23,REPUBLICAN PARTY,House,Challenger,P,Republican,james  pruden,JAMESPRUDEN13,NA,
 H0PA05094,"PRUETT, DASHA",PA,01,REPUBLICAN PARTY,House,Challenger,P,Republican,dasha  pruett,NA,NA,
-H2KY03230,"PUCCETTI, GREGORY PETER",KY,03,REPUBLICAN PARTY,House,Open seat,C,Republican,gregory  puccetti,NA,NA,
 H4KY03244,"PUCCETTI, GREGORY PETER",KY,03,REPUBLICAN PARTY,House,Open seat,N,Republican,gregory  puccetti,NA,NA,
-H0CA28174,"PUDLO, G MAEBE",CA,30,DEMOCRATIC PARTY,House,Challenger,N,Democrat,maebe  pudlo,NA,NA,
+H2KY03230,"PUCCETTI, GREGORY PETER",KY,03,REPUBLICAN PARTY,House,Open seat,C,Republican,gregory  puccetti,NA,NA,
+H0CA28174,"PUDLO, G MAEBE",CA,30,DEMOCRATIC PARTY,House,Challenger,C,Democrat,maebe  pudlo,NA,NA,
 H2LA05266,"PULLEN, HUNTER I MR.",LA,05,REPUBLICAN PARTY,House,Challenger,N,Republican,hunter  pullen,NA,NA,
 H6IN07337,"PULLINS, PIERRE QUINCY",IN,07,DEMOCRATIC PARTY,House,Challenger,N,Democrat,pierre  pullins,pierrepullins,NA,
 H2AK01059,"PURHAM, RANDY",AK,00,REPUBLICAN PARTY,House,Challenger,N,Republican,randy  purham,RPURHAM,NA,
@@ -3626,7 +3645,7 @@ H2OK02182,"QUINN, MARTY L",OK,02,REPUBLICAN PARTY,House,Open seat,P,Republican,m
 H2NJ11152,"QUINN, PATRICK JAMES MR. III",NJ,09,REPUBLICAN PARTY,House,Challenger,N,Republican,patrick  quinn,NA,NA,
 H2TX06186,"QUINTANILLA, CARLOS",TX,33,DEMOCRATIC PARTY,House,Challenger,N,Democrat,carlos  quintanilla,NA,NA,
 H4CA30123,"RAB, AEJAZ (RAJI)",CA,32,DEMOCRATIC PARTY,House,Challenger,P,Democrat,aejaz  rab,NA,NA,
-H2MO07200,"RADAKER-SHEAFER, KRISTEN",MO,07,DEMOCRATIC PARTY,House,Open seat,P,Democrat,kristen  radakersheafer,NA,NA,
+H2MO07200,"RADAKER-SHEAFER, KRISTEN",MO,07,DEMOCRATIC PARTY,House,Open seat,P,Democrat,kristen  radakersheafer,KristenRSheafer,NA,
 H2OH07233,"RADER, TRISTAN",OH,07,DEMOCRATIC PARTY,House,Open seat,P,Democrat,tristan  rader,TWRader,NA,
 H2CA18148,"RADING, AJWANG",CA,16,DEMOCRATIC PARTY,House,Challenger,P,Democrat,ajwang  rading,AjwangRading,NA,
 H2CA33212,"RAGGE, CLAIRE",CA,36,REPUBLICAN PARTY,House,Challenger,C,Republican,claire  ragge,NA,NA,
@@ -3648,10 +3667,10 @@ H2NY11124,"RAMOS DEBARROS, BRITTANY",NY,11,DEMOCRATIC PARTY,House,Challenger,P,D
 H0AZ05185,"RAMOS, JAVIER GARCIA MR.",AZ,05,DEMOCRATIC PARTY,House,Challenger,C,Democrat,javier  ramos,RamosAZ5,NA,
 H2CA01243,"RAMOS, JONATHON ANGEL",CA,01,FEDERALIST,House,Challenger,N,Other,jonathon  ramos,NA,NA,
 H2IL11215,"RAMOS, JUAN",IL,11,REPUBLICAN PARTY,House,Challenger,N,Republican,juan  ramos,NA,NA,
-H2IL11231,"RAMOS, JUAN",IL,11,REPUBLICAN PARTY,House,Challenger,N,Republican,juan  ramos,NA,NA,
 H2IL11256,"RAMOS, JUAN",IL,11,REPUBLICAN PARTY,House,Challenger,N,Republican,juan  ramos,NA,NA,
-H2IL11223,"RAMOS, JUAN",IL,11,REPUBLICAN PARTY,House,Challenger,N,Republican,juan  ramos,NA,NA,
+H2IL11231,"RAMOS, JUAN",IL,11,REPUBLICAN PARTY,House,Challenger,N,Republican,juan  ramos,NA,NA,
 H2IL11249,"RAMOS, JUAN",IL,11,REPUBLICAN PARTY,House,Challenger,N,Republican,juan  ramos,NA,NA,
+H2IL11223,"RAMOS, JUAN",IL,11,REPUBLICAN PARTY,House,Challenger,N,Republican,juan  ramos,NA,NA,
 H2TX38023,"RAMSEY, MARK",TX,38,REPUBLICAN PARTY,House,Open seat,C,Republican,mark  ramsey,RAMSEYforTXCD38,NA,
 H0MT00074,"RANKIN, SAM",MT,02,LIBERTARIAN PARTY,House,Challenger,C,Other,sam  rankin,NA,NA,
 H2CA33188,"RAPHAEL, PATRICK JEAN",CA,33,REPUBLICAN PARTY,House,Challenger,N,Republican,patrick  raphael,NA,NA,
@@ -3675,7 +3694,7 @@ H2KY03214,"RAY, STUART N.",KY,03,REPUBLICAN PARTY,House,Open seat,P,Republican,s
 H2AL02208,"REALZ, JONATHAN",AL,02,LIBERTARIAN PARTY,House,Challenger,N,Other,jonathan  realz,NA,NA,
 H2IL16123,"REBRESH, MICHAEL STEPHAN MR",IL,16,REPUBLICAN PARTY,House,Open seat,P,Republican,michael  rebresh,NA,NA,
 H6MN02206,"RECHTZIGEL, GENE",MN,04,REPUBLICAN PARTY,House,Challenger,N,Republican,gene  rechtzigel,NA,NA,
-H2CA00153,"RECILE, RUDY",CA,08,REPUBLICAN PARTY,House,,N,Republican,rudy  recile,Rudy4USCongress,NA,
+H2CA00153,"RECILE, RUDY",CA,08,REPUBLICAN PARTY,House,Challenger,N,Republican,rudy  recile,Rudy4USCongress,NA,
 H2NY23129,"RECOTTA, JAMES P",NY,23,REPUBLICAN PARTY,House,Open seat,N,Republican,james  recotta,NA,NA,
 H2TX12093,"RECTOR, CHRISTOPHER D.",TX,00,NONE,House,Challenger,N,Other,christopher  rector,NA,NA,
 H2OH01178,"REDDEN, SAVANNA",OH,01,DEMOCRATIC PARTY,House,Challenger,N,Democrat,savanna  redden,NA,NA,
@@ -3718,8 +3737,8 @@ H2CA30275,"RHODES, AARIKA SAMONE",CA,32,DEMOCRATIC PARTY,House,Challenger,P,Demo
 H2CO03286,"RHODES, KELLIE",CO,03,DEMOCRATIC PARTY,House,Challenger,C,Democrat,kellie  rhodes,NA,NA,
 H4NY04075,"RICE, KATHLEEN",NY,04,DEMOCRATIC PARTY,House,Incumbent,P,Democrat,kathleen  rice,NA,R000602,82423741
 H8IL09174,"RICE, MAXWELL",IL,09,REPUBLICAN PARTY,House,Challenger,P,Republican,maxwell  rice,checkrice,NA,
-H2SC07066,"RICE, TOM",SC,07,REPUBLICAN PARTY,House,Incumbent,P,Republican,tom  rice,NA,R000597,1058345042
-H2SC07066,"RICE, TOM",SC,07,REPUBLICAN PARTY,House,Incumbent,P,Republican,tom  rice,NA,R000597,720672102
+H2SC07066,"RICE, TOM",SC,07,REPUBLICAN PARTY,House,Incumbent,P,Republican,tom  rice,tomricesc7,R000597,1058345042
+H2SC07066,"RICE, TOM",SC,07,REPUBLICAN PARTY,House,Incumbent,P,Republican,tom  rice,tomricesc7,R000597,720672102
 H0MO07279,"RICHARDS, AUDREY",MO,07,REPUBLICAN PARTY,House,Open seat,N,Republican,audrey  richards,Audrey4Congress,NA,
 H2GA10257,"RICHARDS, MATT",GA,10,REPUBLICAN PARTY,House,Open seat,P,Republican,matt  richards,NA,NA,
 H2IL12148,"RICHARDSON, KEITH GARTH RABBI",IL,12,DEMOCRATIC PARTY,House,Challenger,N,Democrat,keith  richardson,NA,NA,
@@ -3733,11 +3752,11 @@ H2NH02252,"RIDDLE, JASON DANIEL",NH,02,REPUBLICAN PARTY,House,Challenger,N,Repub
 H2MI13378,"RIDDLE, SAMUEL LEWIS JR",MI,13,DEMOCRATIC PARTY,House,Challenger,C,Democrat,samuel  riddle,samriddle,NA,
 H2UT02456,"RIDER, ERIN CHRISTINE",UT,02,REPUBLICAN PARTY,House,Challenger,C,Republican,erin  rider,erinriderut,NA,
 H2NY22188,"RIDLEY, MIKAYLA",NY,22,DEMOCRATIC PARTY,House,Challenger,C,Democrat,mikayla  ridley,NA,NA,
-H2OH09189,"RIEDEL, CRAIG",OH,09,REPUBLICAN PARTY,House,,N,Republican,craig  riedel,craig_riedel,NA,
+H2OH09189,"RIEDEL, CRAIG",OH,09,REPUBLICAN PARTY,House,Challenger,N,Republican,craig  riedel,NA,NA,
 H2TX12119,"RIEG, ALYSIA",TX,12,REPUBLICAN PARTY,House,Challenger,N,Republican,alysia  rieg,alysiarieg,NA,
 H2IN03210,"RIESEN, CORY",IN,03,DEMOCRATIC PARTY,House,Challenger,N,Democrat,cory  riesen,NA,NA,
 H2CA08255,"RILEY, CHRISTOPHER",CA,08,DEMOCRATIC PARTY,House,Challenger,N,Democrat,christopher  riley,RileyforCA8,NA,
-H8NY22177,"RILEY, JOSH",NY,19,DEMOCRATIC PARTY,House,Challenger,P,Democrat,josh  riley,joshuaue99,NA,
+H8NY22177,"RILEY, JOSH",NY,19,DEMOCRATIC PARTY,House,Challenger,N,Democrat,josh  riley,NA,NA,
 H4DC00092,"RIMENSNYDER, NELSON F",DC,00,REPUBLICAN PARTY,House,Challenger,N,Republican,nelson  rimensnyder,NA,NA,
 H2TX66016,"RINGNESS, JESSE",TX,66,DEMOCRATIC PARTY,House,Challenger,N,Democrat,jesse  ringness,NA,NA,
 H2CA42163,"RIOS, ANGEL ANTHONY MR.",CA,42,DEMOCRATIC PARTY,House,Challenger,N,Democrat,angel  rios,NA,NA,
@@ -3752,8 +3771,7 @@ H0RI02246,"ROBBIO, DONALD F.",RI,02,REPUBLICAN PARTY,House,Open seat,N,Republica
 H2NC02311,"ROBERSON, CHARLES BRENT",NC,01,REPUBLICAN PARTY,House,Challenger,C,Republican,charles  roberson,NA,NA,
 H2MI13295,"ROBERSON, PORTIA",MI,13,DEMOCRATIC PARTY,House,Challenger,C,Democrat,portia  roberson,portiaforcong13,NA,
 H2MI13295,"ROBERSON, PORTIA",MI,13,DEMOCRATIC PARTY,House,Challenger,C,Democrat,portia  roberson,PLRoberson,NA,
-H2NC02253,"ROBERSON, SANDY",NC,01,REPUBLICAN PARTY,House,Challenger,P,Republican,sandy  roberson,SandyRobersonNC,NA,
-H2NC02253,"ROBERSON, SANDY",NC,01,REPUBLICAN PARTY,House,Challenger,P,Republican,sandy  roberson,sandyrobersonrm,NA,
+H2NC02253,"ROBERSON, SANDY",NC,02,REPUBLICAN PARTY,House,,C,Republican,sandy  roberson,NA,NA,
 H2OK02216,"ROBERTS, DUSTIN",OK,02,REPUBLICAN PARTY,House,Open seat,P,Republican,dustin  roberts,dustinrobertsOK,NA,
 H2AL05169,"ROBERTS, JOHN",AL,05,REPUBLICAN PARTY,House,Open seat,C,Republican,john  roberts,johnrobertsal,NA,
 H2CA12182,"ROBERTS, JOSEPH C MR.",CA,12,REPUBLICAN PARTY,House,Challenger,N,Republican,joseph  roberts,NA,NA,
@@ -3767,14 +3785,14 @@ H2GA02171,"ROBERTSON, RICHARD M",GA,02,REPUBLICAN PARTY,House,Challenger,C,Repub
 H2FL07263,"ROBERTS, RUSSELL L. MR.",FL,07,REPUBLICAN PARTY,House,Open seat,P,Republican,russell  roberts,rustyrobertsfl,NA,
 H2NY22204,"ROBERTS, SAM",NY,22,DEMOCRATIC PARTY,House,Challenger,C,Democrat,sam  roberts,samrobertsny,NA,
 H8OH06133,"ROBERTS, SHAWNA",OH,06,DEMOCRATIC PARTY,House,Challenger,N,Democrat,shawna  roberts,NA,NA,
-H2MO01229,"ROBERTS, STEVEN C",MO,01,DEMOCRATIC PARTY,House,Challenger,P,Democrat,steven  roberts,NA,NA,
+H2MO01229,"ROBERTS, STEVEN C",MO,01,DEMOCRATIC PARTY,House,Challenger,P,Democrat,steven  roberts,RobertsforSTL,NA,
 H2FL03205,"ROBINSON, ANDREW PRESTON MR.",FL,03,DEMOCRATIC PARTY,House,Challenger,N,Democrat,andrew  robinson,NA,NA,
 H2NY10142,"ROBINSON, BRIAN JEFFREY",NY,10,DEMOCRATIC PARTY,House,Challenger,P,Democrat,brian  robinson,votebrian,NA,
 H2OK02331,"ROBINSON, BULLDOG BEN",OK,02,INDEPENDENT,House,Challenger,N,Other,bulldog  robinson,NA,NA,
 H2NC10124,"ROBINSON, GARY THOMAS",NC,10,REPUBLICAN PARTY,House,Challenger,P,Republican,gary  robinson,NA,NA,
 H2CT34016,"ROBINSON, TIMOTHY BRENT MR",CT,34,INDEPENDENT CONSERVATIVE DEMOCRATIC,House,Challenger,N,Other,timothy  robinson,NA,NA,
 H2PA02162,"ROBLES, ALBERT IVAN",PA,02,REPUBLICAN PARTY,House,Challenger,N,Republican,albert  robles,NA,NA,
-H2MD08183,"ROCA, MARIELA",MD,06,REPUBLICAN PARTY,House,Challenger,P,Republican,mariela  roca,rocaforcongress,NA,
+H2MD08183,"ROCA, MARIELA",MD,06,REPUBLICAN PARTY,House,Challenger,N,Republican,mariela  roca,NA,NA,
 H4TX30067,"ROCELLERPITTS, ANGEIGH JEANNEAN",TX,30,REPUBLICAN PARTY,House,Challenger,N,Republican,angeigh  rocellerpitts,NA,NA,
 H2MI06125,"ROCHA, JON",MI,06,REPUBLICAN PARTY,House,Open seat,C,Republican,jon  rocha,NA,NA,
 H2CA50208,"ROCHA, JOSEPH C.",CA,50,DEMOCRATIC PARTY,House,Challenger,C,Democrat,joseph  rocha,NA,NA,
@@ -3836,7 +3854,7 @@ H0NC02125,"ROSS, DEBORAH",NC,02,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,debo
 H2FL15217,"ROSS, DENNIS",FL,15,REPUBLICAN PARTY,House,Challenger,C,Republican,dennis  ross,NA,NA,
 H2OK03149,"ROSS, JEREMIAH A",OK,03,DEMOCRATIC PARTY,House,Challenger,N,Democrat,jeremiah  ross,NA,NA,
 H2KY04220,"ROTTINGHAUS, PATRICK JOSEPH",KY,04,DEMOCRATIC PARTY,House,Challenger,N,Democrat,patrick  rottinghaus,NA,NA,
-H8CA48035,"ROUDA, HARLEY E JR",CA,47,DEMOCRATIC PARTY,House,Challenger,N,Democrat,harley  rouda,NA,R000616,
+H8CA48035,"ROUDA, HARLEY E JR",CA,47,DEMOCRATIC PARTY,House,Challenger,C,Democrat,harley  rouda,NA,R000616,
 H8CO03234,"ROUTLEDGE, ROOT",CO,03,DEMOCRATIC PARTY,House,Challenger,N,Democrat,root  routledge,NA,NA,
 H2NC07096,"ROUZER, DAVID",NC,07,REPUBLICAN PARTY,House,Incumbent,C,Republican,david  rouzer,RepDavidRouzer,R000603,834069080
 H2NC07096,"ROUZER, DAVID",NC,07,REPUBLICAN PARTY,House,Incumbent,C,Republican,david  rouzer,DavidRouzer,R000603,834069080
@@ -3882,13 +3900,13 @@ H8NY19223,"RYAN, PATRICK",NY,18,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,patr
 H2OH17109,"RYAN, TIMOTHY",OH,13,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,timothy  ryan,NA,R000577,13491312
 H2OH17109,"RYAN, TIMOTHY",OH,13,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,timothy  ryan,NA,R000577,466532637
 H2SD01058,"RYDER, RYAN",SD,00,DEMOCRATIC PARTY,House,Challenger,N,Democrat,ryan  ryder,NA,NA,
-H2FL11117,"SABATINI, ANTHONY",FL,11,REPUBLICAN PARTY,House,,N,Republican,anthony  sabatini,NA,NA,
+H2FL11117,"SABATINI, ANTHONY",FL,11,REPUBLICAN PARTY,House,Challenger,N,Republican,anthony  sabatini,NA,NA,
 H2OH07209,"SABATUCCI, DANTE",OH,07,REPUBLICAN PARTY,House,Open seat,P,Republican,dante  sabatucci,NA,NA,
-H8MP00041,"SABLAN, GREGORIO KILILI CAMACHO REP.",MP,00,INDEPENDENT,House,Incumbent,N,Other,gregorio  sablan,NA,S001177,926446070812602368
-H8MP00041,"SABLAN, GREGORIO KILILI CAMACHO REP.",MP,00,INDEPENDENT,House,Incumbent,N,Other,gregorio  sablan,NA,S001177,567654571
+H8MP00041,"SABLAN, GREGORIO KILILI CAMACHO REP.",MP,00,DEMOCRATIC PARTY,House,Incumbent,N,Democrat,gregorio  sablan,NA,S001177,926446070812602368
+H8MP00041,"SABLAN, GREGORIO KILILI CAMACHO REP.",MP,00,DEMOCRATIC PARTY,House,Incumbent,N,Democrat,gregorio  sablan,NA,S001177,567654571
 H2NC02220,"SAFTA, ADINA",NC,02,REPUBLICAN PARTY,House,Challenger,P,Republican,adina  safta,NA,NA,
-H2CA01169,"SAGOO, GURPINDER SINGH",CA,01,REPUBLICAN PARTY,House,Challenger,N,Republican,gurpinder  sagoo,NA,NA,
 H2CA24179,"SAGOO, GURPINDER SINGH",CA,24,REPUBLICAN PARTY,House,Challenger,N,Republican,gurpinder  sagoo,NA,NA,
+H2CA01169,"SAGOO, GURPINDER SINGH",CA,01,REPUBLICAN PARTY,House,Challenger,N,Republican,gurpinder  sagoo,NA,NA,
 H2CO08061,"SAINE, LORI A",CO,08,REPUBLICAN PARTY,House,Open seat,C,Republican,lori  saine,lorisaine,NA,
 H0TX14234,"SAJNA, CYRUS",TX,14,DEMOCRATIC PARTY,House,Challenger,N,Democrat,cyrus  sajna,NA,NA,
 H2NY01224,"SAKIN, MICHAEL",NY,02,REPUBLICAN PARTY,House,Open seat,N,Republican,michael  sakin,NA,NA,
@@ -3914,7 +3932,7 @@ H2TX34238,"SANCHEZ, DANIEL",TX,34,DEMOCRATIC PARTY,House,Challenger,C,Democrat,d
 H2CA22157,"SANCHEZ HERNANDEZ, JORGE",CA,22,DEMOCRATIC PARTY,House,Challenger,N,Democrat,jorge  hernandez,NA,NA,
 H2CA39078,"SANCHEZ, LINDA",CA,38,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,linda  sanchez,NA,S001156,312134473
 H2CA39078,"SANCHEZ, LINDA",CA,38,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,linda  sanchez,NA,S001156,917408119222923264
-H2NM01367,"SANCHEZ, LOUIE",NM,01,REPUBLICAN PARTY,House,Challenger,C,Republican,louie  sanchez,NA,NA,
+H2NM01367,"SANCHEZ, LOUIE",NM,01,REPUBLICAN PARTY,House,Challenger,C,Republican,louie  sanchez,GovernorLouie,NA,
 H2LA04137,"SANDAGE, BRANDON",LA,04,REPUBLICAN PARTY,House,Challenger,N,Republican,brandon  sandage,NA,NA,
 H2PA16105,"SANDERA, ROB",PA,16,DEMOCRATIC PARTY,House,Challenger,N,Democrat,rob  sandera,NA,NA,
 H2CT01239,"SANDERS, MARY L",CT,01,GREEN PARTY,House,Challenger,N,Other,mary  sanders,NA,NA,
@@ -3999,10 +4017,10 @@ H2WA22019,"SCOTT(D), CHARLIE (CHARLES) LEE SEN SR",WA,22,DEMOCRATIC PARTY,House,
 H2MI06109,"SCOTT, EZRA MR.",MI,05,REPUBLICAN PARTY,House,Challenger,P,Republican,ezra  scott,NA,NA,
 H0GA08099,"SCOTT, JAMES AUSTIN",GA,08,REPUBLICAN PARTY,House,Incumbent,C,Republican,james  scott,NA,S001189,234797704
 H0GA08099,"SCOTT, JAMES AUSTIN",GA,08,REPUBLICAN PARTY,House,Incumbent,C,Republican,james  scott,NA,S001189,31191969
-H6VA01117,"SCOTT, ROBERT C",VA,03,DEMOCRATIC PARTY,House,Incumbent,N,Democrat,robert  scott,BobbyScott,S000185,161791703
-H6VA01117,"SCOTT, ROBERT C",VA,03,DEMOCRATIC PARTY,House,Incumbent,N,Democrat,robert  scott,BobbyScott4VA3,S000185,161791703
-H6VA01117,"SCOTT, ROBERT C",VA,03,DEMOCRATIC PARTY,House,Incumbent,N,Democrat,robert  scott,BobbyScott,S000185,319829219
-H6VA01117,"SCOTT, ROBERT C",VA,03,DEMOCRATIC PARTY,House,Incumbent,N,Democrat,robert  scott,BobbyScott4VA3,S000185,319829219
+H6VA01117,"SCOTT, ROBERT C",VA,03,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,robert  scott,BobbyScott,S000185,161791703
+H6VA01117,"SCOTT, ROBERT C",VA,03,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,robert  scott,BobbyScott4VA3,S000185,161791703
+H6VA01117,"SCOTT, ROBERT C",VA,03,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,robert  scott,BobbyScott,S000185,319829219
+H6VA01117,"SCOTT, ROBERT C",VA,03,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,robert  scott,BobbyScott4VA3,S000185,319829219
 H2TX31143,"SCURRY, CHRISTOPHER MICHAEL",TX,37,DEMOCRATIC PARTY,House,Open seat,N,Democrat,christopher  scurry,NA,NA,
 H2TX18215,"SEALS SINGH CHAUDRY KUMAR, TINA RICHEL",TX,18,,House,Challenger,N,Other,tina  kumar,NA,NA,
 H8NC02086,"SEARCY, SAM",NC,13,DEMOCRATIC PARTY,House,Open seat,N,Democrat,sam  searcy,ElectSamSearcy,NA,
@@ -4016,7 +4034,7 @@ H2TX03290,"SELF, KEITH ALAN MR",TX,03,REPUBLICAN PARTY,House,Incumbent,C,Republi
 H2OR04111,"SELKER, JOHN STEVEN DR.",OR,04,DEMOCRATIC PARTY,House,Open seat,C,Democrat,john  selker,JohnSelker,NA,
 H2MS04282,"SELLERS, DAVID",MS,04,DEMOCRATIC PARTY,House,Challenger,P,Democrat,david  sellers,DavidSellersMS,NA,
 H2WY01016,"SELVIG, MARISSA JOY",WY,00,CONSTITUTION PARTY,House,Challenger,P,Other,marissa  selvig,MarissaSelvig,NA,
-H2CA07141,"SEMENENKO, MAX",CA,07,REPUBLICAN PARTY,House,Challenger,P,Republican,max  semenenko,NA,NA,
+H2CA07141,"SEMENENKO, MAX",CA,07,REPUBLICAN PARTY,House,Challenger,N,Republican,max  semenenko,NA,NA,
 H2NY23137,"SEMPOLINSKI, JOSEPH",NY,23,REPUBLICAN PARTY,House,Incumbent,P,Republican,joseph  sempolinski,JoeSempo,S001219,
 H2IL11140,"SEPPELFRICK, DEAN ALLEN",IL,11,REPUBLICAN PARTY,House,Challenger,N,Republican,dean  seppelfrick,NA,NA,
 H2NV04094,"SERRANO, CAROLINA",NV,01,REPUBLICAN PARTY,House,Challenger,P,Republican,carolina  serrano,Carolina4NV,NA,
@@ -4101,8 +4119,8 @@ H2NY24176,"SKELLINGTON, SHELLEY M.",NY,24,DEMOCRATIC PARTY,House,Open seat,N,Dem
 H2NJ05337,"SKENDERI, SAB",NJ,05,REPUBLICAN PARTY,House,Challenger,N,Republican,sab  skenderi,NA,NA,
 H2FL12115,"SKINNER, JEANNETTE RENEE",FL,11,REPUBLICAN PARTY,House,Challenger,P,Republican,jeannette  skinner,NA,NA,
 H2CO03310,"SKOWRONSKI, KRISTIN ELISE",CO,03,INDEPENDENT,House,Challenger,P,Other,kristin  skowronski,KristinForCO,NA,
-H2FL21124,"SKRBIC, LJUBO DR",FL,21,REPUBLICAN PARTY,House,Challenger,P,Republican,ljubo  skrbic,LjuboSkrbic,NA,
 H2FL21116,"SKRBIC, LJUBO DR.",FL,21,REPUBLICAN PARTY,House,Challenger,N,Republican,ljubo  skrbic,LjuboSkrbic,NA,
+H2FL21124,"SKRBIC, LJUBO DR MD",FL,21,REPUBLICAN PARTY,House,Challenger,C,Republican,ljubo  skrbic,LjuboSkrbic,NA,
 H2MO03209,"SKWIRA, RICHARD JR.",MO,03,REPUBLICAN PARTY,House,Challenger,N,Republican,richard  skwira,NA,NA,
 H2TX32117,"SLAGEL, GARY ALLEN",TX,32,REPUBLICAN PARTY,House,Challenger,C,Republican,gary  slagel,NA,NA,
 H2MO02151,"SLANTZ, BILL",MO,02,LIBERTARIAN PARTY,House,Challenger,N,Other,bill  slantz,BillSlantz,NA,
@@ -4139,14 +4157,16 @@ H2CO03203,"SMITH, GREGG HARRISON",CO,03,DEMOCRATIC PARTY,House,Challenger,C,Demo
 H2OR04202,"SMITH, G. TOMMY",OR,04,DEMOCRATIC PARTY,House,Open seat,N,Democrat,tommy  smith,NA,NA,
 H2NJ03282,"SMITH, IAN",NJ,03,REPUBLICAN PARTY,House,Challenger,P,Republican,ian  smith,iansmithfitness,NA,
 H2TX26176,"SMITH, ISAAC",TX,26,REPUBLICAN PARTY,House,Challenger,C,Republican,isaac  smith,NA,NA,
-H4MO08162,"SMITH, JASON T",MO,08,REPUBLICAN PARTY,House,Incumbent,C,Republican,jason  smith,NA,S001195,1623308912
-H4MO08162,"SMITH, JASON T",MO,08,REPUBLICAN PARTY,House,Incumbent,C,Republican,jason  smith,NA,S001195,26653478
+H4MO08162,"SMITH, JASON T",MO,08,REPUBLICAN PARTY,House,Incumbent,C,Republican,jason  smith,RepJasonSmith,S001195,1623308912
+H4MO08162,"SMITH, JASON T",MO,08,REPUBLICAN PARTY,House,Incumbent,C,Republican,jason  smith,JasonSmithMO,S001195,1623308912
+H4MO08162,"SMITH, JASON T",MO,08,REPUBLICAN PARTY,House,Incumbent,C,Republican,jason  smith,RepJasonSmith,S001195,26653478
+H4MO08162,"SMITH, JASON T",MO,08,REPUBLICAN PARTY,House,Incumbent,C,Republican,jason  smith,JasonSmithMO,S001195,26653478
 H2AL02190,"SMITH, JONATHAN",AL,02,LIBERTARIAN PARTY,House,Challenger,P,Other,jonathan  smith,NA,NA,
 H2OR06017,"SMITH, LORETTA",OR,06,DEMOCRATIC PARTY,House,Open seat,P,Democrat,loretta  smith,NA,NA,
 H2WI03155,"SMITH, MORGAN ANTHONNY",WI,03,LIBERTARIAN PARTY,House,Open seat,N,Other,morgan  smith,NA,NA,
 H2VA02080,"SMITH, NEIL",VA,02,DEMOCRATIC PARTY,House,Challenger,N,Democrat,neil  smith,NA,NA,
 H0GA06226,"SMITH, PAULETTE MISS",GA,06,REPUBLICAN PARTY,House,Challenger,C,Republican,paulette  smith,NA,NA,
-H0NC03149,"SMITH, SANDY",NC,01,REPUBLICAN PARTY,House,Challenger,N,Republican,sandy  smith,NA,NA,
+H0NC03149,"SMITH, SANDY",NC,01,REPUBLICAN PARTY,House,Challenger,N,Republican,sandy  smith,SandySmithNC,NA,
 H2TX25301,"SMITH, TYLER RAY",TX,25,REPUBLICAN PARTY,House,Challenger,N,Republican,tyler  smith,NA,NA,
 H2MO02177,"SMITH, WESLEY GILMAN",MO,02,REPUBLICAN PARTY,House,Challenger,P,Republican,wesley  smith,WolfofWash,NA,
 H6PA16320,"SMUCKER, LLOYD K.",PA,11,REPUBLICAN PARTY,House,Incumbent,C,Republican,lloyd  smucker,RepSmucker,S001199,41417564
@@ -4173,7 +4193,7 @@ H2IL17147,"SORENSEN, ERIC",IL,17,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,eri
 H2IL17147,"SORENSEN, ERIC",IL,17,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,eric  sorensen,RepEricSorensen,S001225,7698032
 H2IL17147,"SORENSEN, ERIC",IL,17,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,eric  sorensen,ERICSORENSEN,S001225,7698032
 H2FL11125,"SORIANO, GAVRIEL ELIYAHU",FL,11,REPUBLICAN PARTY,House,Challenger,P,Republican,gavriel  soriano,gavsoriano,NA,
-H2MA02085,"SOSSA-PAQUETTE, JEFF",MA,02,REPUBLICAN PARTY,House,,N,Republican,jeff  sossapaquette,NA,NA,
+H2MA02085,"SOSSA-PAQUETTE, JEFF",MA,02,REPUBLICAN PARTY,House,Challenger,N,Republican,jeff  sossapaquette,Jeff4CongressMA,NA,
 H2TX34121,"SOTELO, PHILIP MR",TX,34,REPUBLICAN PARTY,House,Challenger,N,Republican,philip  sotelo,NA,NA,
 H6FL09179,"SOTO, DARREN",FL,09,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,darren  soto,RepDarrenSoto,S001200,818713465653051392
 H6FL09179,"SOTO, DARREN",FL,09,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,darren  soto,DarrenSoto,S001200,818713465653051392
@@ -4201,8 +4221,8 @@ H2CA02217,"SPICER, REBECCA JUNE",CA,02,CONSERVATIVE PARTY,House,Challenger,N,Oth
 H2NY13161,"SPIES, FRANCISCO A.",NY,13,DEMOCRATIC PARTY,House,Challenger,N,Democrat,francisco  spies,NA,NA,
 H2IL01406,"SPILLER, HOWARD L",IL,01,DEMOCRATIC PARTY,House,Open seat,N,Democrat,howard  spiller,NA,NA,
 H2CA41132,"SPINNEY, BILL",CA,39,REPUBLICAN PARTY,House,Challenger,P,Republican,bill  spinney,Bill_Spinney,NA,
-H2AZ08201,"SPREITZER, JEREMY",AZ,08,DEMOCRATIC PARTY,House,Challenger,N,Democrat,jeremy  spreitzer,NA,NA,
 H2AZ08193,"SPREITZER, JEREMY",AZ,08,WRITE-IN,House,Challenger,N,Other,jeremy  spreitzer,NA,NA,
+H2AZ08201,"SPREITZER, JEREMY",AZ,08,DEMOCRATIC PARTY,House,Challenger,N,Democrat,jeremy  spreitzer,NA,NA,
 H2NC01222,"SPRIGGS, JASON ALBERT",NC,01,DEMOCRATIC PARTY,House,Open seat,N,Democrat,jason  spriggs,NA,NA,
 H2SC07207,"SPURLOCK, JEANETTE M",SC,07,REPUBLICAN PARTY,House,Challenger,N,Republican,jeanette  spurlock,NA,NA,
 H2TX22142,"SQUIRES, JAMES SCOTT",TX,22,DEMOCRATIC PARTY,House,Challenger,N,Democrat,james  squires,NA,NA,
@@ -4401,7 +4421,7 @@ H2AK00481,"THISTLE, DAVID",AK,00,,House,Open seat,N,Other,david  thistle,NA,NA,
 H2TX04132,"THOMAS, DANIEL M.",TX,04,REPUBLICAN PARTY,House,Challenger,P,Republican,daniel  thomas,DanNewsMan,NA,
 H2AK00259,"THOMAS, ERNEST F.",AK,00,DEMOCRATIC PARTY,House,Open seat,N,Democrat,ernest  thomas,NA,NA,
 H2IL17196,"THOMAS, KERMIT ELLIOTT MR. JR.",IL,17,DEMOCRATIC PARTY,House,Open seat,N,Democrat,kermit  thomas,NA,NA,
-H0NC04220,"THOMAS, ROBERT",NC,04,REPUBLICAN PARTY,House,Open seat,P,Republican,robert  thomas,NA,NA,
+H0NC04220,"THOMAS, ROBERT",NC,04,REPUBLICAN PARTY,House,Open seat,P,Republican,robert  thomas,robertthomasnc1,NA,
 H2MT02191,"THOMAS, SAMUEL",MT,02,LIBERTARIAN PARTY,House,Open seat,N,Other,samuel  thomas,NA,NA,
 H4IN09098,"THOMAS, WILLIAM JOSEPH",IN,09,REPUBLICAN PARTY,House,Open seat,N,Republican,william  thomas,NA,NA,
 H4MS02068,"THOMPSON, BENNIE G.",MS,02,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,bennie  thompson,BennieGThompson,T000193,82453460
@@ -4410,8 +4430,8 @@ H4MS02068,"THOMPSON, BENNIE G.",MS,02,DEMOCRATIC PARTY,House,Incumbent,C,Democra
 H4MS02068,"THOMPSON, BENNIE G.",MS,02,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,bennie  thompson,BGThompsonMS,T000193,1298346252673994752
 H2NJ28016,"THOMPSON, BRIAN HIRAM MR",NJ,28,INDEPENDENT CONSERVATIVE DEMOCRATIC,House,Challenger,N,Other,brian  thompson,NA,NA,
 H2KS39012,"THOMPSON, CARREY MR",KS,39,INDUSTRIAL GOVERNMENT PARTY,House,Challenger,N,Other,carrey  thompson,NA,NA,
-H2TX18173,"THOMPSON, CHARLES",TX,18,DEMOCRATIC PARTY,House,Challenger,N,Democrat,charles  thompson,NA,NA,
 H2AL05144,"THOMPSON, CHARLES",AL,05,,House,Open seat,C,Other,charles  thompson,NA,NA,
+H2TX18173,"THOMPSON, CHARLES",TX,18,DEMOCRATIC PARTY,House,Challenger,N,Democrat,charles  thompson,NA,NA,
 H8PA05071,"THOMPSON, GLENN MR.",PA,15,REPUBLICAN PARTY,House,Incumbent,C,Republican,glenn  thompson,CongressmanGT,T000467,18967498
 H8PA05071,"THOMPSON, GLENN MR.",PA,15,REPUBLICAN PARTY,House,Incumbent,C,Republican,glenn  thompson,GT_TeamGT,T000467,18967498
 H8PA05071,"THOMPSON, GLENN MR.",PA,15,REPUBLICAN PARTY,House,Incumbent,C,Republican,glenn  thompson,CongressmanGT,T000467,304138251
@@ -4447,12 +4467,12 @@ H8MI13250,"TLAIB, RASHIDA",MI,12,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,ras
 H8MI13250,"TLAIB, RASHIDA",MI,12,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,rashida  tlaib,RepRashida,T000481,435331179
 H8MI13250,"TLAIB, RASHIDA",MI,12,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,rashida  tlaib,RashidaTlaib,T000481,435331179
 H2MT00112,"TODD, MARY BROOKS",MT,01,REPUBLICAN PARTY,House,Challenger,C,Republican,mary  todd,MaryToddForMT,NA,
-H2HI02581,"TOKUDA, JILL NAOMI",HI,02,DEMOCRATIC PARTY,House,Incumbent,N,Democrat,jill  tokuda,RepJillTokuda,T000487,1610730477563805696
-H2HI02581,"TOKUDA, JILL NAOMI",HI,02,DEMOCRATIC PARTY,House,Incumbent,N,Democrat,jill  tokuda,tokudaforhawaii,T000487,1610730477563805696
-H2HI02581,"TOKUDA, JILL NAOMI",HI,02,DEMOCRATIC PARTY,House,Incumbent,N,Democrat,jill  tokuda,jilltokuda,T000487,1610730477563805696
-H2HI02581,"TOKUDA, JILL NAOMI",HI,02,DEMOCRATIC PARTY,House,Incumbent,N,Democrat,jill  tokuda,RepJillTokuda,T000487,1445657911368192000
-H2HI02581,"TOKUDA, JILL NAOMI",HI,02,DEMOCRATIC PARTY,House,Incumbent,N,Democrat,jill  tokuda,tokudaforhawaii,T000487,1445657911368192000
-H2HI02581,"TOKUDA, JILL NAOMI",HI,02,DEMOCRATIC PARTY,House,Incumbent,N,Democrat,jill  tokuda,jilltokuda,T000487,1445657911368192000
+H2HI02581,"TOKUDA, JILL NAOMI",HI,02,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,jill  tokuda,RepJillTokuda,T000487,1610730477563805696
+H2HI02581,"TOKUDA, JILL NAOMI",HI,02,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,jill  tokuda,tokudaforhawaii,T000487,1610730477563805696
+H2HI02581,"TOKUDA, JILL NAOMI",HI,02,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,jill  tokuda,jilltokuda,T000487,1610730477563805696
+H2HI02581,"TOKUDA, JILL NAOMI",HI,02,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,jill  tokuda,RepJillTokuda,T000487,1445657911368192000
+H2HI02581,"TOKUDA, JILL NAOMI",HI,02,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,jill  tokuda,tokudaforhawaii,T000487,1445657911368192000
+H2HI02581,"TOKUDA, JILL NAOMI",HI,02,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,jill  tokuda,jilltokuda,T000487,1445657911368192000
 H2FL15191,"TOLEDO, JACKIE",FL,15,REPUBLICAN PARTY,House,Challenger,P,Republican,jackie  toledo,NA,NA,
 H2PA17129,"TOMSHAY, JAMES",PA,17,REPUBLICAN PARTY,House,Open seat,N,Republican,james  tomshay,NA,NA,
 H8NY21203,"TONKO, PAUL DAVID",NY,20,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,paul  tonko,reppaultonko,T000469,84119348
@@ -4559,8 +4579,8 @@ H2CA50026,"VARGAS, JUAN C.",CA,52,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,ju
 H2CA50026,"VARGAS, JUAN C.",CA,52,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,juan  vargas,JuanVargas4CA,V000130,1260172386
 H2CA50026,"VARGAS, JUAN C.",CA,52,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,juan  vargas,RepJuanVargas,V000130,360688582
 H2CA50026,"VARGAS, JUAN C.",CA,52,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,juan  vargas,JuanVargas4CA,V000130,360688582
-H2NY08153,"VASQUEZ, CLEMENTINE",NY,08,DEMOCRATIC PARTY,House,Challenger,N,Democrat,clementine  vasquez,NA,NA,
 H2TX08141,"VASQUEZ, CLEMENTINE",TX,08,DEMOCRATIC PARTY,House,Open seat,N,Democrat,clementine  vasquez,NA,NA,
+H2NY08153,"VASQUEZ, CLEMENTINE",NY,08,DEMOCRATIC PARTY,House,Challenger,N,Democrat,clementine  vasquez,NA,NA,
 H2NM02191,"VASQUEZ, GABRIEL",NM,02,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,gabriel  vasquez,gabe_nm,V000136,2151608598
 H2NY08146,"VASQUEZ, JORDAN",NY,08,DEMOCRATIC PARTY,House,Challenger,N,Democrat,jordan  vasquez,NA,NA,
 H2CA52162,"VAZQUEZ, JOAQUIN",CA,52,DEMOCRATIC PARTY,House,Challenger,C,Democrat,joaquin  vazquez,NA,NA,
@@ -4588,7 +4608,7 @@ H2NV01264,"VILELA, AMY",NV,01,DEMOCRATIC PARTY,House,Challenger,P,Democrat,amy  
 H2MD05551,"VILLANOVA, TANNIS",MD,05,REPUBLICAN PARTY,House,Challenger,N,Republican,tannis  villanova,NA,NA,
 H2TX21185,"VILLARREAL, RICARDO",TX,21,DEMOCRATIC PARTY,House,Challenger,P,Democrat,ricardo  villarreal,RVillarrealTX21,NA,
 H2TX15195,"VILLARREAL RIGNEY, JOHN",TX,15,DEMOCRATIC PARTY,House,Challenger,P,Democrat,john  rigney,RigneyTeam,NA,
-H2NC08235,"VILLAVERDE, CHRISTINE",NC,02,REPUBLICAN PARTY,House,Challenger,N,Republican,christine  villaverde,Villaverde4NC,NA,
+H2NC08235,"VILLAVERDE, CHRISTINE",NC,02,REPUBLICAN PARTY,House,Challenger,C,Republican,christine  villaverde,Villaverde4NC,NA,
 H2IL03154,"VILLEGAS, GILBERT",IL,03,DEMOCRATIC PARTY,House,Challenger,P,Democrat,gilbert  villegas,NA,NA,
 H1FL20011,"VILME, PRADEL",FL,20,DEMOCRATIC PARTY,House,Open seat,C,Democrat,pradel  vilme,NA,NA,
 H2VA08145,"VIRASINGH, VICTORIA",VA,08,DEMOCRATIC PARTY,House,Challenger,P,Democrat,victoria  virasingh,Victoria4VA,NA,
@@ -4645,7 +4665,8 @@ H2CO08152,"WARD, RICHARD",CO,08,LIBERTARIAN PARTY,House,Challenger,N,Other,richa
 H2OR12015,"WARD, STEFAN MR",OR,12,INDEPENDENT CONSERVATIVE DEMOCRATIC,House,Challenger,N,Other,stefan  ward,NA,NA,
 H2AL05128,"WARDYNSKI, CASEY",AL,05,REPUBLICAN PARTY,House,Open seat,C,Republican,casey  wardynski,FriendsOfCasey,NA,
 H2MD04307,"WARNER, JEFF",MD,04,REPUBLICAN PARTY,House,Open seat,P,Republican,jeff  warner,NA,NA,
-H2AL05177,"WARNER-STANTON, KATHY L",AL,05,DEMOCRATIC PARTY,House,Open seat,P,Democrat,kathy  warnerstanton,NA,NA,
+H2AL05177,"WARNER-STANTON, KATHY L",AL,05,DEMOCRATIC PARTY,House,Open seat,P,Democrat,kathy  warnerstanton,Kathy_Congress,NA,
+H2AL05177,"WARNER-STANTON, KATHY L",AL,05,DEMOCRATIC PARTY,House,Open seat,P,Democrat,kathy  warnerstanton,klws12,NA,
 H0WI06194,"WASHBURN, AMY IRENE MS.",WI,06,DEMOCRATIC PARTY,House,Challenger,P,Democrat,amy  washburn,NA,NA,
 H2KY04253,"WASHINGTON, GEORGE",KY,04,REPUBLICAN PARTY,House,Challenger,N,Republican,george  washington,FokingGeorge,NA,
 H8MD05046,"WASHINGTON, GREGORY KEITH",MD,05,DEMOCRATIC PARTY,House,Challenger,N,Democrat,gregory  washington,NA,NA,
@@ -4658,7 +4679,7 @@ H2MO07168,"WASSON, JAY",MO,07,REPUBLICAN PARTY,House,Open seat,C,Republican,jay 
 H2NC06171,"WATERCOTT, THOMAS",NC,06,LIBERTARIAN PARTY,House,Challenger,P,Other,thomas  watercott,NA,NA,
 H2RI01202,"WATERS, ALLEN R",RI,01,REPUBLICAN PARTY,House,Challenger,P,Republican,allen  waters,NA,NA,
 H2CO01173,"WATERS, DOM",CO,01,OTHER,House,Challenger,N,Other,dom  waters,NA,NA,
-H2FL03189,"WATERS, JUSTIN JAMES MR.",FL,03,REPUBLICAN PARTY,House,Challenger,C,Republican,justin  waters,Waters4Congress,NA,
+H2FL03189,"WATERS, JUSTIN JAMES MR.",FL,03,REPUBLICAN PARTY,House,Challenger,C,Republican,justin  waters,justinwaterslaw,NA,
 H4CA23011,"WATERS, MAXINE MS",CA,43,DEMOCRATIC PARTY,House,Incumbent,N,Democrat,maxine  waters,RepMaxineWaters,W000187,36686040
 H4CA23011,"WATERS, MAXINE MS",CA,43,DEMOCRATIC PARTY,House,Incumbent,N,Democrat,maxine  waters,MaxineWaters,W000187,36686040
 H4CA23011,"WATERS, MAXINE MS",CA,43,DEMOCRATIC PARTY,House,Incumbent,N,Democrat,maxine  waters,RepMaxineWaters,W000187,3166120541
@@ -4698,7 +4719,7 @@ H6VT00160,"WELCH, PETER",VT,00,DEMOCRATIC PARTY,House,Incumbent,P,Democrat,peter
 H2TX07093,"WELCH, RICHARD MR",TX,38,REPUBLICAN PARTY,House,Open seat,N,Republican,richard  welch,NA,NA,
 H2TX08307,"WELLINGTON, JESSICA",TX,08,REPUBLICAN PARTY,House,Open seat,C,Republican,jessica  wellington,jwellingtontx,NA,
 H2TX24189,"WELLINGTON, JETHRO MR",TX,24,INDEPENDENT CONSERVATIVE DEMOCRATIC,House,Challenger,N,Other,jethro  wellington,NA,NA,
-H2CA53038,"WELLS, BILL D.",CA,51,REPUBLICAN PARTY,House,Challenger,N,Republican,bill  wells,NA,NA,
+H2CA53038,"WELLS, BILL D.",CA,51,REPUBLICAN PARTY,House,Challenger,C,Republican,bill  wells,NA,NA,
 H2FL08089,"WELLS, PATRICK LEE",FL,08,REPUBLICAN PARTY,House,Challenger,N,Republican,patrick  wells,NA,NA,
 H2NY22238,"WELLS, STEVEN M",NY,22,REPUBLICAN PARTY,House,Challenger,P,Republican,steven  wells,NA,NA,
 H8FL03020,"WELLS, TOM BECKWITH DR.",FL,03,DEMOCRATIC PARTY,House,Challenger,P,Democrat,tom  wells,TomWells2022,NA,
@@ -4766,7 +4787,8 @@ H2CO03195,"WILHELM, COLIN",CO,03,DEMOCRATIC PARTY,House,Challenger,P,Democrat,co
 H2MD05536,"WILKES, MCKAYLA NICOLLETTE",MD,05,DEMOCRATIC PARTY,House,Challenger,P,Democrat,mckayla  wilkes,MeetMckayla,NA,
 H0MO03237,"WILKINSON, BRANDON",MO,03,REPUBLICAN PARTY,House,Challenger,P,Republican,brandon  wilkinson,Brawil86,NA,
 H2UT03298,"WILLIAMS, ARCHIE",UT,03,DEMOCRATIC PARTY,House,Challenger,N,Democrat,archie  williams,NA,NA,
-H2NY22212,"WILLIAMS, BRANDON MCDONALD",NY,22,REPUBLICAN PARTY,House,Incumbent,C,Republican,brandon  williams,NA,W000828,1496341259539161088
+H2NY22212,"WILLIAMS, BRANDON MCDONALD",NY,22,REPUBLICAN PARTY,House,Incumbent,C,Republican,brandon  williams,RepWilliams,W000828,1496341259539161088
+H2NY22212,"WILLIAMS, BRANDON MCDONALD",NY,22,REPUBLICAN PARTY,House,Incumbent,C,Republican,brandon  williams,Brandon4ny22,W000828,1496341259539161088
 H2IL01372,"WILLIAMS, CHARISE A",IL,01,DEMOCRATIC PARTY,House,Open seat,P,Democrat,charise  williams,putyou1st,NA,
 H2IL01372,"WILLIAMS, CHARISE A",IL,01,DEMOCRATIC PARTY,House,Open seat,P,Democrat,charise  williams,charise4commish,NA,
 H2NE02140,"WILLIAMS, CORNELIUS F",NE,02,DEMOCRATIC PARTY,House,Challenger,N,Democrat,cornelius  williams,NA,NA,
@@ -4775,7 +4797,7 @@ H2NJ19023,"WILLIAMS, GABRIEL VINCENT MR",NJ,19,INDEPENDENT CONSERVATIVE DEMOCRAT
 H2NC01263,"WILLIAMS, HENRY II",NC,01,REPUBLICAN PARTY,House,Open seat,N,Republican,henry  williams,NA,NA,
 H2AK00499,"WILLIAMS, JASON G.",AK,00,,House,Open seat,N,Other,jason  williams,NA,NA,
 H2DC01029,"WILLIAMS, KELLY MIKEL",DC,00,DEMOCRATIC PARTY,House,Challenger,P,Democrat,kelly  williams,NA,NA,
-H2NH02260,"WILLIAMS, LILY TANG",NH,02,REPUBLICAN PARTY,House,Challenger,P,Republican,lily  williams,Lily4Liberty,NA,
+H2NH02260,"WILLIAMS, LILY TANG",NH,02,REPUBLICAN PARTY,House,Challenger,N,Republican,lily  williams,Lily4Liberty,NA,
 H2NY13120,"WILLIAMS, LINDSEY DEMART",NY,13,DEMOCRATIC PARTY,House,Challenger,N,Democrat,lindsey  williams,NA,NA,
 H2TN08184,"WILLIAMS, LYNNETTE",TN,08,DEMOCRATIC PARTY,House,Challenger,N,Democrat,lynnette  williams,NA,NA,
 H2IL16065,"WILLIAMS, MARSHA VIRIGINIA",IL,17,DEMOCRATIC PARTY,House,Open seat,P,Democrat,marsha  williams,CongressMarsha,NA,
@@ -4806,10 +4828,12 @@ H2IL14128,"WILSON, BARRY",IL,14,INDEPENDENT,House,Challenger,P,Other,barry  wils
 H2NY01265,"WILSON, CELINA MRS.",NY,01,REPUBLICAN PARTY,House,Open seat,P,Republican,celina  wilson,NA,NA,
 H2CA26125,"WILSON, DANIEL",CA,26,INDEPENDENT,House,Challenger,N,Other,daniel  wilson,NA,NA,
 H2CA12265,"WILSON, ERIC",CA,12,DEMOCRATIC PARTY,House,Challenger,N,Democrat,eric  wilson,NA,NA,
-H0FL17068,"WILSON, FREDERICA S.",FL,24,DEMOCRATIC PARTY,House,Incumbent,N,Democrat,frederica  wilson,RepWilson,W000808,234014087
-H2SC02059,"WILSON, JOE THE HON.",SC,02,REPUBLICAN PARTY,House,Incumbent,N,Republican,joe  wilson,NA,W000795,254082173
-H2SC02059,"WILSON, JOE THE HON.",SC,02,REPUBLICAN PARTY,House,Incumbent,N,Republican,joe  wilson,NA,W000795,15116570
-H2OH04164,"WILSON, TAMARA",OH,04,DEMOCRATIC PARTY,House,Challenger,N,Democrat,tamara  wilson,Tamie_Wilson_,NA,
+H0FL17068,"WILSON, FREDERICA S.",FL,24,DEMOCRATIC PARTY,House,Incumbent,C,Democrat,frederica  wilson,RepWilson,W000808,234014087
+H2SC02059,"WILSON, JOE THE HON.",SC,02,REPUBLICAN PARTY,House,Incumbent,N,Republican,joe  wilson,RepJoeWilson,W000795,254082173
+H2SC02059,"WILSON, JOE THE HON.",SC,02,REPUBLICAN PARTY,House,Incumbent,N,Republican,joe  wilson,TeamJoeWilson,W000795,254082173
+H2SC02059,"WILSON, JOE THE HON.",SC,02,REPUBLICAN PARTY,House,Incumbent,N,Republican,joe  wilson,RepJoeWilson,W000795,15116570
+H2SC02059,"WILSON, JOE THE HON.",SC,02,REPUBLICAN PARTY,House,Incumbent,N,Republican,joe  wilson,TeamJoeWilson,W000795,15116570
+H2OH04164,"WILSON, TAMARA",OH,04,DEMOCRATIC PARTY,House,Challenger,C,Democrat,tamara  wilson,Tamie_Wilson_,NA,
 H2OH04156,"WILSON, TAMIE",OH,04,DEMOCRATIC PARTY,House,Challenger,N,Democrat,tamie  wilson,Tamie_Wilson_,NA,
 H2AK00549,"WILSON, TREMAYNE",AK,00,NONPARTISAN,House,Open seat,N,Other,tremayne  wilson,NA,NA,
 H2FL10283,"WIMBISH, CALVIN B MR",FL,10,REPUBLICAN PARTY,House,Open seat,P,Republican,calvin  wimbish,cbwimbish,NA,
@@ -4841,7 +4865,7 @@ H0AR03055,"WOMACK, STEPHEN A THE HON",AR,03,REPUBLICAN PARTY,House,Incumbent,C,R
 H0AR03055,"WOMACK, STEPHEN A THE HON",AR,03,REPUBLICAN PARTY,House,Incumbent,C,Republican,stephen  womack,womack4congress,W000809,234469322
 H0AR03055,"WOMACK, STEPHEN A THE HON",AR,03,REPUBLICAN PARTY,House,Incumbent,C,Republican,stephen  womack,rep_stevewomack,W000809,112651673
 H0AR03055,"WOMACK, STEPHEN A THE HON",AR,03,REPUBLICAN PARTY,House,Incumbent,C,Republican,stephen  womack,womack4congress,W000809,112651673
-H2CA14196,"WONG, THOMAS",CA,14,REPUBLICAN PARTY,House,Open seat,P,Republican,thomas  wong,NA,NA,
+H2CA14196,"WONG, THOMAS",CA,14,REPUBLICAN PARTY,House,Open seat,P,Republican,thomas  wong,Wong_4_Congress,NA,
 H2PA18234,"WOODARD, JEFF",PA,18,DEMOCRATIC PARTY,House,Open seat,P,Democrat,jeff  woodard,NA,NA,
 H0AZ03461,"WOOD, DANIEL",AZ,03,REPUBLICAN PARTY,House,Challenger,N,Republican,daniel  wood,NA,NA,
 H2MI12164,"WOODDELL, MICHELLE",MI,12,DEMOCRATIC PARTY,House,Challenger,C,Democrat,michelle  wooddell,NA,NA,
@@ -4879,11 +4903,11 @@ H6AK00045,"YOUNG, DONALD E",AK,00,REPUBLICAN PARTY,House,Incumbent,P,Republican,
 H2IL16115,"YOUNG, GENO MR.",IL,01,REPUBLICAN PARTY,House,Open seat,N,Republican,geno  young,NA,NA,
 H4KY06163,"YOUNG, GEOFFREY M",KY,06,DEMOCRATIC PARTY,House,Challenger,P,Democrat,geoffrey  young,GeoffYoung4KY,NA,
 H2MO04116,"YOUNG, HERSCHEL L",MO,05,REPUBLICAN PARTY,House,Challenger,N,Republican,herschel  young,NA,NA,
-H2CA24195,"YOUNG, KENNETH",CA,24,INDEPENDENT,House,Challenger,N,Other,kenneth  young,NA,NA,
 H2CA24187,"YOUNG, KENNETH",CA,24,INDEPENDENT,House,Challenger,N,Other,kenneth  young,NA,NA,
+H2CA24195,"YOUNG, KENNETH",CA,24,INDEPENDENT,House,Challenger,N,Other,kenneth  young,NA,NA,
 H2FL23104,"YOUNG, RUBIN MR.",FL,25,REPUBLICAN PARTY,House,Challenger,C,Republican,rubin  young,NA,NA,
 H2MS03136,"YOUNG, SHUWASKI",MS,03,DEMOCRATIC PARTY,House,Challenger,P,Democrat,shuwaski  young,NA,NA,
-H2CA14238,"YOUNG, TOM",CA,14,REPUBLICAN PARTY,House,Open seat,N,Republican,tom  young,NA,NA,
+H2CA14238,"YOUNG, TOM",CA,14,REPUBLICAN PARTY,House,Open seat,N,Republican,tom  young,Wong_4_Congress,NA,
 H4GA12051,"YU, EUGENE",GA,06,REPUBLICAN PARTY,House,Challenger,P,Republican,eugene  yu,NA,NA,
 H2CO02197,"YURASH, STEPHEN ANDREW",CO,02,UNAFFILIATED,House,Challenger,P,Other,stephen  yurash,NA,NA,
 H2NY01216,"ZAJIC, ALEXANDRE",NY,01,DEMOCRATIC PARTY,House,Open seat,N,Democrat,alexandre  zajic,NA,NA,
@@ -4897,7 +4921,8 @@ H2OH06128,"ZELENITZ, GREGORY M.",OH,06,REPUBLICAN PARTY,House,Challenger,N,Repub
 H2NY14169,"ZHERKA, HASIME SAMANTHA MRS.",NY,14,NO PARTY AFFILIATION,House,Challenger,N,Other,hasime  zherka,NA,NA,
 H2GA05166,"ZIMM, CHRISTIAN GERARD",GA,05,REPUBLICAN PARTY,House,Challenger,P,Republican,christian  zimm,ChristianZimm_,NA,
 H2CO03260,"ZIMMERMAN, MARINA",CO,03,REPUBLICAN PARTY,House,Challenger,P,Republican,marina  zimmerman,NA,NA,
-H2NY03188,"ZIMMERMAN, ROBERT",NY,03,DEMOCRATIC PARTY,House,Open seat,P,Democrat,robert  zimmerman,NA,NA,
+H2NY03188,"ZIMMERMAN, ROBERT",NY,03,DEMOCRATIC PARTY,House,Open seat,P,Democrat,robert  zimmerman,ZimmermanforNY,NA,
+H2NY03188,"ZIMMERMAN, ROBERT",NY,03,DEMOCRATIC PARTY,House,Open seat,P,Democrat,robert  zimmerman,ZimmermanRob,NA,
 H2CA01235,"ZINK, DAVID LEON MR.",CA,01,DEMOCRATIC PARTY,House,Challenger,C,Democrat,david  zink,NA,NA,
 H4MT01041,"ZINKE, RYAN K",MT,01,REPUBLICAN PARTY,House,Incumbent,C,Republican,ryan  zinke,RepRyanZinke,Z000018,1906282568
 H4MT01041,"ZINKE, RYAN K",MT,01,REPUBLICAN PARTY,House,Incumbent,C,Republican,ryan  zinke,RyanZinke,Z000018,1906282568

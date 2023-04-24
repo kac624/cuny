@@ -18,10 +18,6 @@ Config
 ```{r setup, message = FALSE}
 library(tidyverse)
 library(openintro)
-# library(infer)
-# library(cowplot)
-# library(kableExtra)
-set.seed(789)
 ```
 
 Data
@@ -56,11 +52,11 @@ What type of plot would you use to display the relationship between the personal
 #### Response
 
 ```{r}
-ggplot(hfi, aes(pf_score, pf_expression_control)) +
+ggplot(hfi, aes(pf_expression_control, pf_score)) +
   geom_point()
 ```
 
-A scatter plot is a helpful way to explore potential linear relationships between two variables. Typically, the response variable takes the x axis, and the predictor takes the y axis. There does appear to be a reasonably linear, positive relationship between the personal freedom score and the expression control score. So, a linear model may be appropriate to predict `pf_score` based on `pf_expression_control`.
+A scatter plot is a helpful way to explore potential linear relationships between two variables. Typically, the response variable takes the y axis, and the predictor takes the x axis. There does appear to be a reasonably linear, positive relationship between the personal freedom score and the expression control score. So, a linear model may be appropriate to predict `pf_score` based on `pf_expression_control`.
 
 ---
 
@@ -78,7 +74,14 @@ hfi %>%
 
 #### Response
 
-The relationship appears positive. That is, as `pf_expression_control` increases, so does `pf_score`. The relationship appears relatively strong, as indicated by the correlation coefficient of ~0.80. There are, however,   
+The relationship appears positive. That is, as `pf_expression_control` increases, so does `pf_score`. The relationship appears relatively strong, as indicated by the correlation coefficient of ~0.80. There is, however, significant spread around any best fit line. As such, I would expect a linear regression to have a relative low $R^2$.
+
+```{r}
+ggplot(hfi, aes(pf_expression_control, pf_score)) +
+  geom_point() +
+  geom_smooth(method = 'lm', se = FALSE)
+```
+
 
 ---
 
@@ -88,13 +91,18 @@ The relationship appears positive. That is, as `pf_expression_control` increases
 
 Using plot_ss, choose a line that does a good job of minimizing the sum of squares. Run the function several times. What was the smallest sum of squares that you got? How does it compare to your neighbors?
 
-#### Response
-
 ```{r}
+hfi_clean <- hfi %>% filter(!is.na(pf_score))
 
+DATA606::plot_ss(x = hfi_clean$pf_expression_control, 
+                 y = hfi_clean$pf_score, 
+                 showSquares = TRUE)
 ```
 
-TBD.
+
+#### Response
+
+The lowest sum of squares I got when manually choosing two points was ~5068, with ann intercept of 4.9872 and a $\beta$ of 0.4861. As indicated above, however, the true minimized sum of squares with the best fit line is much lower.
 
 ---
 
@@ -106,7 +114,13 @@ Fit a new model that uses pf_expression_control to predict hf_score, or the tota
 
 #### Response
 
-TBD
+```{r}
+model_fit <- lm(hf_score ~ pf_expression_control, data = hfi)
+
+summary(model_fit)
+```
+
+The positive slope indicates a positive correlation between `pf_expression_control` and `hf_score`. In other words, as `pf_expression_control` increases, so does `hf_score`. So, countries with less political pressure on media content tend to have high total human freedom scores.
 
 ---
 
@@ -116,13 +130,28 @@ TBD
 
 If someone saw the least squares regression line and not the actual data, how would they predict a country’s personal freedom school for one with a 6.7 rating for pf_expression_control? Is this an overestimate or an underestimate, and by how much? In other words, what is the residual for this prediction?
 
+```{r}
+m1 <- lm(pf_score ~ pf_expression_control, data = hfi)
+```
+
+
 #### Response
 
 ```{r}
-
+predict(m1, newdata = data.frame(pf_expression_control = 6.7))
 ```
 
-TBD
+The model would predict a `pf_score` of ~7.91. We can pinpoint this location on the plot below.
+
+```{r}
+ggplot(hfi, aes(pf_expression_control, pf_score)) +
+  geom_point() +
+  geom_smooth(method = 'lm', se = FALSE) +
+  geom_hline(yintercept = 7.91) +
+  geom_vline(xintercept = 6.70)
+```
+
+It appears there are observations both above and below the line at this point. So, while there is some error associated with this prediction, we cannot confidently say whether it is an over or underprediction.
 
 ---
 
@@ -132,13 +161,18 @@ TBD
 
 Is there any apparent pattern in the residuals plot? What does this indicate about the linearity of the relationship between the two variables?
 
-#### Response
-
-```{r, warning = FALSE}
-
+```{r}
+ggplot(data = m1, aes(x = .fitted, y = .resid)) +
+  geom_point() +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  xlab("Fitted values") +
+  ylab("Residuals")
 ```
 
-TBD
+
+#### Response
+
+The residuals appear evenly distributed above and below zero, with no apparent pattern. This lends support to the notion that the relationship between the two variables is indeed linear.
 
 ---
 
@@ -148,13 +182,18 @@ TBD
 
 Based on the histogram and the normal probability plot, does the nearly normal residuals condition appear to be met?
 
-#### Response
-
 ```{r}
+ggplot(data = m1, aes(x = .resid)) +
+  geom_histogram(bins = 25) +
+  xlab("Residuals")
 
+ggplot(data = m1, aes(sample = .resid)) +
+  stat_qq()
 ```
 
-TBD
+#### Response
+
+The histogram appears almost normal and centered on zero, though there is a slight negative skew, and some potential outliers in the right tail. This is confirmed in the qq plot. Both plots, however, indicate sufficient normality in terms of residual analysis.
 
 ---
 
@@ -164,13 +203,18 @@ TBD
 
 Based on the residuals vs. fitted plot, does the constant variability condition appear to be met?
 
-#### Response
-
 ```{r}
-
+ggplot(data = m1, aes(x = .fitted, y = .resid)) +
+  geom_point() +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  xlab("Fitted values") +
+  ylab("Residuals")
 ```
 
-TBD
+
+#### Response
+
+Variance of residuals appears sufficiently constant to meet the condition.
 
 ---
 
@@ -178,15 +222,17 @@ TBD
 
 #### Question
 
-Choose another freedom variable and a variable you think would strongly correlate with it.. Produce a scatterplot of the two variables and fit a linear model. At a glance, does there seem to be a linear relationship?
+Choose another freedom variable and a variable you think would strongly correlate with it. Produce a scatterplot of the two variables and fit a linear model. At a glance, does there seem to be a linear relationship?
 
 #### Response
 
 ```{r}
-
+ggplot(hfi, aes(ef_trade_tariffs, ef_trade)) +
+  geom_point() +
+  geom_smooth(method = 'lm', se = FALSE)
 ```
 
-TBD
+There does indeed appear to be a linear relationship between a country's economic freedom trade score and its tariffs score.
 
 ---
 
@@ -194,16 +240,23 @@ TBD
 
 #### Question
 
-How does this relationship compare to the relationship between pf_expression_control and pf_score? Use the R2
- values from the two model summaries to compare. Does your independent variable seem to predict your dependent one better? Why or why not?
+How does this relationship compare to the relationship between pf_expression_control and pf_score? Use the $R^2$ values from the two model summaries to compare. Does your independent variable seem to predict your dependent one better? Why or why not?
 
 #### Response
 
 ```{r}
+ef_model <- lm(ef_trade ~ ef_trade_tariffs, data = hfi)
 
+cat('EF model results',
+    '\nR-squared: ', summary(ef_model)$r.squared,
+    '\nAdjusted R-squared: ', summary(ef_model)$adj.r.squared,
+    '\nPF model results',
+    '\nR-squared: ', summary(m1)$r.squared,
+    '\nAdjusted R-squared: ', summary(m1)$adj.r.squared
+)
 ```
 
-TBD
+The `pf_score` model has a significantly higher $R^2$, indicating that `pf_expression_control` is a better linear predictor of `pf_score` than `ef_trade_tariffs` is for `ef_trade`.
 
 ---
 
@@ -216,9 +269,47 @@ What’s one freedom relationship you were most surprised about and why? Display
 #### Response
 
 ```{r}
-
+ggplot(hfi, aes(pf_score, ef_score)) +
+  geom_point() +
+  geom_smooth(method = 'lm', se = FALSE)
 ```
 
-TBD
+I was surprised that the EF and PF scores were not more tightly correlated. Yes, there is a clear linear relationship between the two variables, as shown by the diagnostics below.
+
+```{r}
+ef_pf_model <- lm(ef_trade ~ pf_score, data = hfi)
+
+ggplot(data = ef_pf_model, aes(x = .fitted, y = .resid)) +
+  geom_point() +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  xlab("Fitted values") +
+  ylab("Residuals")
+
+ggplot(data = ef_pf_model, aes(x = .resid)) +
+  geom_histogram(bins = 25) +
+  xlab("Residuals")
+
+ggplot(data = ef_pf_model, aes(sample = .resid)) +
+  stat_qq()
+```
+
+Residuals appear relatively normal and centered on zero, despite some outliers in the left tail. Variability also appears sufficiently constant, and no pattern emerges in the residual plot to indicate a non-linear relationship. So, we can conclude a linear relationship exists. What's surprising is the relatively poor performance of the model, as indicated by the low $R^2$.
+
+```{r}
+summary(ef_pf_model)
+```
+
+I expected the two scores to be very tightly correlated, but the low $R^2$ indicates otherwise. I suspect the relationship is complicated by states that have worked to create pro-business environments while still enforcing tight restrictions on the political freedoms of its citizens (e.g. Gulf states, Hong Kong, Singapore).
+
+```{r}
+hfi %>%
+  mutate(pf_ef_diff = pf_score - ef_score) %>%
+  filter(year == 2016) %>%
+  arrange(pf_ef_diff) %>%
+  select(countries, pf_score, ef_score, pf_ef_diff) %>%
+  head(10)
+```
+
+My above prediction appears partially true, but there appear to be more prominent factors driving discrepancies between political and economic freedoms scores. Conflict appears to be key, as evidenced by the fact that Yemen, Syria and Iraq (all of which experienced conflict in 2016) have the greatest discrepancies. As I predicted, we do also see some states that have a heavy pro-business lean coupled with tight cultural restrictions (e.g. UAE, Saudi, Qatar).
 
 ---
