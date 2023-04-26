@@ -1,5 +1,5 @@
 ---
-title: "EC_Week11_GlobalBaseline"
+title: "Global Baseline Estimator for Movie Recommendations"
 author: "Keith Colella"
 date: "`r Sys.Date()`"
 output: html_document
@@ -162,7 +162,7 @@ gbe2(1,'Toy Story (1995)')
 
 Finally, we can check out the error (RMSE) using the same approach as above.
 
-```{r, eval = FALSE}
+```{r, eval = TRUE}
 comparison2 <- data.frame()
 
 for (movie in colnames(MovieLense)) {
