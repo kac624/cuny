@@ -1,0 +1,188 @@
+---
+title: "EC_Week11_GlobalBaseline"
+author: "Keith Colella"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, message = FALSE}
+library(tidyverse)
+library(getPass)
+library(RMySQL)
+library(recommenderlab)
+```
+
+## Read in Data
+
+We'll start by using the original movie ratings from the Week 2 assignment. As before, I'll read this in from a local database.
+
+```{r}
+pwd <- getPass(msg = "Please enter MySQL root password: ",
+               noblank = TRUE,
+               forcemask = TRUE)
+
+dBconnection <- dbConnect(RMySQL::MySQL(),
+                        dbname = 'movie_ratings',
+                        host = 'localhost',
+                        port = 3306,
+                        user = 'root',
+                        password = pwd)
+
+ratings <- dbGetQuery(dBconnection, "select * from ratings")
+
+print(ratings) 
+```
+
+I'll perform some clean-up to structure the dataframe like a matrix. This structure will facilitate some of the calculations below.
+
+```{r}
+rownames(ratings) <- ratings$ID
+
+ratings <- select(ratings, -ID, -ReviewerName)
+```
+
+I can now calculate the average rating for each reviewer and each movie, as well as the total average for *all* ratings.
+
+```{r}
+movie_avgs = list()
+
+for (i in colnames(ratings)) {
+  avg <- mean(ratings[,i], na.rm = TRUE)
+  movie_avgs[i] <- avg
+}
+
+reviewer_avgs = list()
+
+for (i in rownames(ratings)) {
+  avg <- mean(as.numeric(ratings[i,]), na.rm = TRUE)
+  reviewer_avgs[i] <- avg
+}
+
+total_avg = mean(data.matrix(ratings), na.rm = TRUE)
+```
+
+```{r}
+movie_avgs = colMeans(ratings, na.rm = TRUE)
+reviewer_avgs = rowMeans(ratings, na.rm = TRUE)
+total_avg = mean(ratings, na.rm  = TRUE)
+```
+
+Next, I'll define a function to perform the Global Baseline Estimate calculation for a single reviewer-movie combination.
+
+```{r}
+gbe <- function(reviewer_ID, movie) {
+  
+  # avg_movie_rating_minus_total <- unlist(movie_avgs)[movie] - 
+  avg_movie_rating_minus_total <- movie_avgs[movie] - 
+    total_avg
+  # avg_reviewer_rating_minus_total <- unlist(reviewer_avgs)[reviewer_ID] - 
+  avg_reviewer_rating_minus_total <- reviewer_avgs[reviewer_ID] - 
+    total_avg
+  estimate <- total_avg + 
+    avg_movie_rating_minus_total + 
+    avg_reviewer_rating_minus_total
+  
+  return(unname(estimate))
+}
+```
+
+Let's try it out!
+
+```{r}
+gbe('1','Avatar')
+gbe('3','Whale')
+gbe('4','Everything')
+```
+
+Looks good! I want to get a sense of how close these predictions are to the actual ratings in this dataset. So, I'll use the above function to generate predictions for all users and movies, then find the "error" or difference between the two (where actual ratings are available). Finally, I can calculate the root mean squared error to get a sense of predictive accuracy.
+
+```{r}
+comparison <- data.frame()
+
+for (movie in colnames(ratings)) {
+  df <- data.frame(matrix(nrow = 5, ncol = 0))
+  i <- 1
+  for (reviewer in rownames(ratings)) {
+    df[i,'ID'] <- reviewer
+    df[i,'actual'] <- ratings[reviewer,movie]
+    df[i,'predicted'] <- gbe(reviewer,movie)
+    i <- i + 1
+  }
+  df[, 'movie'] <- movie
+  comparison <- rbind(comparison, df)
+}
+
+comparison <- comparison %>%
+  mutate(sq_error = (predicted - actual)^2)
+
+cat('Root Mean Squared Error of predicted ratings:',
+    sqrt(mean(comparison$sq_error, na.rm = TRUE)))
+```
+
+An RMSE of 1.13 on a 5-point scale represents 23% error. Not bad for a simple model!
+
+I'm curious if a larger dataset might improve predictive accuracy. The `recommenderlab` library has a dataset, MovieLense, containing ~100,000 ratings (1-5) from 943 users on 1664 movies. Details are available here: https://rdrr.io/cran/recommenderlab/man/MovieLense.html.
+
+I'll load that in and take a quick look.
+
+```{r}
+data(MovieLense)
+
+as(MovieLense[1:5,1:5], "matrix")
+```
+
+Let's deefine another global baseline estimate function for that works on the dataset's unique structure (realRatingMatrix).
+
+```{r}
+movie_avgs2 = colMeans(MovieLense, na.rm = TRUE)
+reviewer_avgs2 = rowMeans(MovieLense, na.rm = TRUE)
+total_avg2 = mean(as(MovieLense, "matrix"), na.rm  = TRUE)
+
+####
+
+gbe2 <- function(reviewer_ID, movie) {
+  
+  avg_movie_rating_minus_total <- movie_avgs2[movie] - 
+    total_avg2
+  avg_reviewer_rating_minus_total <- reviewer_avgs2[reviewer_ID] - 
+    total_avg2
+  estimate <- total_avg2 + 
+    avg_movie_rating_minus_total + 
+    avg_reviewer_rating_minus_total
+  
+  return(unname(estimate))
+}
+```
+
+It's alive!
+
+```{r}
+gbe2(1,'Toy Story (1995)')
+```
+
+Finally, we can check out the error (RMSE) using the same approach as above.
+
+```{r, eval = FALSE}
+comparison2 <- data.frame()
+
+for (movie in colnames(MovieLense)) {
+  df <- data.frame(matrix(nrow = 0, ncol = 0))
+  i <- 1
+  for (reviewer in rownames(MovieLense)) {
+    df[i,'ID'] <- reviewer
+    df[i,'actual'] <- as(MovieLense[reviewer,movie], "matrix")
+    df[i,'predicted'] <- gbe2(reviewer,movie)
+    i <- i + 1
+  }
+  df[, 'movie'] <- movie
+  comparison2 <- rbind(comparison2, df)
+}
+
+comparison2 <- comparison2 %>%
+  mutate(sq_error = (predicted - actual)^2)
+
+cat('Root Mean Squared Error of predicted ratings:',
+    sqrt(mean(comparison2$sq_error, na.rm = TRUE)))
+```
+
+We do see a ~17% decrease in RMSE from 1.126594 to 0.9381032. Not bad!

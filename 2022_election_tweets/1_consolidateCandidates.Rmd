@@ -91,7 +91,7 @@ https://ballotpedia.org/List_of_congressional_candidates_in_the_2022_elections
 ballotpedia <- read_csv('data/ballotpedia_scrape2022.csv')
 
 ballotpedia <- ballotpedia[!duplicated(ballotpedia),] %>%
-  filter(twitter != '[]') %>%
+  # filter(twitter != '[]') %>%
   mutate(district = if_else(is.na(district), '00', sprintf("%02d", district)),
          state = str_replace_all(state, '_', ' '),
          twitter_name = str_extract_all(twitter, '(?<=twitter.com/)\\w+(?=\')'))
@@ -108,7 +108,8 @@ candidates <- og_candidates
 ballotpedia <- og_ballotpedia
 
 candidates <- candidates %>%
-  mutate(party_simple = case_when(party == 'REPUBLICAN PARTY' ~ 'Republican',
+  mutate(name = str_replace(name, '(?<=WALLACE)\\.', ','),
+         party_simple = case_when(party == 'REPUBLICAN PARTY' ~ 'Republican',
                                   party == 'DEMOCRATIC PARTY' ~ 'Democrat',
                                   TRUE ~ 'Other'),
          key = case_when(!str_detect(name,',') ~ name,
@@ -116,7 +117,7 @@ candidates <- candidates %>%
                                        str_extract(name, '.*(?=,)'))) %>%
            str_remove_all(str_c(
              '(MS\\.|MRS\\.|MR\\.|DR\\.|JR\\.|JR|SR\\.|III|II|',
-             '\\b[A-Z]\\.\\b|\\b[A-Z]\\b|É|[0-9])')) %>%
+             ' [A-Z]\\.(?= )| [A-Z](?= )|É|[A-Z]+`|[0-9])')) %>%
            str_remove_all('[[:punct:]]') %>%
            str_replace_all('  ', ' ') %>%
            trimws() %>%
@@ -129,7 +130,8 @@ ballotpedia <- ballotpedia %>%
          party_simple = case_when(party == 'Republican Party' ~ 'Republican',
                                   party == 'Democratic Party' ~ 'Democrat',
                                   TRUE ~ 'Other'),
-         key = str_remove_all(name, '(III|II|Jr\\.|Sr\\.|\\b[A-Z]\\.\\b|é)') %>%
+         key = str_remove_all(name, str_c('(III|II|Jr\\.|Sr\\.|',
+                                          ' [A-Z]\\.(?= )| [A-Z](?= )|é)')) %>%
            str_remove_all('[[:punct:]]') %>%
            str_replace_all('  ', ' ') %>%
            trimws() %>%
@@ -141,22 +143,20 @@ candidates[is.na(candidates)] <- ''
 ballotpedia[is.na(ballotpedia)] <- ''
 
 ## Fuzzy join to grab twitter handles from ballotpedia
-fuzzy <- candidates %>%
-  stringdist_join(
-    select(ballotpedia, key, state, party_simple, district, twitter_name),
-    by = 'key',
-    mode = 'inner',
-    method = 'lv',
-    max_dist = 5,
-    ignore_case = TRUE,
-    distance_col = 'distance') %>%
+fuzzy <- stringdist_join(
+  select(candidates, key, state, party_simple, 
+         district, fec_id),
+  select(ballotpedia, key, state, party_simple,
+         district, twitter_name, ballotpedia),
+  by = 'key',
+  mode = 'inner',
+  method = 'lv',
+  max_dist = 5,
+  ignore_case = TRUE,
+  distance_col = 'distance') %>%
   filter(state.x == state.y, 
          party_simple.x == party_simple.y,
          district.x == district.y)
-
-fuzzy %>%
-  filter(distance > 3) %>%
-  arrange(key.x)
 
 # kalena bruce	kyle labrue	MO	Republican
 # carlos gimenez	carlos garin	FL	Republican	28
@@ -164,13 +164,8 @@ fuzzy %>%
 # john beatty	john henley	VA	Republican
 
 candidates <- candidates %>%
-  left_join(select(fuzzy, key.x, twitter_name),
-            by = c('key' = 'key.x'),
-            keep = FALSE) 
-
-# %>%
-#   unnest_longer(twitter_name, keep_empty = TRUE) %>%
-#   filter(!is.na(twitter_name))
+  left_join(select(fuzzy, fec_id, twitter_name, ballotpedia),
+            by = 'fec_id', keep = FALSE) 
 ```
 
 https://github.com/unitedstates/congress-legislators
@@ -222,6 +217,26 @@ candidates %>%
 candidates
 ```
 
+Final checks
+
+```{r}
+candidates %>%
+  filter(is.na(ballotpedia),
+         !is.na(bioguide_id))
+
+candidates[duplicated(candidates),]
+
+fuzzy %>%
+  filter(distance > 4) %>%
+  select(key.x, key.y, state.x, party_simple.x, district.x,
+         ballotpedia, twitter_name, distance) %>%
+  arrange(key.x)
+
+candidates %>%
+  filter(name == 'BRINDISI, ANTHONY')
+```
+
+Write to csv
 
 ```{r}
 write_csv(candidates, paste0('data/candidates',year,'.csv'))
