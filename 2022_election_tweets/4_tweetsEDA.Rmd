@@ -15,7 +15,6 @@ library(data.table)
 
 # library(wordcloud)
 # library(lexicon)
-# library(reshape2)
 ```
 
 ## Data
