@@ -1,0 +1,222 @@
+---
+title: "tweetsEDA"
+author: "Keith Colella"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, message = FALSE}
+library(tidyverse)
+library(httr)
+library(tidytext)
+library(kableExtra)
+library(superml)
+library(data.table)
+
+# library(wordcloud)
+# library(lexicon)
+# library(reshape2)
+```
+
+## Data
+
+```{r}
+kaggle <- jsonlite::read_json('data/kaggle.json')
+username <- kaggle$username
+authkey <- kaggle$key
+
+url <- paste0('https://www.kaggle.com/api/v1/datasets/download/',
+              'kac624/politicaltweets/candidate_tweets2022_04.29.csv')
+response <- GET(url, authenticate(username, authkey, type = 'basic'))
+temp <- tempfile()
+download.file(response$url, temp, mode = 'wb')
+tweets <- read_csv(unz(temp, 'candidate_tweets2022_04.29.csv'))
+unlink(temp)
+rm(response)
+```
+
+Clean up
+
+```{r}
+tweets <- tweets %>%
+  select(-...1) %>%
+  filter(year(date_created) > 2020,
+         year(date_created) < 2023,
+         is.na(retweeted_id),
+         text != '')
+
+tweets$text <- tweets$text %>%
+  str_remove_all('&amp;') %>%
+  str_remove_all('https://t.co/[a-z,A-Z,0-9]*') %>%
+  str_remove_all('[â¢\u0080-\uFFFF]') %>%
+  str_remove_all('\\p{So}') %>%
+  str_remove_all('\'s') %>%
+  str_replace_all('[[:cntrl:]]', ' ')
+
+tweets <- tweets[!duplicated(tweets$tweet_id), ]
+
+tweets %>%
+  select(username, text) %>%
+  head(10) %>%
+  kable(align = 'l') %>% 
+  kable_classic(position = 'center')
+```
+
+Add in candidate data
+
+```{r}
+candidates <- read_csv('data/candidates2022_clean.csv')
+
+tweets <- tweets %>%
+  mutate(username = tolower(username)) %>%
+  left_join(
+    candidates %>%
+      mutate(twitter_name = tolower(twitter_name)) %>%
+      select(name, state, district, party_simple, twitter_name),
+    by = c('username' = 'twitter_name'), keep = FALSE
+  )
+
+tweets <- tweets[!duplicated(tweets), ]
+
+tweets <- tweets %>%
+  filter(!(name == 'REYNOLDS, CONRAD EARL'))
+```
+
+EDA / Visualizations
+
+```{r}
+tweets %>%
+  ggplot(aes(party_simple)) +
+  geom_bar() +
+  scale_y_continuous(labels = scales::comma)
+
+tweets %>%
+  group_by(name) %>%
+  summarize(tweet_count = n(), .groups = 'keep') %>%
+  ggplot(aes(tweet_count)) +
+  geom_histogram() +
+  scale_y_continuous(labels = scales::comma)
+
+tweets %>%
+  group_by(month = floor_date(date_created, 'month')) %>%
+  summarize(count = n()) %>%
+  ggplot(aes(month, count)) +
+  geom_col() +
+  scale_y_continuous(labels = scales::comma) +
+  coord_flip()
+
+tweets %>%
+  group_by(state) %>% 
+	summarise(count = n()) %>% 
+  ggplot(aes(x = reorder(state, count), y = count)) +
+  geom_bar(stat = 'identity') +
+  scale_x_discrete(guide = guide_axis(n.dodge=2)) +
+  coord_flip()
+
+tweets %>%
+  filter(replies < 100) %>%
+  ggplot(aes(replies)) +
+  geom_histogram(bins = 50) +
+  scale_x_continuous(labels = scales::comma) +
+  scale_y_continuous(labels = scales::comma)
+
+tweets %>%
+  filter(likes < 1000) %>%
+  ggplot(aes(likes)) +
+  geom_histogram(bins = 50) +
+  scale_x_continuous(labels = scales::comma) +
+  scale_y_continuous(labels = scales::comma)
+```
+
+Next?
+
+```{r}
+# tweets_tf_idf <- tweets %>%
+#   group_by(name) %>%
+#   mutate(tweet_count = n()) %>%
+#   ungroup() %>%
+#   filter(tweet_count > 100) %>%
+#   unnest_tokens(word, text) %>%
+#   count(name, word, sort = TRUE) %>%
+#   bind_tf_idf(word, name, n)
+# 
+# tweets_tf_idf %>%
+#   arrange(desc(tf_idf))
+```
+
+Calculating frequencies
+
+```{r}
+tweets_consolidated <- tweets %>%
+  filter(party_simple != 'Other') %>%
+  group_by(name, party_simple) %>%
+  summarize(text = paste0(text, collapse = ''), .groups = 'keep') %>%
+  mutate(party_simple = if_else(party_simple == 'Republican', 1, 0))
+
+sample <- sample(c(rep(0, round(0.8 * nrow(tweets_consolidated))), 
+                   rep(1, round(0.2 * nrow(tweets_consolidated)))))
+
+train <- tweets_consolidated[sample == 0, ] %>%
+  data.table() %>% select(-name)
+test <- tweets_consolidated[sample == 1, ] %>%
+  data.table() %>% select(-name)
+
+head(train, 3)
+head(test, 3)
+```
+
+Fit tf-idf
+
+```{r}
+tfv <- TfIdfVectorizer$new(min_df = 0.3, max_features = 30)
+
+tfv$fit(train$text)
+
+train_tf_features <- tfv$transform(train$text)
+test_tf_features <- tfv$transform(test$text)
+
+dim(train_tf_features)
+dim(test_tf_features)
+
+x_train <- data.table(cbind(train_tf_features, party = train$party_simple))
+x_test <- data.table(test_tf_features, party = test$party_simple)
+```
+
+train models
+
+```{r}
+lf <- LMTrainer$new(family = 'binomial')
+lf$fit(X = x_train, y = 'party')
+summary(lf$model)
+pred <- lf$predict(x_test)
+Metrics::auc(actual = x_test$party, predicted = pred)
+caret::confusionMatrix(as.factor(as.numeric(pred > 0.5)), 
+                       as.factor(x_test$party))
+
+nb <- NBTrainer$new()
+nb$fit(x_train, 'party')
+pred <- nb$predict(x_test)
+Metrics::auc(actual = x_test$party, predicted = pred)
+caret::confusionMatrix(pred, as.factor(x_test$party))
+```
+
+distribution of output from LM
+
+```{r}
+full_data <- rbind(x_train, x_test)
+
+pred <- lf$predict(full_data)
+Metrics::auc(actual = full_data$party, predicted = pred)
+caret::confusionMatrix(as.factor(as.numeric(pred > 0.5)), 
+                       as.factor(full_data$party))
+
+data.frame(pred) %>%
+  ggplot(aes(pred)) +
+  geom_histogram(bins = 20)
+```
+
+```{r}
+write_csv(x_train, 'data/tf-idf_train.csv')
+write_csv(x_train, 'data/tf-idf_test.csv')
+```
+
