@@ -1,0 +1,331 @@
+---
+title: "Election Tweets 2022 - Party Prediction"
+author: "Keith Colella"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, message = FALSE}
+library(tidyverse)
+library(httr)
+library(tidytext)
+library(kableExtra)
+library(superml)
+library(data.table)
+```
+
+This analysis will aim to predict a political candidate's party based on the language used in their tweets. I'll use a collection of over 3 million tweets scraped from over a thousand candidates running for House seats in the 2022 midterm elections. The data is hosted here on Kaggle: https://www.kaggle.com/datasets/kac624/politicaltweets. See https://github.com/kac624/cuny/tree/main/election_tweets for additional details on the collection of this data.
+
+I'll begin by reading in the data from kaggle, cleaning the tweets, then mapping in data on party affiliation (sourced from the Federal Election Committee (FEC)). I'll then engineer features by calculating the Term Frequency - Inverse Document Frequency (TF-IDF) statistic for key terms and transforming the corpus into a matrix. That matrix will provide training data for three classifier models (logistic regression, Naive-Bayes, and XGBoost), all implemented with the `superml` package. For the sake of this exercise, I'll focus only on binary classification of candidates as Democrat (0) or Republican (1). 
+
+## Data
+
+I'll begin by reading in the corpus of tweets scraped from Twitter.
+
+```{r}
+kaggle <- jsonlite::read_json('data/kaggle.json')
+username <- kaggle$username
+authkey <- kaggle$key
+
+url <- paste0('https://www.kaggle.com/api/v1/datasets/download/',
+              'kac624/politicaltweets/candidate_tweets2022_04.29.csv')
+response <- GET(url, authenticate(username, authkey, type = 'basic'))
+temp <- tempfile()
+download.file(response$url, temp, mode = 'wb')
+tweets <- read_csv(unz(temp, 'candidate_tweets2022_04.29.csv'))
+unlink(temp)
+rm(response)
+```
+
+As this analysis focuses on the 2022 midterm elections, I'll first subset the data to include only tweets from 2021 and 2022. I'll also remove retweets, as I wish to focus on candidates' own language. I'll remove duplicates, tweets with no text (typically images), links and special characters. We can then preview a sample.
+
+```{r}
+tweets <- tweets %>%
+  select(-...1) %>%
+  filter(year(date_created) > 2020,
+         year(date_created) < 2023,
+         is.na(retweeted_id),
+         text != '')
+
+tweets <- tweets[!duplicated(tweets$tweet_id), ]
+
+tweets$text <- tweets$text %>%
+  str_remove_all('&amp;') %>%
+  str_remove_all('https://t.co/[a-z,A-Z,0-9]*') %>%
+  str_remove_all('[â¢\u0080-\uFFFF]') %>%
+  str_remove_all('\\p{So}') %>%
+  str_remove_all('\'s') %>%
+  str_replace_all('[[:cntrl:]]', ' ')
+
+tweets[sample(nrow(tweets), 10), ] %>%
+  select(username, text) %>%
+  head(10) %>%
+  kable(align = 'l') %>% 
+  kable_classic(position = 'center')
+```
+
+I'll use previously obtained data from the FEC to map party and state details to these tweets. The join produces some duplication, so I'll again remove duplicates.
+
+```{r}
+candidates <- read_csv('data/candidates2022_clean.csv')
+
+tweets <- tweets %>%
+  mutate(username = tolower(username)) %>%
+  left_join(
+    candidates %>%
+      mutate(twitter_name = tolower(twitter_name)) %>%
+      select(name, state, party_simple, twitter_name),
+    by = c('username' = 'twitter_name'), keep = FALSE
+  )
+
+tweets <- tweets[!duplicated(tweets), ]
+
+tweets <- tweets %>%
+  filter(!(name == 'REYNOLDS, CONRAD EARL'))
+```
+
+## Visualizations
+
+A number of visualizations are provided below to provide a sense of the distribution of tweets across parties, time and states. The final histogram shows the distribution of the count tweets per candidate.
+
+```{r}
+tweets %>%
+  ggplot(aes(party_simple)) +
+  geom_bar() +
+  scale_y_continuous(labels = scales::comma)
+
+tweets %>%
+  group_by(month = floor_date(date_created, 'month')) %>%
+  summarize(count = n()) %>%
+  ggplot(aes(month, count)) +
+  geom_col() +
+  scale_y_continuous(labels = scales::comma) +
+  coord_flip()
+
+tweets %>%
+  group_by(state) %>% 
+	summarise(count = n()) %>% 
+  ggplot(aes(x = reorder(state, count), y = count)) +
+  geom_bar(stat = 'identity') +
+  scale_x_discrete(guide = guide_axis(n.dodge=2)) +
+  coord_flip()
+
+tweets %>%
+  group_by(name) %>%
+  summarize(tweet_count = n(), .groups = 'keep') %>%
+  ggplot(aes(tweet_count)) +
+  geom_histogram(bins = 30) +
+  scale_y_continuous(labels = scales::comma)
+```
+
+## Feature Engineering
+
+We can now move ahead with feature engineering. I'll first load in the stopwords from `tidytext` (note that the `TfIdfVectorizer` function in `superml` has its own stopwords, but I found that the list was missing many common, low-impact words that should be excluded). In re-running the models below, I also identified a number of additional words that have high TF-IDF scores, but mean very little. So, I've added them to the stopword list.
+
+I then perform some additional cleaning as I eliminate stopwords and finally concatenate all tweets for each candidate into single rows, so that each row represents a candidate. Candidates outside of the Republican / Democratic parties or with <100 tweets are removed, and party labels are one-hot encoded. The code below also extracts hashtags as a separate column, to be used for model enhancement below.
+
+Finally, I split the dataset into training and test subsets, using an 80/20 split.
+
+```{r}
+data('stop_words')
+stop_words <- stop_words %>%
+  select(word) %>%
+  rbind(data.frame(word = c('im', 'vote', 'congress', '1', '2',
+                            '3', '4', '5', '6', '7', '8', '9', '0')))
+
+tweets_consolidated <- tweets %>%
+  mutate(hashtags = str_extract_all(text, '#[a-zA-Z0-9]+'),
+         hashtags = map_chr(hashtags, str_c, collapse = ' ')) %>%
+  group_by(name) %>%
+  mutate(tweet_count = n()) %>%
+  ungroup() %>%
+  filter(tweet_count > 100,
+         party_simple != 'Other') %>%
+  unnest_tokens(word, text) %>%
+  anti_join(stop_words, by = c('word')) %>%
+  group_by(name, party_simple) %>%
+  summarize(text = paste0(word, collapse = ' '),
+            hashtags = paste0(hashtags, collapse = ' '),
+            .groups = 'keep') %>%
+  mutate(party_simple = if_else(party_simple == 'Republican', 1, 0))
+
+sample <- sample(c(rep(0, round(0.8 * nrow(tweets_consolidated))), 
+                   rep(1, round(0.2 * nrow(tweets_consolidated)))))
+
+tweets_consolidated_train <- tweets_consolidated[sample == 0, ] %>%
+  data.table() %>% select(-name)
+tweets_consolidated_test <- tweets_consolidated[sample == 1, ] %>%
+  data.table() %>% select(-name)
+```
+
+Next, I'll use the `TfIdfVectorizer` to calculate TF-IDF scores and transform the resulting scores into a sparse matrix. Given the size of the data (with over 31 million tokens), I'll need to set certain restrictions to limit the size of the final matrix. For now, I'll set the `max_features` parameter to 30, meaning the only the top 30 tokens will be included in the feature set. I'll also set `min_df` to 0.3, meaning the the document frequency for all final tokens should be at least 0.3.
+
+WARNING: The fitting and transforming of this matrix can be time consuming.
+
+```{r, eval = FALSE}
+tfv_text <- TfIdfVectorizer$new(min_df = 0.3, max_features = 30, remove_stopwords = F)
+
+tfv_text$fit(tweets_consolidated_train$text)
+features_train_text <- tfv_text$transform(tweets_consolidated_train$text)
+features_test_text <- tfv_text$transform(tweets_consolidated_test$text)
+
+dim(features_train_text)
+dim(features_test_text)
+
+tfv_text_train <- data.table(features_train_text, 
+                             party = tweets_consolidated_train$party_simple)
+tfv_text_test <- data.table(features_test_text, 
+                            party = tweets_consolidated_test$party_simple)
+```
+
+I'll perform the same process as above, but this time focusing only on hashtags. I only plan to use additional hashtag-related features to enhance the training set below, so I'll set the `min_df` and `max_features` parameters a bit more strictly.
+
+```{r, eval = FALSE}
+tfv_hash <- TfIdfVectorizer$new(min_df = 0.5, max_features = 20)
+
+tfv_hash$fit(tweets_consolidated_train$hashtags)
+features_train_hash <- tfv_hash$transform(tweets_consolidated_train$hashtags)
+features_test_hash <- tfv_hash$transform(tweets_consolidated_test$hashtags)
+
+dim(features_train_hash)
+dim(features_test_hash)
+
+tfv_hash_train <- data.table(features_train_hash, 
+                             party = tweets_consolidated_train$party_simple)
+tfv_hash_test <- data.table(features_test_hash, 
+                            party = tweets_consolidated_test$party_simple)
+```
+
+```{r, include=FALSE, echo=FALSE}
+tfv_text_train <- read_csv('data/tfv_text_train.csv')
+tfv_text_test <- read_csv('data/tfv_text_test.csv')
+tfv_hash_train <- read_csv('data/tfv_hash_train.csv')
+tfv_hash_test <- read_csv('data/tfv_hash_test.csv')
+```
+
+We can now take a look at the final tokens / hastags in our feature set.
+
+```{r}
+names(tfv_text_train)
+names(tfv_hash_train)
+```
+
+## Models
+
+I'll begin by setting a baseline for document classification. After the additional cleaning I performed, the dataset is evenly balanced between Democrats (0) and Republicans (1), as shown below. So, we'll set our baseline at ~50%.
+
+```{r}
+nrow(tweets_consolidated[tweets_consolidated$party_simple == 1,]) / 
+  nrow(tweets_consolidated)
+```
+
+Next, I'll define two functions. The first will fit the chosen model and generate predictions and key evaluation metrics. The second function will compile and print those metrics. For logistic regression models, we'll use 0.5 as the cutoff for classifying predicted probabilities as 0 or 1.
+
+```{r}
+fit_evaluate <- function(model, train, test) {
+  model$fit(X = train, y = 'party')
+  pred <- model$predict(test)
+  auc <- Metrics::auc(actual = test$party, predicted = pred)
+  confusion <- tryCatch(
+    {
+      caret::confusionMatrix(as.factor(as.numeric(pred > 0.5)), 
+                             as.factor(test$party))
+    }, error = function(cond) 
+    {
+      caret::confusionMatrix(pred, as.factor(test$party))
+    }
+  )
+  
+  return(list(model = model, pred = pred, 
+              auc = auc, confusion = confusion))
+}
+
+print_metrics <- function(model_results) {
+  cat('\nResults for',model_results$model$model$method,
+      '\n\nConfusion Matrix\n')
+  print(model_results$confusion$table)
+  cat('Accuracy:', model_results$confusion$overall[1],
+      '\nKappa:', model_results$confusion$overall[2],
+      '\nArea Under Curve:', model_results$auc,'\n')
+}
+```
+
+We begin modeling with Logistic Regression.
+
+```{r}
+logit <- fit_evaluate(LMTrainer$new(family = 'binomial'),
+                      tfv_text_train, tfv_text_test)
+print_metrics(logit)
+
+data.frame(pred = logit$model$predict(rbind(tfv_text_train, tfv_text_test))) %>%
+  ggplot(aes(pred)) +
+  geom_histogram(bins = 50)
+```
+
+Out of the gate, performance appears solid, with over 90% accuracy, much higher than our 50% baseline. If we look at the distribution of predicted probabilities, we see the distribution is heavily focused near 0 and 1, as expected by the high accuracy score.
+
+We'll see if we can enhance the logistic regression by adding in some key hashtags to our feature set. I noticed above that the hashtag feature set contains some apparently meaningless tokens related only to the district in which candidates are running (e.g. "#ny21" for New York's 21st district). To avoid introducing noise to our feature set, I'll remove these hashtags, then combine the text-based and tag-based features into a single training set to feed into the model.
+
+```{r}
+bad_tags <- unlist(str_extract_all(colnames(tfv_hash_train), '[a-z]{2}[0-9]{2}'))
+
+tfv_combo_train <- cbind(tfv_text_train, 
+                         select(tfv_hash_train, -any_of(bad_tags)))
+tfv_combo_test <- cbind(tfv_text_test,
+                        select(tfv_hash_test, -any_of(bad_tags)))
+
+logit <- fit_evaluate(LMTrainer$new(family = 'binomial'),
+                      tfv_combo_train, tfv_combo_test)
+print_metrics(logit)
+
+data.frame(pred = logit$model$predict(rbind(tfv_combo_train, tfv_combo_test))) %>%
+  ggplot(aes(pred)) +
+  geom_histogram(bins = 50)
+```
+
+We see a marginal improvement in accuracy, bumping up to ~93%.
+
+Finally, we'll use the same data in two additional models: Naive-Bayes and XGBoost classifiers.
+
+```{r}
+nb <- fit_evaluate(NBTrainer$new(), tfv_text_train, tfv_text_test)
+print_metrics(nb)
+
+nb <- fit_evaluate(NBTrainer$new(), tfv_combo_train, tfv_combo_test)
+print_metrics(nb)
+
+xgb <- fit_evaluate(XGBTrainer$new(objective = 'reg:squarederror',
+                                   n_estimators = 500, 
+                                   eval_metric = "rmse",
+                                   maximize = F,
+                                   learning_rate = 0.1,
+                                   max_depth = 6,
+                                   verbose = 0),
+                    tfv_text_train, tfv_text_test)
+print_metrics(xgb)
+
+xgb <- fit_evaluate(XGBTrainer$new(objective = 'reg:squarederror',
+                                   n_estimators = 500, 
+                                   eval_metric = "rmse",
+                                   maximize = F,
+                                   learning_rate = 0.1,
+                                   max_depth = 6,
+                                   verbose = 0),
+                    tfv_combo_train, tfv_combo_test)
+print_metrics(xgb)
+```
+
+We see comparable, though slightly lower performance. Again, the addition of hashtags improves accuracy, but only minimally.
+
+## Conclusion
+
+It appears that the language used by Democratic and Republican candidates on Twitter is distinct, as one might expect. What is noteworthy is that this language is sufficiently distinct to allow even a simple logistic regression model to reliably predict the party of most candidates. I suspect that this model may be enhanced through the addition of other features that account for network  structures (e.g. likes, follows, retweets), as well as features related to tweeting behavior (e.g. tweet length, time/frequency of tweets). 
+
+As a final step, I'll save the vectorized feature sets to avoid having to frequently refit.
+
+```{r, eval = FALSE}
+write_csv(tfv_text_train, 'data/tfv_text_train.csv')
+write_csv(tfv_text_test, 'data/tfv_text_test.csv')
+write_csv(tfv_hash_train, 'data/tfv_hash_train.csv')
+write_csv(tfv_hash_test, 'data/tfv_hash_test.csv')
+```
