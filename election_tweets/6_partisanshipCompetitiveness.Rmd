@@ -1,0 +1,47 @@
+---
+title: "Election Tweets 2022 - Partisanship and Competitiveness"
+author: "Keith Colella"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, message = FALSE}
+library(tidyverse)
+library(kableExtra)
+```
+
+## Data
+
+
+
+
+Smooth, Rank and re-score
+https://cran.r-project.org/web/packages/ks/ks.pdf
+
+```{r}
+library(ks)
+
+kde <- kde(scores$score_norm_abs, h = hpi(scores$score_norm_abs),
+           xmin = 0, xmax = 1, 
+           gridsize = nrow(scores),
+           w = runif(nrow(scores)))
+
+line <- seq(from = 0, to = 1, length.out =  nrow(scores))
+
+qkde(p = 0.999, fhat = kde)
+quantile(scores$score_norm_abs, 0.10)
+quantile(line, 0.50)
+
+data.frame(kde = rkde(n = 10000, fhat = kde, positive = T)) %>%
+  ggplot(aes(kde)) + 
+  geom_histogram(bins = 100)
+
+scores %>%
+  mutate(perc_rank = min_rank(score_norm_abs)/length(score_norm_abs),
+         smoothed_score = qkde(p = perc_rank, fhat = kde)) %>%
+  ggplot(aes(perc_rank)) + 
+  geom_line()
+```
+
+## EDA
+

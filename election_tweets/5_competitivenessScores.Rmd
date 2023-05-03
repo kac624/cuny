@@ -1,0 +1,86 @@
+---
+title: "Election Tweets 2022 - Competitiveness Scores"
+author: "Keith Colella"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, message = FALSE}
+library(tidyverse)
+library(kableExtra)
+```
+
+## Data
+
+```{r}
+partisanship <- read_csv('data/partisanship.csv')
+elections <- read_csv('data/1976-2020-house.csv')
+```
+
+Efficiency Gap
+
+```{r}
+elections <- filter(elections, stage == 'GEN') %>%
+  mutate(yearStateDist = paste0(year, state_po, district))
+
+elections <- elections %>% 
+  group_by(yearStateDist) %>% 
+  mutate(result = case_when(candidatevotes == max(candidatevotes) ~ 'winner',
+                            candidatevotes != max(candidatevotes) ~ 'loser')) %>%
+  ungroup()
+
+elections <- elections %>%
+  mutate(wastedVotes = case_when(result == 'winner' ~ (candidatevotes - (totalvotes %/% 2)),
+                                 result == 'loser' ~ candidatevotes),
+         wastedVotes = case_when(party == 'DEMOCRAT' ~ -wastedVotes,
+                                 party == 'REPUBLICAN' ~ wastedVotes,
+                                 TRUE ~ 0))
+
+eff_gap <- elections %>%
+  group_by(year, state_po, district) %>%
+  summarize(netWastedVotes = sum(wastedVotes),
+            totalVotes = sum(totalvotes),
+            eff_gap = abs(netWastedVotes / totalVotes),
+            .groups = 'drop') %>%
+  group_by(state_po, district) %>%
+  summarize(avg_eff_gap = mean(eff_gap),
+            .groups = 'keep')
+
+summary(eff_gap)
+
+eff_gap %>% 
+  ggplot(aes(avg_eff_gap)) +
+  geom_histogram(binwidth = 0.02)
+```
+
+GovTrack Ideology Score
+
+```{r}
+ideology <- read_delim('https://www.govtrack.us/data/analysis/by-congress/116/sponsorshipanalysis_h.txt',
+                         delim = ',', col_names = TRUE)
+
+ggplot(ideology, aes(x = ideology, y = leadership, color = party)) +
+  geom_point() + 
+  scale_color_manual(values = c('Democrat' = 'blue',
+                                'Republican' = 'red',
+                                'Libertarian' = 'pink',
+                                'Independent' = 'purple'))
+```
+
+Efficiency and Partisanship
+
+```{r}
+data <- partisanship %>%
+  left_join(mutate(eff_gap, district = as.numeric(district)),
+            by = c('state' = 'state_po', 'district' = 'district'))
+
+data %>%
+  ggplot(aes(x = avg_eff_gap, y = partisanship)) +
+  geom_point() +
+  geom_smooth() + 
+  coord_trans(y = "exp")
+```
+
+
+
+
