@@ -10,16 +10,89 @@ library(tidyverse)
 library(kableExtra)
 ```
 
-## Data
+## District-Level Ideology Survey
 
+https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/BQKU4M
+"We orient our ideal points so that lower values are associated with politically left preferences and higher values with politically right preferences."
 ```{r}
-partisanship <- read_csv('data/partisanship.csv')
-elections <- read_csv('data/1976-2020-house.csv')
+load('data/aip_district_ideology_v2022a.RData')
+district_ideology <- table
+rm(table)
+
+district_ideology %>% head()
+
+district_ideology %>%
+  filter(congress == 118) %>%
+  ggplot() +
+  geom_freqpoly(aes(mrp_ideology)) +
+  geom_freqpoly(aes(irt_ideology_unweighted), color = 'red')
+
+min_score <- min(district_ideology$mrp_ideology, na.rm = TRUE)
+max_score <- max(district_ideology$mrp_ideology, na.rm = TRUE)
+
+district_ideology <- district_ideology %>%
+  mutate(mrp_norm = 2 * (mrp_ideology - min_score) / (max_score - min_score) - 1,
+         mrp_norm_abs = abs(mrp_norm))
+
+min_score <- min(district_ideology$irt_ideology_unweighted, na.rm = TRUE)
+max_score <- max(district_ideology$irt_ideology_unweighted, na.rm = TRUE)
+
+district_ideology <- district_ideology %>%
+  mutate(itr_norm = 2 * (irt_ideology_unweighted - min_score) / (max_score - min_score) - 1,
+         itr_norm_abs = abs(itr_norm))
+
+district_ideology %>%
+  filter(congress == 118) %>%
+  ggplot() +
+  geom_freqpoly(aes(mrp_norm)) +
+  geom_freqpoly(aes(itr_norm), color = 'red')
+
+district_ideology %>%
+  filter(congress == 118) %>%
+  ggplot() +
+  geom_freqpoly(aes(mrp_norm_abs)) +
+  geom_freqpoly(aes(itr_norm_abs), color = 'red')
 ```
 
+## Cook Partisan Voting Index
+
+https://www.cookpolitical.com/cook-pvi/2022-partisan-voting-index/district-map-and-list
+```{r}
+cookpvi <- read_csv('data/cook_pvi.csv')
+
+cookpvi <- cookpvi %>%
+  rename(trump2020 = trump...7,
+         trump2016 = trump...9) %>%
+  mutate(pvi_num = 
+           case_when(str_detect(pvi,'R') ~ as.numeric(str_extract(pvi,'[0-9]+')),
+                     str_detect(pvi,'D') ~ as.numeric(str_extract(pvi,'[0-9]+'))*-1,
+                     TRUE ~ 0))
+
+min_score <- min(cookpvi$pvi_num)
+max_score <- max(cookpvi$pvi_num)
+
+cookpvi <- cookpvi %>%
+  mutate(pvi_abs = abs(pvi_num),
+         pvi_norm = 2 * (pvi_num - min_score) / (max_score - min_score) - 1,
+         pvi_norm_abs = abs(pvi_norm))
+
+cookpvi %>%
+  ggplot() +
+  geom_freqpoly(aes(pvi_norm), bins = 20)
+
+cookpvi %>%
+  ggplot() +
+  geom_freqpoly(aes(pvi_abs), bins = 20, color = 'red')
+```
+
+## Efficiency Gap
+
 Efficiency Gap
+https://electionlab.mit.edu/data
 
 ```{r}
+elections <- read_csv('data/1976-2020-house.csv')
+
 elections <- filter(elections, stage == 'GEN') %>%
   mutate(yearStateDist = paste0(year, state_po, district))
 
@@ -44,7 +117,8 @@ eff_gap <- elections %>%
             .groups = 'drop') %>%
   group_by(state_po, district) %>%
   summarize(avg_eff_gap = mean(eff_gap),
-            .groups = 'keep')
+            .groups = 'keep') %>%
+  ungroup()
 
 summary(eff_gap)
 
@@ -53,34 +127,85 @@ eff_gap %>%
   geom_histogram(binwidth = 0.02)
 ```
 
-GovTrack Ideology Score
+## Compactness Score
+
+https://fivethirtyeight.com/features/we-drew-2568-congressional-districts-by-hand-heres-how/
+
+## Election-Demographic Discrepancy
+
+My own measure? Difference between partisan split of population and actual split of elected officials
+
+## Unified Dataset
+
+Prep data for joins
+
+First account for states with 1 district
 
 ```{r}
-ideology <- read_delim('https://www.govtrack.us/data/analysis/by-congress/116/sponsorshipanalysis_h.txt',
-                         delim = ',', col_names = TRUE)
-
-ggplot(ideology, aes(x = ideology, y = leadership, color = party)) +
-  geom_point() + 
-  scale_color_manual(values = c('Democrat' = 'blue',
-                                'Republican' = 'red',
-                                'Libertarian' = 'pink',
-                                'Independent' = 'purple'))
+one_dist_state_regex <- 'AK|WY|MT|ND|SD|VT|DE|DC'
 ```
 
-Efficiency and Partisanship
+Then prep the dfs themselves
 
 ```{r}
-data <- partisanship %>%
-  left_join(mutate(eff_gap, district = as.numeric(district)),
-            by = c('state' = 'state_po', 'district' = 'district'))
+district_ideology <- district_ideology %>%
+  filter(state != 'NA', !is.na(mrp_ideology), !is.na(irt_ideology_unweighted)) %>%
+  mutate(cd_fips = sprintf('%04d', as.numeric(cd_fips)),
+         state_code = str_sub(cd_fips, 1, 2),
+         district = str_sub(cd_fips, 3, 4)) %>%
+  left_join(
+    data.frame(state = state.name,
+               state_abb = state.abb)) %>%
+  arrange(cd_fips, desc(congress)) %>%
+  mutate(state_abb = if_else(is.na(state_abb), 'DC', state_abb),
+         district = if_else(str_detect(state_abb,one_dist_state_regex),
+                            '00',district),
+         dupe = duplicated(cd_fips)) %>%
+  filter(dupe == FALSE) %>%
+  rename(compete_ideology_mrp = mrp_norm_abs,
+         compete_ideology_itr = itr_norm_abs)
 
-data %>%
-  ggplot(aes(x = avg_eff_gap, y = partisanship)) +
-  geom_point() +
-  geom_smooth() + 
-  coord_trans(y = "exp")
+cookpvi <- cookpvi %>%
+  rename(state_dist = district) %>%
+  mutate(state = str_sub(state_dist, 1, 2),
+         district = str_sub(state_dist, 4, 5),
+         district = if_else(str_detect(state, one_dist_state_regex),
+                            '00', district)) %>%
+  rename(compete_cookpvi_reg = pvi_abs,
+         compete_cookpvi_norm = pvi_norm_abs)
+
+eff_gap <- eff_gap %>%
+  mutate(district = sprintf('%02d', as.numeric(district)),
+         district = if_else(str_detect(state_po, one_dist_state_regex),
+                            '00', district)) %>%
+  rename(compete_eff_gap = avg_eff_gap)
+``` 
+
+Read in candidates and join
+
+```{r}
+candidates <- read_csv('data/candidates_partisanship.csv')
+
+candidates %>%
+  mutate(district = sprintf('%02d', district),
+         district = if_else(str_detect(state, one_dist_state_regex),
+                            '00', district)) %>%
+  left_join(
+    select(district_ideology, compete_ideology_mrp, compete_ideology_itr, state_abb, district),
+    by = c('state' = 'state_abb', 'district')
+  ) %>%
+  left_join(
+    select(cookpvi, compete_cookpvi_reg, compete_cookpvi_norm, state, district),
+    by = c('state', 'district')
+  ) %>%
+  left_join(
+    select(eff_gap, compete_eff_gap, state_po, district),
+    by = c('state' = 'state_po', 'district')
+  ) %>%
+  filter(is.na(compete_eff_gap), !is.na(partisan_score_twitter))
+
+
+eff_gap %>%
+  filter(state_po == 'FL')
 ```
-
-
-
 

@@ -29,11 +29,11 @@ username <- kaggle$username
 authkey <- kaggle$key
 
 url <- paste0('https://www.kaggle.com/api/v1/datasets/download/',
-              'kac624/politicaltweets/candidate_tweets2022_04.29.csv')
+              'kac624/politicaltweets/candidate_tweets2022_05.05.csv')
 response <- GET(url, authenticate(username, authkey, type = 'basic'))
 temp <- tempfile()
 download.file(response$url, temp, mode = 'wb')
-tweets <- read_csv(unz(temp, 'candidate_tweets2022_04.29.csv'))
+tweets <- read_csv(unz(temp, 'candidate_tweets2022_05.05.csv'))
 unlink(temp)
 rm(response)
 ```
@@ -407,6 +407,10 @@ scores %>%
 
 MANUAL REVIEW
 
+https://medium.com/@jon.reynolds30/comparing-classification-models-using-lending-clubs-peer-toloan-data-615153db2124
+https://fivethirtyeight.com/features/the-5-main-factions-of-the-house-gop/
+https://fivethirtyeight.com/features/what-drove-9-moderate-house-democrats-to-hold-up-their-partys-agenda/
+
 ```{r}
 scores %>% filter(str_detect(name, 'COSTA'))
 scores %>% filter(score_norm_abs > 0.9)
@@ -418,28 +422,135 @@ caret::confusionMatrix(as.factor(as.numeric(test > 0.5)),
                        as.factor(rbind(tfv_combo_train, tfv_combo_test)$party))
 ```
 
-https://medium.com/@jon.reynolds30/comparing-classification-models-using-lending-clubs-peer-toloan-data-615153db2124
-https://fivethirtyeight.com/features/the-5-main-factions-of-the-house-gop/
-https://fivethirtyeight.com/features/what-drove-9-moderate-house-democrats-to-hold-up-their-partys-agenda/
+## Additional Sources
 
-Export to csv
+Vote View NOMINATE Ideology scores
+https://voteview.com/data
 
 ```{r}
-partisanship <- scores %>%
-  select(name, party, score_norm_abs) %>%
-  left_join(select(candidates, name, party_simple, state, district),
-            by = c('name'), keep = FALSE) %>%
-  rename(party_num = party,
-         party_chr = party_simple,
-         partisanship = score_norm_abs) %>%
-  select(name, party_chr, party_num, state, district, partisanship) %>%
-  filter(!(name == 'DOYLE, MICHAEL' & party_chr == 'Republican'))
+voteview <- read_csv('data/voteview_ideology_scores.csv')
 
-partisanship <- partisanship[!duplicated(partisanship),]
+voteview %>%
+  filter(congress == 118) %>%
+  head()
 
-partisanship$name %>% unique() %>% length()
+voteview <- voteview %>%
+  filter(congress == 118) %>%
+  mutate(party = case_when(party_code == 100 ~ 'Dem',
+                           party_code == 200 ~ 'Rep',
+                           TRUE ~ 'Other')) %>%
+  rowwise %>%
+  mutate(nominate_avg = mean(c(nominate_dim1,nominate_dim2))) %>%
+  ungroup()
 
-write_csv(partisanship, 'data/partisanship.csv')
+voteview %>%
+  ggplot() +
+  geom_point(aes(nominate_dim1, nominate_dim2, color = party)) +
+  scale_color_manual(values = c('Dem' = 'blue', 'Rep' = 'red', 'Other' = 'purple'))
+
+voteview %>%
+  filter(congress == 118) %>%
+  ggplot() +
+  geom_freqpoly(aes(nominate_dim1), bins = 20, color = 'red') +
+  geom_freqpoly(aes(nominate_dim2), bins = 20, color = 'blue') +
+  geom_freqpoly(aes(nominate_avg), bins = 20, color = 'black')
+
+voteview <- voteview %>%
+  mutate(nominate_avg_abs = abs(nominate_avg),
+         nominate_dim1_abs = abs(nominate_dim1),
+         nominate_dim2_abs = abs(nominate_dim2)) 
+
+voteview %>%
+  ggplot(aes(nominate_dim1_abs)) +
+  geom_freqpoly(aes(nominate_dim1_abs), bins = 20, color = 'red') +
+  geom_freqpoly(aes(nominate_dim2_abs), bins = 20, color = 'blue') +
+  geom_freqpoly(aes(nominate_avg_abs), bins = 20, color = 'black')
+```
+
+GovTrack Ideology Score
+https://www.govtrack.us/congress/members/report-cards/2022/house/ideology
+https://www.govtrack.us/data/analysis/by-congress/
+
+```{r, message = FALSE}
+govtrack <- data.frame(matrix(ncol = 11, nrow = 0))
+colnames(govtrack) <- c('ID', 'ideology', 'leadership', 'name', 'party', 
+                     'description', 'introduced_bills', 'cosponsored_bills', 
+                     'unique_cosponsors', 'total_cosponsors', 'congress')
+
+for (congress in 110:118) {
+  link <- paste0('https://www.govtrack.us/data/analysis/by-congress/',
+                 congress,'/sponsorshipanalysis_h.txt')
+  ith_house <- read_delim(link, delim = ',', trim_ws = TRUE)
+  ith_house['congress'] = congress
+  colnames(ith_house) <- colnames(govtrack)
+  govtrack <- rbind(govtrack, ith_house)
+}
+
+rm(congress, ith_house)
+
+govtrack <- govtrack %>%
+  arrange(name, desc(congress)) %>%
+  mutate(dupe = duplicated(name)) %>%
+  filter(dupe == FALSE)
+
+govtrack %>%
+  filter(congress == 118) %>%
+  ggplot(aes(x = ideology, y = leadership, color = party)) +
+  geom_point() + 
+  scale_color_manual(values = c('Democrat' = 'blue',
+                                'Republican' = 'red',
+                                'Libertarian' = 'pink',
+                                'Independent' = 'purple'))
+
+min_score <- min(govtrack$ideology)
+max_score <- max(govtrack$ideology)
+
+govtrack <- govtrack %>%
+  mutate(gt_ideo_norm = 2 * (ideology - min_score) / (max_score - min_score) - 1,
+         gt_ideo_norm_abs = abs(gt_ideo_norm))
+
+govtrack %>%
+  ggplot() +
+  geom_freqpoly(aes(gt_ideo_norm_abs), bins = 20, color = 'black') +
+  geom_freqpoly(aes(ideology), bins = 20, color = 'blue')
+```
+
+## Union and Comparisons
+
+Unified dataset
+
+```{r}
+candidates <- candidates %>%
+  left_join(select(scores, name, score_norm_abs)) %>%
+  left_join(select(voteview, bioguide_id, nominate_dim1_abs)) %>%
+  left_join(select(govtrack, ID, gt_ideo_norm_abs), 
+            by = c('govtrack_id' = 'ID')) %>%
+  mutate(ballotpedia_id = str_remove(ballotpedia, 'https://ballotpedia.org/')) %>%
+  select(-...1, -twitter_status_tweet, -twitter_status_name, 
+         -twitter_status_id, -twitter_id, -key, -party_simple, -ballotpedia) %>%
+  rename(partisan_score_twitter = score_norm_abs,
+         partisan_score_nominate = nominate_dim1_abs,
+         partisan_score_govtrack = gt_ideo_norm_abs)
+
+candidates <- candidates[!duplicated(candidates), ]
+
+candidates %>%
+  mutate(dupe = duplicated(name)) %>%
+  filter(!is.na(partisan_score_twitter), 
+         !is.na(partisan_score_nominate), 
+         !is.na(partisan_score_govtrack),
+         dupe == FALSE) %>%
+  ggplot() +
+  geom_freqpoly(aes(partisan_score_twitter), color = 'blue') +
+  geom_freqpoly(aes(partisan_score_nominate), color = 'green') +
+  geom_freqpoly(aes(partisan_score_govtrack), color = 'red')
+```
+
+
+## Export 
+
+```{r}
+write_csv(candidates, 'data/candidates_partisanship.csv')
 ```
 
 ## Conclusion

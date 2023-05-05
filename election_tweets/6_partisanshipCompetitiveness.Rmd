@@ -8,40 +8,73 @@ output: html_document
 ```{r setup, message = FALSE}
 library(tidyverse)
 library(kableExtra)
+library(cowplot)
 ```
 
 ## Data
 
-
-
-
-Smooth, Rank and re-score
-https://cran.r-project.org/web/packages/ks/ks.pdf
-
 ```{r}
-library(ks)
-
-kde <- kde(scores$score_norm_abs, h = hpi(scores$score_norm_abs),
-           xmin = 0, xmax = 1, 
-           gridsize = nrow(scores),
-           w = runif(nrow(scores)))
-
-line <- seq(from = 0, to = 1, length.out =  nrow(scores))
-
-qkde(p = 0.999, fhat = kde)
-quantile(scores$score_norm_abs, 0.10)
-quantile(line, 0.50)
-
-data.frame(kde = rkde(n = 10000, fhat = kde, positive = T)) %>%
-  ggplot(aes(kde)) + 
-  geom_histogram(bins = 100)
-
-scores %>%
-  mutate(perc_rank = min_rank(score_norm_abs)/length(score_norm_abs),
-         smoothed_score = qkde(p = perc_rank, fhat = kde)) %>%
-  ggplot(aes(perc_rank)) + 
-  geom_line()
+candidates <- read_csv('data/candidates_partisanship.csv')
 ```
 
 ## EDA
 
+Spread across states
+
+```{r}
+state_bar_plot <- function (data, filter_column) {
+  data %>%
+    mutate(dupe = duplicated(name)) %>%
+    filter(!is.na(filter_column),
+           dupe == FALSE) %>%
+    group_by(state) %>% 
+    summarise(count = n()) %>% 
+    ggplot(aes(x = reorder(state, count), y = count)) +
+    geom_bar(stat = 'identity') +
+    scale_x_discrete(guide = guide_axis(n.dodge = 3)) +
+    xlab(filter_column) +
+    coord_flip()
+}
+
+state_plots <- lapply(c('name','partisan_score_twitter',
+                        'partisan_score_nominate','partisan_score_govtrack'), 
+                      state_bar_plot, data = candidates)
+
+plot_grid(plotlist = state_plots, nrow = 2, ncol = 2)
+```
+
+Spread across parties
+
+```{r}
+party_bar_plot <- function (data, filter_column) {
+  data %>%
+    mutate(dupe = duplicated(name)) %>%
+    filter(!is.na(filter_column), dupe == FALSE,
+           party == 'DEMOCRATIC PARTY' | party == 'REPUBLICAN PARTY') %>%
+    group_by(party) %>% 
+    summarise(count = n()) %>% 
+    ggplot(aes(x = reorder(party, count), y = count)) +
+    geom_bar(stat = 'identity') +
+    xlab(filter_column)
+}
+
+party_plots <- lapply(c('name','partisan_score_twitter',
+                        'partisan_score_nominate','partisan_score_govtrack'), 
+                      party_bar_plot, data = candidates)
+
+plot_grid(plotlist = party_plots, nrow = 2, ncol = 2)
+```
+
+Efficiency and Partisanship
+
+```{r}
+data <- partisanship %>%
+  left_join(mutate(eff_gap, district = as.numeric(district)),
+            by = c('state' = 'state_po', 'district' = 'district'))
+
+data %>%
+  ggplot(aes(x = avg_eff_gap, y = partisanship)) +
+  geom_point() +
+  geom_smooth() + 
+  coord_trans(y = "exp")
+```
