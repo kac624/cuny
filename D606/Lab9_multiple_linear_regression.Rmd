@@ -19,6 +19,8 @@ Config
 library(tidyverse)
 library(openintro)
 library(GGally)
+library(cowplot)
+library(patchwork)
 ```
 
 Data
@@ -36,7 +38,7 @@ Is this an observational study or an experiment? The original research question 
 
 #### Response
 
-The dataset has 123 variables (columns) with 1458 observations (rows).
+The description provided indicates an observation study. There does not appear to be any separation between control and experimental groups, as required by experimental design. So, we likely cannot draw conclusions about any causal relationships between variables. Instead, we can only examine correlation, i.e. whether or not a significant relationship exists. We can rephrase our research question accordingly: is there a statistically significant relationship between the physical appearance of an instructor and course evaluations?
 
 ---
 
@@ -48,7 +50,13 @@ Describe the distribution of `score`. Is the distribution skewed? What does that
 
 #### Response
 
+```{r}
+evals %>%
+  ggplot(aes(score)) + 
+  geom_histogram(bins = 20)
+```
 
+Yes, the distribution appears negatively skewed. This indicates that students are wary of providing very low ratings. This may be driven by a high level of instruction at UT, or by a general unwillingness to provide instructors very low (1 or 2) ratings. Perhaps students are hesistant to provide low ratings to instructors after having spent months developing a relationship with them.
 
 ---
 
@@ -60,7 +68,13 @@ Excluding `score`, select two other variables and describe their relationship wi
 
 #### Response
 
+```{r}
+evals %>%
+  ggplot(aes(gender, age)) +
+  geom_boxplot()
+```
 
+In examining the relationship between gender and age, it appears male instructors in the survey are generally older than female students. The median age for women appears roughly 46 years old, whereas the median age for men is roughly 51.
 
 ---
 
@@ -70,14 +84,15 @@ Excluding `score`, select two other variables and describe their relationship wi
 
 Replot the scatterplot, but this time use `geom_jitter` as your layer. What was misleading about the initial scatterplot?
 
-```{r}
-
-```
-
-
 #### Response
 
+```{r}
+ggplot(data = evals, aes(x = bty_avg, y = score)) +
+  geom_jitter() +
+  geom_smooth(method = 'lm', formula = 'y~x')
+```
 
+The discretized nature of `bty_avg` perhaps gave the indication of a stronger relationship that there really is. When using `geom_jitter`, the relationship appears even more noisy.
 
 ---
 
@@ -89,7 +104,12 @@ Let’s see if the apparent trend in the plot is something more than natural var
 
 #### Response
 
+```{r}
+m_bty <- lm(score ~ bty_avg, data = evals)
+summary(m_bty)
+```
 
+The average beauty rating does appear to be a significant predictor of evaluation score. The positive coefficient indicates that, for each 1-point in crease in beauty score, the model would predict a ~0.07 higher score. The fact that the coefficient is so small shows that, while beauty is statistically significant, it is not practically significant. Moreover, the $R^2$ is very small, highlight the fact that beauty alone explains almost non of the variability in scores: less than 4%. 
 
 ---
 
@@ -101,7 +121,28 @@ Use residual plots to evaluate whether the conditions of least squares regressio
 
 #### Response
 
+```{r}
+p1 <- ggplot(data = m_bty, aes(x = .resid)) +
+  geom_histogram(bins = 25) +
+  xlab("Residuals")
 
+p2 <- ggplot(data = m_bty, aes(sample = .resid)) +
+  stat_qq() + 
+  geom_abline(intercept = mean(m_bty$residuals), 
+              slope = sd(m_bty$residuals),
+              color = 'red', linetype = 'dashed')
+
+
+p3 <- ggplot(data = m_bty, aes(x = .fitted, y = .resid)) +
+  geom_point() +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  xlab("Fitted values") +
+  ylab("Residuals")
+
+plot_grid(plot_grid(p1, p2), p3, nrow = 2, ncol = 1)
+```
+
+The residual plots indicate some non-normality in the residuals and some clear skewness, potentially violating of assumptions. The residual versus fitted plot, however, adheres to regression assumptions, as they show no clear pattern, indicating constant variance (i.e. homoskedasiticity).
 
 ---
 
@@ -111,9 +152,41 @@ Use residual plots to evaluate whether the conditions of least squares regressio
 
 P-values and parameter estimates should only be trusted if the conditions for the regression are reasonable. Verify that the conditions for this model are reasonable using diagnostic plots.
 
+```{r}
+m_bty_gen <- lm(score ~ bty_avg + gender, data = evals)
+summary(m_bty_gen)
+```
+
 #### Response
 
+```{r, fig.height=10, fig.width=8}
+p1 <- ggplot(data = evals, aes(x = bty_avg, y = score)) +
+  geom_jitter() +
+  geom_smooth(method = 'lm', formula = 'y~x')
 
+p2 <- ggplot(data = evals, aes(x = gender, y = score)) +
+  geom_boxplot() 
+
+p3 <- ggplot(data = m_bty_gen, aes(x = .resid)) +
+  geom_histogram(bins = 25) +
+  xlab("Residuals")
+
+p4 <- ggplot(data = m_bty_gen, aes(sample = .resid)) +
+  stat_qq() + 
+  geom_abline(intercept = mean(m_bty$residuals), 
+              slope = sd(m_bty$residuals),
+              color = 'red', linetype = 'dashed')
+
+p5 <- ggplot(data = m_bty_gen, aes(x = .fitted, y = .resid)) +
+  geom_point() +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  xlab("Fitted values") +
+  ylab("Residuals")
+
+plot_grid(plot_grid(p1, p2), plot_grid(p3, p4), p5, nrow = 3, ncol = 1)
+```
+
+First, there does appear to be a linear relationship between our independent and target variables. Regarding normal residuals, as above, we do see some skewness in the model residuals, likely as a result of skewness in our target variable (scores). The level of skewness does not appear to be an extreme violation of the normality assumption. Finally, regarding homoskedasticity, residuals again appear random distributed around zero, indicating constant variance. 
 
 ---
 
@@ -125,7 +198,7 @@ Is `bty_avg` still a significant predictor of score? Has the addition of `gender
 
 #### Response
 
-
+The average beauty rating remains a significant, though minor, predictor of evaluation scores. The addition of gender did not make beauty any less significant, though the model does have a slightly increased coefficient for this variable. Overall, however, the impact of beauty appears minimal, as does the overall ability of the model to explain the variance in scores (as shown by the low $R^2$).
 
 ---
 
@@ -137,7 +210,15 @@ What is the equation of the line corresponding to those with color pictures? (*H
 
 #### Response
 
+```{r}
+m_color <- lm(score ~ pic_color, data = evals)
+summary(m_color)
+```
 
+The formula of the line is given as follows:
+$$
+\hat{score} = \hat{\beta}_0 + \hat{\beta}_1 * \text{pic_color}
+$$
 
 ---
 
@@ -149,7 +230,12 @@ Create a new model called `m_bty_rank` with `gender` removed and `rank` added in
 
 #### Response
 
+```{r}
+m_bty_rank <- lm(score ~ bty_avg + rank, data = evals)
+summary(m_bty_rank)
+```
 
+For categorical variables with more than two levels, R automatically one-hot encodes each level beyond the reference level as a separate dummy variable. So, a value of 0 for `ranktenure track` and 0 for `ranktenured` would indicate that rank = teaching. A value of 1 for `ranktenure track` and 0 for `ranktenured` would indicate that rank = tenure track. And finally, a value of 0 for `ranktenure track` and 1 for `ranktenured` would indicate that rank = tenured.
 
 ---
 
@@ -161,7 +247,7 @@ Which variable would you expect to have the highest p-value in this model? Why? 
 
 #### Response
 
-
+I would expect that some of the more superficial variables have the weakest relationship with scores. For example, pic_outfit and pic_color should have the weakest relationships.
 
 ---
 
@@ -173,7 +259,14 @@ Check your suspicions from the previous exercise. Include the model output in yo
 
 #### Response
 
+```{r}
+m_full <- lm(score ~ rank + gender + ethnicity + language + age + cls_perc_eval 
+             + cls_students + cls_level + cls_profs + cls_credits + bty_avg 
+             + pic_outfit + pic_color, data = evals)
+summary(m_full)
+```
 
+As I expected, `pic_outfit` does indeed have an insigificant relationship in the current model. However, the highest p-value is with the `cls_profs` variable.
 
 ---
 
@@ -185,7 +278,11 @@ Interpret the coefficient associated with the ethnicity variable.
 
 #### Response
 
+```{r}
+m_full$coefficients
+```
 
+The coefficient for `ethnicitynot minority` is ~0.1234, indicating that when an instructor is not an ethnic minority, their scores are 0.1234 points higher, holding all else equal.
 
 ---
 
@@ -197,7 +294,21 @@ Drop the variable with the highest p-value and re-fit the model. Did the coeffic
 
 #### Response
 
+```{r}
+sort(summary(m_full)$coefficients[,4], decreasing = TRUE)
+```
 
+We see that `cls_profs` has the highest p-value.
+
+```{r}
+m_fullish <- lm(score ~ rank + gender + ethnicity + language + age + 
+                  cls_perc_eval + cls_students + cls_level + cls_credits + 
+                  bty_avg + pic_outfit + pic_color, 
+                data = evals)
+summary(m_fullish)
+```
+
+After removing `cls_profs`, not much changes. The signs of coefficients are all the same, and significance remains largely unchanged. The `ethnicity` variable has actually increased in significance.
 
 ---
 
@@ -209,6 +320,26 @@ Using backward-selection and p-value as the selection criterion, determine the b
 
 #### Response
 
+```{r}
+model_vars <- colnames(evals)
+exclusions <- c()
+results <- list()
+counter <- 0
+
+for (i in 1:length(evals)) {
+  model <- lm(score ~ ., data = select(evals, -all_of(exclusions)))
+  worst_pval <- names(sort(summary(model)$coefficients[,4], 
+                           decreasing = TRUE))[1]
+  worst_pval <- str_sub(worst_pval,1,7)
+  worst_pval <- evals %>% 
+    select(contains(worst_pval)) %>% 
+    colnames
+  exclusions <- c(exclusions, worst_pval)
+  results[[i]] <- list(vars = colnames(model$model),
+                       r2 = summary(model)$adj.r.squared,
+                       exclusions = exclusions)
+}
+```
 
 
 ---
