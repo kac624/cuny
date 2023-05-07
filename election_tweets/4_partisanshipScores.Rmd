@@ -396,13 +396,24 @@ max_score <- max(scores$score)
 
 scores <- scores %>%
   mutate(score_normalized = 2 * (score - min_score) / (max_score - min_score) - 1,
-         score_norm_abs = abs(score_normalized))
+         score_norm_abs = abs(score_normalized),
+         score_norm_abs_rank = min_rank(score_norm_abs))
 
 scores %>%
   ggplot(aes(score_norm_abs)) +
   geom_histogram(aes(y = ..density..), bins = 100) +
   geom_density(color = 'blue') +
   stat_density(geom = 'line', adjust = 5, color = 'green')
+
+func <- ecdf(scores$score_norm_abs)
+ecdf_rank <- func(scores$score_norm_abs)
+
+scores <- scores %>%
+  cbind(ecdf_rank)
+
+scores %>%
+  ggplot() +
+  geom_freqpoly(aes(ecdf_rank))
 ```
 
 MANUAL REVIEW
@@ -420,6 +431,11 @@ scores %>% filter(party == 1, logit_combo < 0.5)
 test <- logit2$model$predict(rbind(tfv_combo_train, tfv_combo_test))
 caret::confusionMatrix(as.factor(as.numeric(test > 0.5)),
                        as.factor(rbind(tfv_combo_train, tfv_combo_test)$party))
+
+scores %>%
+  mutate(score_norm_abs_rank = min_rank(score_norm_abs)) %>%
+  ggplot(aes(score_norm_abs_rank)) +
+  geom_histogram()
 ```
 
 ## Additional Sources
@@ -490,7 +506,7 @@ rm(congress, ith_house)
 
 govtrack <- govtrack %>%
   arrange(name, desc(congress)) %>%
-  mutate(dupe = duplicated(name)) %>%
+  mutate(dupe = duplicated(ID)) %>%
   filter(dupe == FALSE)
 
 govtrack %>%
@@ -520,15 +536,18 @@ govtrack %>%
 Unified dataset
 
 ```{r}
+candidates <- read_csv('data/candidates2022_clean.csv')
+
 candidates <- candidates %>%
-  left_join(select(scores, name, score_norm_abs)) %>%
+  left_join(select(scores, name, score_norm_abs, ecdf_rank)) %>%
   left_join(select(voteview, bioguide_id, nominate_dim1_abs)) %>%
   left_join(select(govtrack, ID, gt_ideo_norm_abs), 
             by = c('govtrack_id' = 'ID')) %>%
   mutate(ballotpedia_id = str_remove(ballotpedia, 'https://ballotpedia.org/')) %>%
   select(-...1, -twitter_status_tweet, -twitter_status_name, 
          -twitter_status_id, -twitter_id, -key, -party_simple, -ballotpedia) %>%
-  rename(partisan_score_twitter = score_norm_abs,
+  rename(partisan_score_twitter = ecdf_rank,
+         # partisan_score_twitter = score_norm_abs,
          partisan_score_nominate = nominate_dim1_abs,
          partisan_score_govtrack = gt_ideo_norm_abs)
 
@@ -536,14 +555,30 @@ candidates <- candidates[!duplicated(candidates), ]
 
 candidates %>%
   mutate(dupe = duplicated(name)) %>%
-  filter(!is.na(partisan_score_twitter), 
-         !is.na(partisan_score_nominate), 
-         !is.na(partisan_score_govtrack),
-         dupe == FALSE) %>%
+  filter(dupe == FALSE) %>%
   ggplot() +
   geom_freqpoly(aes(partisan_score_twitter), color = 'blue') +
   geom_freqpoly(aes(partisan_score_nominate), color = 'green') +
   geom_freqpoly(aes(partisan_score_govtrack), color = 'red')
+```
+
+Comparisons
+
+```{r}
+candidates %>%
+  ggplot(aes(partisan_score_twitter, partisan_score_nominate)) +
+  geom_point() +
+  geom_smooth(method = 'lm', formula = 'y ~ x')
+
+candidates %>%
+  ggplot(aes(partisan_score_twitter, partisan_score_govtrack)) +
+  geom_point() +
+  geom_smooth(method = 'lm', formula = 'y ~ x')
+
+candidates %>%
+  ggplot(aes(partisan_score_nominate, partisan_score_govtrack)) +
+  geom_point() +
+  geom_smooth(method = 'lm', formula = 'y ~ x')
 ```
 
 

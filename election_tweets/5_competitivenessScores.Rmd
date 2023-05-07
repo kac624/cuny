@@ -8,6 +8,8 @@ output: html_document
 ```{r setup, message = FALSE}
 library(tidyverse)
 library(kableExtra)
+library(tigris)
+library(sf)
 ```
 
 ## District-Level Ideology Survey
@@ -93,7 +95,9 @@ https://electionlab.mit.edu/data
 ```{r}
 elections <- read_csv('data/1976-2020-house.csv')
 
-elections <- filter(elections, stage == 'GEN') %>%
+elections <- elections %>%
+  filter(stage == 'GEN',
+         year > 2010) %>%
   mutate(yearStateDist = paste0(year, state_po, district))
 
 elections <- elections %>% 
@@ -142,7 +146,7 @@ Prep data for joins
 First account for states with 1 district
 
 ```{r}
-one_dist_state_regex <- 'AK|WY|MT|ND|SD|VT|DE|DC'
+one_dist_state_regex <- 'AK|WY|ND|SD|VT|DE|DC|MT'
 ```
 
 Then prep the dfs themselves
@@ -162,8 +166,7 @@ district_ideology <- district_ideology %>%
                             '00',district),
          dupe = duplicated(cd_fips)) %>%
   filter(dupe == FALSE) %>%
-  rename(compete_ideology_mrp = mrp_norm_abs,
-         compete_ideology_itr = itr_norm_abs)
+  rename(compete_ideology = mrp_norm_abs)
 
 cookpvi <- cookpvi %>%
   rename(state_dist = district) %>%
@@ -171,8 +174,7 @@ cookpvi <- cookpvi %>%
          district = str_sub(state_dist, 4, 5),
          district = if_else(str_detect(state, one_dist_state_regex),
                             '00', district)) %>%
-  rename(compete_cookpvi_reg = pvi_abs,
-         compete_cookpvi_norm = pvi_norm_abs)
+  rename(compete_cookpvi = pvi_abs)
 
 eff_gap <- eff_gap %>%
   mutate(district = sprintf('%02d', as.numeric(district)),
@@ -186,26 +188,117 @@ Read in candidates and join
 ```{r}
 candidates <- read_csv('data/candidates_partisanship.csv')
 
-candidates %>%
+candidates <- candidates %>%
   mutate(district = sprintf('%02d', district),
          district = if_else(str_detect(state, one_dist_state_regex),
                             '00', district)) %>%
   left_join(
-    select(district_ideology, compete_ideology_mrp, compete_ideology_itr, state_abb, district),
+    select(district_ideology, compete_ideology, state_abb, district),
     by = c('state' = 'state_abb', 'district')
   ) %>%
   left_join(
-    select(cookpvi, compete_cookpvi_reg, compete_cookpvi_norm, state, district),
+    select(cookpvi, compete_cookpvi, state, district),
     by = c('state', 'district')
   ) %>%
   left_join(
     select(eff_gap, compete_eff_gap, state_po, district),
     by = c('state' = 'state_po', 'district')
+  )
+
+data('fips_codes')
+
+districts_sf <- congressional_districts() %>% 
+  st_simplify(dTolerance = 10000) %>%
+  data.frame() %>%
+  left_join(
+    fips_codes %>%
+      select(state, state_code) %>%
+      unique(), 
+    by = c('STATEFP' = 'state_code')
+  )
+
+states_sf <- states(cb = TRUE) %>% 
+  st_simplify(dTolerance = 1000) %>%
+  data.frame() %>%
+  filter(STUSPS != 'AS',
+         STUSPS != 'GU',
+         STUSPS != 'MP',
+         STUSPS != 'VI',
+         STUSPS != 'PR',)
+
+candidates_sf <- candidates %>%
+  left_join(
+    select(districts_sf, state, CD116FP, geometry),
+    by = c('state', 'district' = 'CD116FP'),
   ) %>%
-  filter(is.na(compete_eff_gap), !is.na(partisan_score_twitter))
+  left_join(
+    select(states_sf, STUSPS, geometry), suffix = c('_distr','_state'),
+    by = c('state' = 'STUSPS')
+  )
+```
+
+Mapping
+https://cran.r-project.org/web/packages/tigris/tigris.pdf
+https://ballotpedia.org/New_congressional_districts_created_after_the_2020_census
 
 
-eff_gap %>%
-  filter(state_po == 'FL')
+https://cdmaps.polisci.ucla.edu/
+https://www.census.gov/geographies/mapping-files/time-series/geo/tiger-line-file.html
+
+```{r}
+candidates_sf %>%
+  filter(state != 'HI',
+         state != 'AK',
+         state != 'PR') %>%
+  ggplot() + 
+  geom_sf(aes(geometry = geometry_distr, fill = compete_ideology)) +
+  geom_sf(aes(geometry = geometry_state), color = 'blue', size = 0.5, fill = NA) +
+  scale_fill_gradient(low = 'gray100', 
+                      high = 'purple') + 
+  theme(legend.position="bottom")
+
+candidates_sf %>%
+  filter(state != 'HI',
+         state != 'AK',
+         state != 'PR') %>%
+  ggplot() + 
+  geom_sf(aes(geometry = geometry_distr, fill = compete_cookpvi)) +
+  scale_fill_gradient(low = 'gray100', 
+                      high = 'purple') + 
+  theme(legend.position="bottom")
+
+candidates_sf %>%
+  filter(state != 'HI',
+         state != 'AK',
+         state != 'PR') %>%
+  ggplot() + 
+  geom_sf(aes(geometry = geometry_distr, fill = compete_eff_gap)) +
+  scale_fill_gradient(low = 'gray100', 
+                      high = 'purple') + 
+  theme(legend.position="bottom")
+```
+
+```{r}
+candidates %>%
+  ggplot(aes(compete_ideology, compete_cookpvi)) +
+  geom_point() +
+  geom_smooth(method = 'lm', formula = 'y ~ x')
+
+candidates %>%
+  ggplot(aes(compete_ideology, compete_eff_gap)) +
+  geom_point() +
+  geom_smooth(method = 'lm', formula = 'y ~ x')
+
+candidates %>%
+  ggplot(aes(compete_cookpvi, compete_eff_gap)) +
+  geom_point() +
+  geom_smooth(method = 'lm', formula = 'y ~ x')
+```
+
+
+Export
+
+```{r}
+write_csv(candidates, 'data/candidates_partisan_compete.csv')
 ```
 
