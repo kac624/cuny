@@ -320,8 +320,9 @@ hyp_test_heatmap <- function(results_df) {
   results_df %>%
     mutate(x = str_remove_all(x, 'compete|binary|_'),
            y = str_remove_all(y, 'partisan_score|_')) %>% 
-    ggplot(aes(factor(x, levels = c('cookpvi','ideology','effgap')), 
-               factor(y, levels = c('twitter','govtrack','nominate')))) +
+    ggplot(aes(x, y)) +
+               # factor(x, levels = c('cookpvi','ideology','effgap')), 
+               # factor(y, levels = c('twitter','govtrack','nominate')))) +
     geom_tile(aes(fill = p_value)) +
     geom_text(aes(label = str_c('p-value: ',
                                 if_else(p_value == 0, '<0.000', 

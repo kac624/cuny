@@ -1,0 +1,193 @@
+---
+title: "TidyVerse Vignette - Philly Crime Rates"
+author: "Keith Colella"
+date: "`r Sys.Date()`"
+output: html_document
+knit: (function(input, ...) {
+    rmarkdown::render(
+      input,
+      output_dir = "../D607/output"
+    )
+  })
+---
+
+We'll walk through an analysis of crime rates in Philadelphia, highlighting various features of the tidyverse along the way. We'll primarily make use of `dplyr`, `ggplot` and `forcats` functions.
+
+Our data will be pulled from the City of Philadelphia's OpenPhillyData site: https://opendataphilly.org/datasets/crime-incidents/. The site provides an API, which can be queried using SQL (specifically PostgreSQL). OpenPhillyData even offers an R package — `rphl` — to facilitate queries, which can be installed using the `remotes` package (remotes::install_github("CityOfPhiladelphia/rphl").
+
+```{r}
+library(tidyverse)
+library(rphl)
+```
+
+We'll begin by defining our query and submitting it via the `rphl` package's `get_carto` function. In this query, we request counts of various types of crimes per year.
+
+```{r}
+query_crime <- paste("SELECT Text_General_Code, COUNT(*) AS n,",
+                        "DATE_PART('YEAR', Dispatch_Date_Time) AS Year",
+                     "FROM incidents_part1_part2",
+                     "GROUP BY Year, Text_General_Code",
+                     "ORDER BY Year, n")
+
+crime <- get_carto(query_crime, format = "csv") %>%
+  filter(year != 2023)
+
+crime %>%
+  head(10) %>%
+  knitr::kable()
+
+crime %>%
+  ggplot(aes(year, n, color = text_general_code)) +
+  geom_line() +
+  theme(legend.position = 'bottom')
+```
+
+In previewing our dataframe and generating a line plot, we see that we have too many levels in the `Text_General_Code` field to handle simultaneously. However, we can use tidyverse features to map in additional data and simplify this factor in support of more streamlined analysis.
+
+We begin with another query that creates a mapping between `Text_General_Code` and the `UCR_General` codes, which are more consolidated. 
+
+```{r}
+query_mapping <- paste("SELECT UCR_General, Text_General_Code",
+                       "FROM incidents_part1_part2",
+                       "GROUP BY UCR_General, Text_General_Code",
+                       "ORDER BY UCR_General")
+
+mapping <- get_carto(query_mapping, format = "csv")
+
+mapping %>%
+  arrange(ucr_general) %>%
+  head(10) %>%
+  knitr::kable()
+```
+
+The `UCR_General` field still has a few too many levels, so we'll use the `mutate` function to generate a new field, `code_simple`. Within `mutate`, we'll leverage the `case_when` function to manually determine how each of the 26 code categories should be reclassified.
+
+```{r}
+mapping <- mapping %>%
+  mutate(code_simple = case_when(ucr_general == 100 ~ 'Homocide',
+                                 ucr_general == 200 ~ 'Rape',
+                                 ucr_general == 300 ~ 'Robbery/Burglary',
+                                 ucr_general == 400 ~ 'Assault',
+                                 ucr_general == 500 ~ 'Robbery/Burglary',
+                                 ucr_general == 600 ~ 'Theft',
+                                 ucr_general == 700 ~ 'Theft',
+                                 ucr_general == 800 ~ 'Assault',
+                                 ucr_general == 900 ~ 'Arson',
+                                 ucr_general == 1000 ~ 'Forgery/Fraud',
+                                 ucr_general == 1100 ~ 'Forgery/Fraud',
+                                 ucr_general == 1200 ~ 'Forgery/Fraud',
+                                 ucr_general == 1300 ~ 'Forgery/Fraud',
+                                 ucr_general == 1400 ~ 'Vandalism',
+                                 ucr_general == 1500 ~ 'Weapons',
+                                 ucr_general == 1600 ~ 'Prostitution/Vice',
+                                 ucr_general == 1700 ~ 'Prostitution/Vice',
+                                 ucr_general == 1800 ~ 'Narcotics',
+                                 ucr_general == 1900 ~ 'Prostitution/Vice',
+                                 ucr_general == 2000 ~ 'Other',
+                                 ucr_general == 2100 ~ 'DUI',
+                                 ucr_general == 2200 ~ 'Other',
+                                 ucr_general == 2300 ~ 'Other',
+                                 ucr_general == 2400 ~ 'Other',
+                                 ucr_general == 2500 ~ 'Other',
+                                 ucr_general == 2600 ~ 'Other'))
+
+mapping %>% select(text_general_code) %>% unique() %>% nrow()
+mapping %>% select(code_simple) %>% unique() %>% nrow()
+```
+
+We can see that we've reduced the number of levels in our crime coding from 33 to 13. We're now able to use the `left_join` from `dplyr` to bring this simplified code field into our crime dataframe. Following the join, we can use `group_by` and `summarize` to consolidate the crime tallies under the new, simplified classifications.
+
+```{r}
+crime_simple <- crime %>%
+  left_join(
+    select(mapping, text_general_code, code_simple)) %>%
+  group_by(year, code_simple) %>%
+  summarize(count = sum(n), .groups = 'keep')
+
+crime_simple %>%
+  head(10) %>%
+  knitr::kable()
+
+crime_simple %>%
+  ggplot(aes(year, count, color = code_simple)) +
+  geom_line() +
+  theme(legend.position = 'bottom') +
+  scale_y_continuous(labels = scales::comma)
+```
+
+Our plot is now much more interpretable. However, there still appears to be a few too many levels to see the finer details, so it will be best to simplify this field a bit further. We'll again use `mutate` to redefine the field, but instead of `case_when` we can use a different function from the `forcats` package: `fct_collapse`. After coercing the character field into a factor, we can then create new levels, listing out each of the constituent levels from the previous classification. We'll single out Homicide, then create another level for other violent crimes, then collapse all other crimes into the Non-Violent category.
+
+```{r}
+crime_simpler <- crime_simple %>%
+  mutate(code_simple = as.factor(code_simple),
+         code_simple = factor(fct_collapse(
+           code_simple,
+           Homocide = c('Homocide'),
+           Rape_Assault_Burglary = c('Rape','Robbery/Burglary','Arson','Assault'),
+           other_level = 'Non-Violent')),
+         ordered = TRUE) %>%
+  group_by(year, code_simple) %>%
+  summarize(count = sum(count), .groups = 'keep') %>%
+  ungroup()
+
+crime_simpler %>%
+  head(10) %>%
+  knitr::kable()
+
+crime_simpler %>%
+  ggplot(aes(year, count)) +
+  geom_line() +
+  facet_grid(rows = vars(code_simple),
+             scales = 'free') +
+  scale_y_continuous(labels = scales::comma)
+```
+
+We now have a clean plot to facilitate analysis. The plot shows that both Non-Violent and Violent Crimes excluding homocide have steadily decreased since 2006, with slight upticks in 2022. The level of homicides, however, shows a different path. After some slight declines through ~2014, the number of homicides has steadily increased. The increase between 2019 and 2020 appears especially pronounced.
+
+This raises a question. The plot above shows *absolute* counts of crimes, so it is unclear whether crime *rates* have increased. In other words, is the increase in homicide rates simply a reflection of an increasing population?
+
+To answer this question, we'll pull in one final dataset from OpenDataPhilly, this one detailing the total population of Philadelphia County. This dataset is available directly in .csv format, so we can use the `read_csv` function from `readr`. We'll also use the `filter` function from `dplyr` to remove unwanted rows, focusing only on total population counts each year.
+
+```{r}
+pop <- read_csv(paste0('https://opendata.arcgis.com/api/v3/datasets/',
+                       'd0ac67bb117b42f39614bad23525a13e_0/downloads/',
+                       'data?format=csv&spatialRefId=4326'))
+
+pop_annual <- pop %>%
+  filter(SEX == 'All sexes',
+         RACE_ETHNICITY == 'All races/ethnicities',
+         AGE_CATEGORY == 'All ages',
+         SOURCE == 'Annual County Resident Population Estimates')
+
+pop_annual %>%
+  tail(10) %>%
+  knitr::kable()
+```
+
+As above, we'll use the `left_join` function to map in the population counts per year, and the `mutate` function to calculate crime rates, defined as number of crimes divided by total population. We'll then generate a final plot to compare crimes total and rates per category over time.
+
+```{r}
+crime_simpler_pop <- crime_simpler %>%
+  left_join(select(pop_annual, YEAR, COUNT_),
+            by = c('year' = 'YEAR')) %>%
+  rename(population = COUNT_) %>%
+  fill(population, .direction = 'down') %>%
+  mutate(rate = count / population)
+
+crime_simpler_pop %>%
+  pivot_longer(cols = c(count, rate),
+               names_to = 'measure') %>%
+  ggplot() +
+  geom_line(aes(year, value)) +
+  facet_wrap(measure ~ code_simple,
+             # rows = vars(code_simple),
+             # cols = vars(measure),
+             scales = 'free') +
+  scale_y_continuous(labels = scales::comma)
+```
+
+Surprisingly, the plots of crime counts and rates match almost exactly, indicating the crime overall has kept pace with increases in total population. On the one hand, this indicates that most crime is steadily decreasing. At the same time, homicide rates have continued to climb despite the decreases in other categories.
+
+--- 
+
+In conclusion, we see that the tidyverse offers a variety of tools to gather, clean and compile data efficiently and intuitively. 
