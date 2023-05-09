@@ -1,0 +1,91 @@
+---
+title: "OLD"
+author: "Keith Colella"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+## ANOVA
+
+Quartile split
+
+```{r}
+candidates <- candidates %>%
+  mutate(
+    compete_ideology_discrete = factor(
+      case_when(compete_ideology < summary(candidates$compete_ideology)[2] ~ 1,
+                compete_ideology < summary(candidates$compete_ideology)[3] ~ 2,
+                compete_ideology < summary(candidates$compete_ideology)[5] ~ 3,
+                compete_ideology >= summary(candidates$compete_ideology)[5] ~ 4,
+                TRUE ~ NA), levels = c(1,2,3,4), ordered = TRUE),
+    compete_cookpvi_discrete =factor(
+      case_when(compete_cookpvi < summary(candidates$compete_cookpvi)[2] ~ 1,
+                compete_cookpvi < summary(candidates$compete_cookpvi)[3] ~ 2,
+                compete_cookpvi < summary(candidates$compete_cookpvi)[5] ~ 3,
+                compete_cookpvi >= summary(candidates$compete_cookpvi)[5] ~ 4,
+                TRUE ~ NA), levels = c(1,2,3,4), ordered = TRUE),
+    compete_eff_gap_discrete = factor(
+      case_when(compete_eff_gap < summary(candidates$compete_eff_gap)[2] ~ 1,
+                compete_eff_gap < summary(candidates$compete_eff_gap)[3] ~ 2,
+                compete_eff_gap < summary(candidates$compete_eff_gap)[5] ~ 3,
+                compete_eff_gap >= summary(candidates$compete_eff_gap)[5] ~ 4,
+                TRUE ~ NA), levels = c(1,2,3,4), ordered = TRUE))
+
+var_grid_discrete <- data.frame(
+  x = var_grid$x %>%
+    str_replace_all('_binary','_discrete'),
+  y = var_grid$y %>%
+    str_replace_all('_binary','_discrete'))
+
+plot_list <- list()
+
+for (row in 1:nrow(var_grid_discrete)) {
+  plot <- boxplot(as.character(var_grid_discrete[row,'x']),
+                  as.character(var_grid_discrete[row,'y']))
+  plot_list[[row]] <- plot
+}
+
+plot_grid(plotlist = plot_list, nrow = 3, ncol = 3)
+```
+
+Assumptions
+
+```{r}
+for (row in 1:nrow(var_grid_discrete)) {
+  x = as.character(var_grid_discrete[row,'x'])
+  y = as.character(var_grid_discrete[row,'y'])
+  candidates %>%
+    group_by(!!sym(x)) %>%
+    summarize(std_dev = sd(!!sym(y), na.rm = TRUE)) %>%
+    print()
+}
+```
+
+```{r}
+plot_list <- list()
+
+for (row in 1:nrow(var_grid_discrete)) {
+  x = as.character(var_grid_discrete[row,'x'])
+  y = as.character(var_grid_discrete[row,'y'])
+  plot <- candidates %>%
+    filter(!is.na(!!sym(x)),
+           !is.na(!!sym(y))) %>%
+    ggplot(aes(!!sym(y), color = !!sym(x))) +
+    geom_freqpoly(bins = 10, show.legend=FALSE) +
+    scale_color_manual(values = c('lightblue1','lightblue2',
+                                  'lightblue3','lightblue4'))
+  plot_list[[row]] <- plot
+}
+
+plot_grid(plotlist = plot_list, nrow = 3, ncol = 3)
+```
+
+```{r}
+for (row in 1:nrow(var_grid_discrete)) {
+  x = as.character(var_grid_discrete[row,'x'])
+  y = as.character(var_grid_discrete[row,'y'])
+  cat('Results for: ', y, ' ~ ', x, '\n')
+  print(summary(aov(data = candidates, formula = as.formula(paste(y,'~',x)))))
+  cat('\n')
+}
+```
