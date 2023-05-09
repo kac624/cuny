@@ -18,6 +18,7 @@ Config
 ```{r setup, message = FALSE}
 library(tidyverse)
 library(openintro)
+library(StepReg)
 library(GGally)
 library(cowplot)
 library(patchwork)
@@ -321,26 +322,47 @@ Using backward-selection and p-value as the selection criterion, determine the b
 #### Response
 
 ```{r}
-model_vars <- colnames(evals)
+evals_oh <- mltools::one_hot(data.table::as.data.table(evals)) %>%
+  select(-contains('bty_f'),-contains('bty_m'))
+colnames(evals_oh) <- colnames(evals_oh) %>% 
+  str_replace_all(' ', '_') %>%
+  str_replace_all('-', '_') %>%
+  str_replace_all('&', '_')
 exclusions <- c()
-results <- list()
-counter <- 0
+model_list <- list()
+results <- data.frame(step = as.numeric(),
+                      removed_var = as.character(),
+                      r_squared = as.numeric(),
+                      variables = as.character())
 
-for (i in 1:length(evals)) {
-  model <- lm(score ~ ., data = select(evals, -all_of(exclusions)))
+for (i in 1:(length(evals_oh) - 1)) {
+  model <- lm(score ~ ., data = select(evals_oh, -all_of(exclusions)))
   worst_pval <- names(sort(summary(model)$coefficients[,4], 
                            decreasing = TRUE))[1]
-  worst_pval <- str_sub(worst_pval,1,7)
-  worst_pval <- evals %>% 
-    select(contains(worst_pval)) %>% 
-    colnames
   exclusions <- c(exclusions, worst_pval)
-  results[[i]] <- list(vars = colnames(model$model),
-                       r2 = summary(model)$adj.r.squared,
-                       exclusions = exclusions)
+  model_list[[i]] <- model
+  result <- data.frame(step = i, 
+                       removed_var = worst_pval,
+                       r_squared = summary(model)$adj.r.squared, 
+                       variables = paste(colnames(model$model), collapse = ', '))
+  results <- rbind(results, result)
 }
+
+results %>%
+  arrange(desc(r_squared)) %>% 
+  select(-variables) %>%
+  head()
 ```
 
+This process also requires a ranking metric, for which I've chosen $R^2$. To facilitate the manual implementation of backward selection, I also one-hot encoded the dataframe before feeding it to the selection loop. I started with all variables (except for redundant beauty variables) and removed the one with the highest p_value at each step until only one variable was left. Then, I ranked all those models by $R^2$ to choose the "best", given as follows.
+
+$$ \hat{score} = \hat{\beta}_0 + \hat{\beta}_1 * \text{course_id} + \hat{\beta}_2 * \text{rank_teaching} + \hat{\beta}_3 * \text{ethnicity_minority} + $$
+$$ \hat{\beta}_4 * \text{ethnicity_not_minority} + \hat{\beta}_5 * \text{gender_female} + \hat{\beta}_6 * \text{gender_male} + $$
+$$ \hat{\beta}_7 * \text{language_english} + \hat{\beta}_8 * \text{language_non_english} + \hat{\beta}_9 * \text{age} + $$
+$$ \hat{\beta}_{10} * \text{cls_perc_eval} + \hat{\beta}_{11} * \text{cls_did_eval} + \hat{\beta}_{12} * \text{cls_students} + $$
+$$ \hat{\beta}_{13} * \text{cls_profs_multiple} + \hat{\beta}_{14} * \text{cls_profs_single} + \hat{\beta}_{15} * \text{cls_credits_multi_credit} + $$
+$$ \hat{\beta}_{16} * \text{cls_credits_one_credit} + \hat{\beta}_{17} * \text{bty_avg} + \hat{\beta}_{18} * \text{pic_outfit_formal} + $$
+$$ \hat{\beta}_{19} * \text{pic_outfit_not_formal} + \hat{\beta}_{20} * \text{pic_color_black_white} + \hat{\beta}_{21} * \text{pic_color_color} $$
 
 ---
 
@@ -352,7 +374,28 @@ Verify that the conditions for this model are reasonable using diagnostic plots.
 
 #### Response
 
+```{r}
+p1 <- ggplot(data = model_list[[6]], aes(x = .resid)) +
+  geom_histogram(bins = 25) +
+  xlab("Residuals")
 
+p2 <- ggplot(data = model_list[[6]], aes(sample = .resid)) +
+  stat_qq() + 
+  geom_abline(intercept = mean(m_bty$residuals), 
+              slope = sd(m_bty$residuals),
+              color = 'red', linetype = 'dashed')
+
+
+p3 <- ggplot(data = model_list[[6]], aes(x = .fitted, y = .resid)) +
+  geom_point() +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  xlab("Fitted values") +
+  ylab("Residuals")
+
+plot_grid(plot_grid(p1, p2), p3, nrow = 2, ncol = 1)
+```
+
+Using the top ranked model (i.e. the 6th in our list), we generate the residual plots above. As observed previously, the residuals exhibit some negative skew, but it does not appear sufficient to drive meaningful unreliability in terms of p-values. The residuals also do not appear to exhibit heteroskedasticity.
 
 ---
 
@@ -364,7 +407,7 @@ The original paper describes how these data were gathered by taking a sample of 
 
 #### Response
 
-
+The sampling process may introduce some problems with inference. If the unit of observation is a course, rather than an instructor, then the courses were not randomly sampled. Randomly sampling courses would involve starting with the population of all courses scored at UT and then randomly choosing a sample from the course list. Instead, a sample of teachers was chosen. As a result, there may be some violation of the independence condition, which could impact our ability to draw inference from these results.
 
 ---
 
@@ -376,7 +419,17 @@ Based on your final model, describe the characteristics of a professor and cours
 
 #### Response
 
+```{r}
+data.frame(
+  variables = names(summary(model_list[[6]])$coefficients[,1]),
+  coefficients = summary(model_list[[6]])$coefficients[,1],
+  pvals = summary(model_list[[6]])$coefficients[,4]
+) %>%
+  filter(pvals < 0.1) %>%
+  arrange(desc(coefficients))
+```
 
+According to our top-ranked model, the variables that are significant and have the greatest coefficients are listed above. So, we we expect the top-scored instructors to have black-and-white profile pictures of themselves in formal outfits, to speak English, to be physically attractive, to be young, and to be male.
 
 ---
 
@@ -388,6 +441,6 @@ Would you be comfortable generalizing your conclusions to apply to professors ge
 
 #### Response
 
-
+I would not. First, there are potential issues with the sampling approach described above (i.e. the courses were not truly randomly sampled), so inference even within UT may be problematic. More importantly, however, the sample includes no instructors from other universities. Only with conclusions draw from a random sample across many universities would I feel comfortable drawing conslusions about instructors at colleges across the country. 
 
 ---

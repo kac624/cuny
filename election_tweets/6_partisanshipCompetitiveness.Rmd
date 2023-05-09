@@ -13,7 +13,7 @@ library(sf)
 library(kableExtra)
 library(cowplot)
 
-set.seed(1989)
+set.seed(888)
 ```
 
 ## Data
@@ -26,7 +26,8 @@ candidates <- read_csv('data/candidates_partisan_compete.csv')
 glimpse(candidates)
 
 candidates <- candidates %>%
-  select(name, state, district, party, incumbent_challenge, # candidate_status,
+  mutate(moc = if_else(is.na(bioguide_id), 'No', 'Yes')) %>%
+  select(name, state, district, party, incumbent_challenge, moc,
          contains('partisan'), contains('compete'))
 
 candidates <- candidates[!duplicated(candidates),]
@@ -117,6 +118,43 @@ party_plots <- lapply(c('name','partisan_score_twitter',
 plot_grid(plotlist = party_plots, nrow = 2, ncol = 2)
 ```
 
+Geographic Visualization
+
+```{r}
+candidates_sf %>%
+  filter(state != 'HI',
+         state != 'AK',
+         state != 'PR') %>%
+  ggplot() + 
+  geom_sf(aes(geometry = geometry_distr, fill = compete_ideology)) +
+  geom_sf(aes(geometry = geometry_state), color = 'blue', size = 0.4, fill = NA) +
+  scale_fill_gradient(low = 'gray100', 
+                      high = 'purple') + 
+  theme(legend.position='bottom')
+
+candidates_sf %>%
+  filter(state != 'HI',
+         state != 'AK',
+         state != 'PR') %>%
+  ggplot() + 
+  geom_sf(aes(geometry = geometry_distr, fill = compete_cookpvi)) +
+  geom_sf(aes(geometry = geometry_state), color = 'blue', size = 0.4, fill = NA) +
+  scale_fill_gradient(low = 'gray100', 
+                      high = 'purple') + 
+  theme(legend.position='bottom')
+
+candidates_sf %>%
+  filter(state != 'HI',
+         state != 'AK',
+         state != 'PR') %>%
+  ggplot() + 
+  geom_sf(aes(geometry = geometry_distr, fill = compete_eff_gap)) +
+  geom_sf(aes(geometry = geometry_state), color = 'blue', size = 0.4, fill = NA) +
+  scale_fill_gradient(low = 'gray100', 
+                      high = 'purple') + 
+  theme(legend.position='bottom')
+```
+
 Efficiency and Partisanship
 
 ```{r}
@@ -179,7 +217,6 @@ boxplot <- function(x,y) {
          !is.na(!! sym(y))) %>%
   ggplot(aes(x = !! sym(x), y = !! sym(y))) +
   geom_boxplot() +
-  geom_smooth(method = 'lm', formula = 'y ~ x') +
   theme(axis.title.x = element_blank(),
         axis.title.y = element_blank(),
         plot.title = element_text(size = 10)) +
@@ -205,7 +242,7 @@ plot_grid(plotlist = plot_list, nrow = 3, ncol = 3)
 
 ## Hypothesis Test
 
-Define function
+Define functions
 
 ```{r}
 hyp_diff_means <- function(x, y, 
@@ -243,52 +280,258 @@ hyp_diff_means <- function(x, y,
   
   return(results)
 }
-```
 
-Test and plot heatmap
-
-```{r}
-results_df <- data.frame(var_grid, p_value = NA, lower_ci = NA, upper_ci = NA)
-
-for (row in 1:nrow(var_grid)) {
-  test_name <- str_c(str_remove_all(as.character(var_grid[row,'x']),
-                                    'compete|_|binary'), '_',
-                     str_remove_all(as.character(var_grid[row,'y']),
-                                    'partisan_score|_'))
+grid_hyp_test <- function(data, grid) {
   
-  result <- hyp_diff_means(as.character(var_grid[row,'x']),
-                           as.character(var_grid[row,'y']))
+  results_df <- data.frame(grid, p_value = NA, lower_ci = NA, upper_ci = NA)
   
-  results_df <- results_df %>%
-    mutate(
-      p_value = replace(p_value,
-                        x == as.character(var_grid[row,'x']) &
-                          y == as.character(var_grid[row,'y']),
-                        result$p_value),
-      lower_ci = replace(lower_ci,
-                        x == as.character(var_grid[row,'x']) &
-                          y == as.character(var_grid[row,'y']),
-                        result$lower_ci),
-      upper_ci = replace(upper_ci,
-                         x == as.character(var_grid[row,'x']) &
-                           y == as.character(var_grid[row,'y']),
-                         result$upper_ci))
+  for (row in 1:nrow(grid)) {
+    
+    test_name <- str_c(str_remove_all(as.character(grid[row,'x']),
+                                      'compete|_|binary'), '_',
+                       str_remove_all(as.character(grid[row,'y']),
+                                      'partisan_score|_'))
+    
+    result <- hyp_diff_means(as.character(grid[row,'x']),
+                             as.character(grid[row,'y']),
+                             data = data)
+    
+    results_df <- results_df %>%
+      mutate(
+        p_value = replace(p_value,
+                          x == as.character(grid[row,'x']) &
+                            y == as.character(grid[row,'y']),
+                          result$p_value),
+        lower_ci = replace(lower_ci,
+                           x == as.character(grid[row,'x']) &
+                             y == as.character(grid[row,'y']),
+                           result$lower_ci),
+        upper_ci = replace(upper_ci,
+                           x == as.character(grid[row,'x']) &
+                             y == as.character(grid[row,'y']),
+                           result$upper_ci))
+  }
+  
+  return(results_df)
+  
 }
 
+hyp_test_heatmap <- function(results_df) {
+  results_df %>%
+    mutate(x = str_remove_all(x, 'compete|binary|_'),
+           y = str_remove_all(y, 'partisan_score|_')) %>% 
+    ggplot(aes(factor(x, levels = c('cookpvi','ideology','effgap')), 
+               factor(y, levels = c('twitter','govtrack','nominate')))) +
+    geom_tile(aes(fill = p_value)) +
+    geom_text(aes(label = str_c('p-value: ',
+                                if_else(p_value == 0, '<0.000', 
+                                        format(round(p_value,3), nsmall=3)),
+                                '\n95% CI: ',round(lower_ci,3),
+                                ' to ',round(upper_ci,3)))) +
+    xlab('District Competition Measures') +
+    ylab('Candidate Partisanship Measures') +
+    theme(axis.text.y = element_text(angle = 90, hjust = 0.5)) +
+    scale_fill_gradient(low = 'darkslategray1', 
+                        high = 'gray100',
+                        limits = c(0,0.1),
+                        oob = scales::squish)
+}
+```
+
+Run test on full data
+
+```{r}
+results <- grid_hyp_test(data = candidates, grid = var_grid)
+hyp_test_heatmap(results)
+```
+
+Split by party
+
+```{r}
+results_dem <- grid_hyp_test(data = filter(candidates,
+                                           party == 'DEMOCRATIC PARTY'), 
+                             grid = var_grid)
+hyp_test_heatmap(results_dem)
+
+results_rep <- grid_hyp_test(data = filter(candidates,
+                                           party == 'REPUBLICAN PARTY'), 
+                             grid = var_grid)
+hyp_test_heatmap(results_rep)
+```
+
+By Candidate Status
+
+```{r}
+results_incumb <- grid_hyp_test(data = filter(candidates,
+                                              incumbent_challenge == 'Incumbent'), 
+                                grid = filter(var_grid,
+                                              str_detect(y, 'twitter')))
+hyp_test_heatmap(results_incumb)
+
+results_chall <- grid_hyp_test(data = filter(candidates,
+                                              incumbent_challenge == 'Challenger'), 
+                                grid = filter(var_grid,
+                                              str_detect(y, 'twitter')))
+hyp_test_heatmap(results_chall)
+
+results_open <- grid_hyp_test(data = filter(candidates,
+                                              incumbent_challenge == 'Open seat'), 
+                                grid = filter(var_grid,
+                                              str_detect(y, 'twitter')))
+hyp_test_heatmap(results_open)
+```
+
+No MOCs
+
+```{r}
+results_noMOC <- grid_hyp_test(data = filter(candidates,
+                                             moc == 'No'), 
+                                grid = filter(var_grid,
+                                              str_detect(y, 'twitter')))
+hyp_test_heatmap(results_noMOC)
+```
+
+## ANOVA
+
+Quartile split
+
+```{r}
+candidates <- candidates %>%
+  mutate(
+    compete_ideology_discrete = factor(
+      case_when(compete_ideology < summary(candidates$compete_ideology)[2] ~ 1,
+                compete_ideology < summary(candidates$compete_ideology)[3] ~ 2,
+                compete_ideology < summary(candidates$compete_ideology)[5] ~ 3,
+                compete_ideology >= summary(candidates$compete_ideology)[5] ~ 4,
+                TRUE ~ NA), levels = c(1,2,3,4), ordered = TRUE),
+    compete_cookpvi_discrete =factor(
+      case_when(compete_cookpvi < summary(candidates$compete_cookpvi)[2] ~ 1,
+                compete_cookpvi < summary(candidates$compete_cookpvi)[3] ~ 2,
+                compete_cookpvi < summary(candidates$compete_cookpvi)[5] ~ 3,
+                compete_cookpvi >= summary(candidates$compete_cookpvi)[5] ~ 4,
+                TRUE ~ NA), levels = c(1,2,3,4), ordered = TRUE),
+    compete_eff_gap_discrete = factor(
+      case_when(compete_eff_gap < summary(candidates$compete_eff_gap)[2] ~ 1,
+                compete_eff_gap < summary(candidates$compete_eff_gap)[3] ~ 2,
+                compete_eff_gap < summary(candidates$compete_eff_gap)[5] ~ 3,
+                compete_eff_gap >= summary(candidates$compete_eff_gap)[5] ~ 4,
+                TRUE ~ NA), levels = c(1,2,3,4), ordered = TRUE))
+
+var_grid_discrete <- data.frame(
+  x = var_grid$x %>%
+    str_replace_all('_binary','_discrete'),
+  y = var_grid$y %>%
+    str_replace_all('_binary','_discrete'))
+
+plot_list <- list()
+
+for (row in 1:nrow(var_grid_discrete)) {
+  plot <- boxplot(as.character(var_grid_discrete[row,'x']),
+                  as.character(var_grid_discrete[row,'y']))
+  plot_list[[row]] <- plot
+}
+
+plot_grid(plotlist = plot_list, nrow = 3, ncol = 3)
+```
+
+Assumptions
+
+```{r}
+for (row in 1:nrow(var_grid_discrete)) {
+  x = as.character(var_grid_discrete[row,'x'])
+  y = as.character(var_grid_discrete[row,'y'])
+  candidates %>%
+    group_by(!!sym(x)) %>%
+    summarize(std_dev = sd(!!sym(y), na.rm = TRUE)) %>%
+    print()
+}
+```
+
+```{r}
+plot_list <- list()
+
+for (row in 1:nrow(var_grid_discrete)) {
+  x = as.character(var_grid_discrete[row,'x'])
+  y = as.character(var_grid_discrete[row,'y'])
+  plot <- candidates %>%
+    filter(!is.na(!!sym(x)),
+           !is.na(!!sym(y))) %>%
+    ggplot(aes(!!sym(y), color = !!sym(x))) +
+    geom_freqpoly(bins = 10, show.legend=FALSE) +
+    scale_color_manual(values = c('lightblue1','lightblue2',
+                                  'lightblue3','lightblue4'))
+  plot_list[[row]] <- plot
+}
+
+plot_grid(plotlist = plot_list, nrow = 3, ncol = 3)
+```
+
+```{r}
+for (row in 1:nrow(var_grid_discrete)) {
+  x = as.character(var_grid_discrete[row,'x'])
+  y = as.character(var_grid_discrete[row,'y'])
+  cat('Results for: ', y, ' ~ ', x, '\n')
+  print(summary(aov(data = candidates, formula = as.formula(paste(y,'~',x)))))
+  cat('\n')
+}
+```
+
+## Linear Regression
+
+```{r}
+var_grid_continous <- data.frame(
+  x = var_grid$x %>%
+    str_remove_all('_binary'),
+  y = var_grid$y %>%
+    str_remove_all('_binary'))
+
+results_df <- data.frame(var_grid_continous,
+                         beta_coef = NA,
+                         predictor_pval = NA,
+                         r_squared = NA)
+
+for (row in 1:nrow(var_grid_continous)) {
+  x = as.character(var_grid_continous[row,'x'])
+  y = as.character(var_grid_continous[row,'y'])
+  
+  model <- lm(data = candidates, formula = as.formula(paste(y,'~',x)))
+
+  results_df <- results_df %>%
+      mutate(
+        beta_coef = replace(beta_coef,
+                          x == as.character(var_grid_continous[row,'x']) &
+                            y == as.character(var_grid_continous[row,'y']),
+                          summary(model)$coefficients[2]),
+        predictor_pval = replace(predictor_pval,
+                           x == as.character(var_grid_continous[row,'x']) &
+                             y == as.character(var_grid_continous[row,'y']),
+                           summary(model)$coefficients[8]),
+        r_squared = replace(r_squared,
+                           x == as.character(var_grid_continous[row,'x']) &
+                             y == as.character(var_grid_continous[row,'y']),
+                          summary(model)$r.squared))
+}
+
+results_df %>% 
+  filter(predictor_pval < 0.1) %>%
+  arrange(desc(r_squared))
+
 results_df %>%
-  mutate(x = str_remove_all(x, 'compete|binary|_'),
+  mutate(x = str_remove_all(x, 'compete|_'),
          y = str_remove_all(y, 'partisan_score|_')) %>% 
   ggplot(aes(factor(x, levels = c('cookpvi','ideology','effgap')), 
              factor(y, levels = c('twitter','govtrack','nominate')))) +
-  geom_tile(aes(fill = p_value)) +
-  geom_text(aes(label = str_c('p-value: ',format(round(p_value,3), nsmall=3),
-                              '\n95% CI: ',round(lower_ci,3),
-                              ' - ',round(upper_ci,3)))) +
+  # geom_tile(aes(fill = r_squared)) +
+  geom_tile(aes(fill = ifelse(predictor_pval < 0.1, r_squared, NA))) +
+  geom_text(aes(label = str_c('R^2: ',round(r_squared,3),
+                              '\nPredictor pval: ',round(predictor_pval,3),
+                              '\nBeta: ',round(beta_coef,3)))) +
   xlab('District Competition Measures') +
   ylab('Candidate Partisanship Measures') +
-  scale_fill_gradient(low = 'darkslategray1', 
-                      high = 'gray100',
-                      limits = c(0,0.1),
-                      oob = scales::squish)
+  scale_fill_gradient(low = 'gray100', 
+                      high = 'darkslategray1',
+                      na.value = 'grey50') + 
+  theme(axis.text.y = element_text(angle = 90, hjust = 0.5)) +
+  labs(fill = 'R^2')
 ```
 
