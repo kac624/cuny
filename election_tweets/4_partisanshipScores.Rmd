@@ -407,13 +407,17 @@ scores %>%
 
 func <- ecdf(scores$score_norm_abs)
 ecdf_rank <- func(scores$score_norm_abs)
+norm_rank <- qnorm(ecdf_rank, mean = 0.5, sd = 1/6)
 
 scores <- scores %>%
-  cbind(ecdf_rank)
+  cbind(ecdf_rank, norm_rank) %>%
+  mutate(norm_rank = replace(norm_rank, norm_rank == Inf, 0.99),
+         norm_rank = replace(norm_rank, norm_rank < 0, 0.01))
 
 scores %>%
   ggplot() +
-  geom_freqpoly(aes(ecdf_rank))
+  geom_freqpoly(aes(ecdf_rank), color = 'red') +
+  geom_freqpoly(aes(norm_rank))
 ```
 
 MANUAL REVIEW
@@ -539,15 +543,15 @@ Unified dataset
 candidates <- read_csv('data/candidates2022_clean.csv')
 
 candidates <- candidates %>%
-  left_join(select(scores, name, score_norm_abs, ecdf_rank)) %>%
+  # twitter alts: score_norm_abs, ecdf_rank
+  left_join(select(scores, name, norm_rank)) %>%
   left_join(select(voteview, bioguide_id, nominate_dim1_abs)) %>%
   left_join(select(govtrack, ID, gt_ideo_norm_abs), 
             by = c('govtrack_id' = 'ID')) %>%
   mutate(ballotpedia_id = str_remove(ballotpedia, 'https://ballotpedia.org/')) %>%
   select(-...1, -twitter_status_tweet, -twitter_status_name, 
          -twitter_status_id, -twitter_id, -key, -party_simple, -ballotpedia) %>%
-  rename(partisan_score_twitter = ecdf_rank,
-         # partisan_score_twitter = score_norm_abs,
+  rename(partisan_score_twitter = norm_rank,
          partisan_score_nominate = nominate_dim1_abs,
          partisan_score_govtrack = gt_ideo_norm_abs)
 

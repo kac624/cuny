@@ -401,9 +401,7 @@ results_df %>%
 results_df %>%
   mutate(x = str_remove_all(x, 'compete|_'),
          y = str_remove_all(y, 'partisan_score|_')) %>% 
-  ggplot(aes(factor(x, levels = c('cookpvi','ideology','effgap')), 
-             factor(y, levels = c('twitter','govtrack','nominate')))) +
-  # geom_tile(aes(fill = r_squared)) +
+  ggplot(aes(x,y)) +
   geom_tile(aes(fill = ifelse(predictor_pval < 0.1, r_squared, NA))) +
   geom_text(aes(label = str_c('R^2: ',round(r_squared,3),
                               '\nPredictor pval: ',round(predictor_pval,3),
