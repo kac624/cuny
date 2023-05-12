@@ -80,7 +80,7 @@ cookpvi <- cookpvi %>%
 
 cookpvi %>%
   ggplot() +
-  geom_freqpoly(aes(pvi_norm), bins = 20)
+  geom_freqpoly(aes(pvi_norm_abs), bins = 20)
 
 cookpvi %>%
   ggplot() +
@@ -129,6 +129,22 @@ summary(eff_gap)
 eff_gap %>% 
   ggplot(aes(avg_eff_gap)) +
   geom_histogram(binwidth = 0.02)
+
+eff_gap <- eff_gap %>%
+  mutate(avg_eff_gap = if_else(avg_eff_gap > 0.25, 0.25, avg_eff_gap))
+
+min_score <- min(eff_gap$avg_eff_gap, na.rm = TRUE)
+max_score <- max(eff_gap$avg_eff_gap, na.rm = TRUE)
+
+eff_gap <- eff_gap %>%
+  mutate(avg_eff_gap_norm = (avg_eff_gap - min_score) / (max_score - min_score))
+
+eff_gap %>% 
+  ggplot(aes(avg_eff_gap_norm)) +
+  geom_histogram(binwidth = 0.05)
+
+eff_gap %>%
+  arrange(desc(avg_eff_gap))
 ```
 
 ## Compactness Score
@@ -174,13 +190,13 @@ cookpvi <- cookpvi %>%
          district = str_sub(state_dist, 4, 5),
          district = if_else(str_detect(state, one_dist_state_regex),
                             '00', district)) %>%
-  rename(compete_cookpvi = pvi_abs)
+  rename(compete_cookpvi = pvi_norm_abs)
 
 eff_gap <- eff_gap %>%
   mutate(district = sprintf('%02d', as.numeric(district)),
          district = if_else(str_detect(state_po, one_dist_state_regex),
                             '00', district)) %>%
-  rename(compete_eff_gap = avg_eff_gap)
+  rename(compete_eff_gap = avg_eff_gap_norm)
 ``` 
 
 Read in candidates and join
@@ -295,6 +311,23 @@ candidates %>%
   geom_smooth(method = 'lm', formula = 'y ~ x')
 ```
 
+Distributions
+
+```{r}
+candidates %>%
+  mutate(dupe = duplicated(name)) %>%
+  filter(dupe == FALSE) %>%
+  ggplot() +
+  geom_freqpoly(aes(compete_cookpvi, after_stat(density), color = 'blue'), bins = 20) +
+  geom_freqpoly(aes(compete_eff_gap, after_stat(density), color = 'green'), bins = 20) +
+  geom_freqpoly(aes(compete_ideology, after_stat(density), color = 'red'), bins = 20) +
+  scale_colour_manual(name = 'Variable', 
+                      values = c('blue' = 'blue', 'green' = 'green', 'red' = 'red'), 
+                      labels = c('cookpvi','eff_gap', 'ideology')) +
+  xlab('Competitiveness Score') +
+  ylab('Density') +
+  theme(legend.position = 'bottom')
+```
 
 Export
 

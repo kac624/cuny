@@ -16,6 +16,20 @@ library(cowplot)
 set.seed(888)
 ```
 
+## Abstract
+
+In this paper, I investigate the relationship between the competitiveness of electoral districts and the partisan leanings of candidates elected in those districts. The predominating narrative on partisan gerrymandering posits that redistricting efforts led by one-sided state legislatures leads to one-sided, uncompetitive congressional races, in which one party is heavily favored in most districts. In turn this lack of competition contributes to polarization, as the "real" races take place during primary elections, in which candidates are incentivized to take more extreme positions to appeal to their parties' political bases. This narrative is compelling, but I have found very limited empirical evidence to support it. Therein lies the goal of the analysis I put forth below: is there empirical support linking a lack of competitiveness with more polarizing candidates?
+
+Because these phenomena are not directly observable — referred to as "latent" variables — I consider six different proxy variables that attempt to quantify competitiveness and partisanship. To attempt to measure competitiveness, I consider three variables: the results of a 2022 study measuring voter policy preferences (referred to below as the "Ideology" measure; see [1]), the Cook Partisan Voting Index (referred to as "Cook PVI"; see [2]), and the average, district-level "efficiency gap" for all congressional elections since 2010 (see [3]). As a proxy of how far left or right candidates lean, I consider another three variables: the NOMINATE measure of ideological leanings in Congressional voting, popularized by Poole and Rosenthal (referred to as "Nominate"; see [4]), GovTrack's measure of partisan cooperation in Congress (referred to as "Govtrack"; see [5]) and a "homemade" measure of partisan rhetoric based on predictive modeling performed on a corpus candidate tweets.
+
+Testing is performed on all nine combinations of the above six variables. Because of the latent nature of these variables, it is difficult to assign a high degree of confidence to any one test. I therefore found it useful to conduct multiple test simultaneously and compare results, attempting to assess the strength of any relationship holistically. I first conduct null hypothesis test to compare the mean partisanship score of candidates from districts with a high degree of competitiveness versus those from districts with a low degree of competitiveness. Results appear mixed, but tend to indicate only a weak relationship, if any, with three of the nine pairs of variables showing a statistically significant relationship. To follow up on this finding, I fit a series of linear regression models. Of the nine models, only three had statistically significant predictors, corresponding to the same three significant pairs from the first round of tests. Moreover, those three models offered only limited explanation of the variance in the dependent variable, as evidenced by low $R^2$ (all under 15%). Effect sizes also appear minimal, with beta coefficients near zero in all but once case.
+
+In conclusion, this analysis provides limited .
+
+LIMITATIONS
+
+CITATIONS
+
 ## Data
 
 Primary data
@@ -85,7 +99,9 @@ state_bar_plot <- function (data, filter_column) {
     ggplot(aes(x = reorder(state, count), y = count)) +
     geom_bar(stat = 'identity') +
     scale_x_discrete(guide = guide_axis(n.dodge = 3)) +
-    xlab(filter_column) +
+    xlab('') +
+    ylab('') +
+    labs(title = str_remove_all(filter_column, 'partisan_score_')) +
     coord_flip()
 }
 
@@ -94,6 +110,13 @@ state_plots <- lapply(c('name','partisan_score_twitter',
                       state_bar_plot, data = candidates)
 
 plot_grid(plotlist = state_plots, nrow = 2, ncol = 2)
+
+state_plots <- lapply(c('partisan_score_twitter',
+                        'partisan_score_nominate',
+                        'partisan_score_govtrack'), 
+                      state_bar_plot, data = candidates)
+
+plot_grid(plotlist = state_plots, nrow = 1, ncol = 3)
 ```
 
 Spread across parties
@@ -106,9 +129,14 @@ party_bar_plot <- function (data, filter_column) {
            party == 'DEMOCRATIC PARTY' | party == 'REPUBLICAN PARTY') %>%
     group_by(party) %>% 
     summarise(count = n()) %>% 
-    ggplot(aes(x = reorder(party, count), y = count)) +
-    geom_bar(stat = 'identity') +
-    xlab(filter_column)
+    ggplot(aes(x = reorder(party, count), y = count, fill = party)) +
+    geom_bar(stat = 'identity', show.legend = FALSE) +
+    scale_fill_manual(values = c('DEMOCRATIC PARTY' = 'deepskyblue2',
+                                 'REPUBLICAN PARTY' = 'firebrick3')) +
+    xlab('') +
+    ylab('') +
+    labs(title = str_remove_all(filter_column, 'partisan_score_')) +
+    coord_flip()
 }
 
 party_plots <- lapply(c('name','partisan_score_twitter',
@@ -116,43 +144,43 @@ party_plots <- lapply(c('name','partisan_score_twitter',
                       party_bar_plot, data = candidates)
 
 plot_grid(plotlist = party_plots, nrow = 2, ncol = 2)
+
+party_plots <- lapply(c('partisan_score_twitter',
+                        'partisan_score_nominate',
+                        'partisan_score_govtrack'), 
+                      party_bar_plot, data = candidates)
+
+plot_grid(plotlist = party_plots, nrow = 3, ncol = 1)
 ```
 
 Geographic Visualization
 
 ```{r}
-candidates_sf %>%
-  filter(state != 'HI',
-         state != 'AK',
-         state != 'PR') %>%
-  ggplot() + 
-  geom_sf(aes(geometry = geometry_distr, fill = compete_ideology)) +
-  geom_sf(aes(geometry = geometry_state), color = 'blue', size = 0.4, fill = NA) +
-  scale_fill_gradient(low = 'gray100', 
-                      high = 'purple') + 
-  theme(legend.position='bottom')
+map_plot <- function(fill, 
+                     color = 'blue', 
+                     data = candidates_sf) {
+  data %>%
+    filter(state != 'HI',
+           state != 'AK',
+           state != 'PR') %>%
+    ggplot() + 
+    geom_sf(aes(geometry = geometry_distr, fill = !!sym(fill))) +
+    geom_sf(aes(geometry = geometry_state), color = 'purple', size = 0.4, fill = NA) +
+    scale_fill_gradient(low = 'gray100', 
+                        high = color,
+                        limits = c(0,1),
+                        name = str_remove_all(fill, 'compete_')) + 
+    theme(legend.position='bottom')
+}
 
-candidates_sf %>%
-  filter(state != 'HI',
-         state != 'AK',
-         state != 'PR') %>%
-  ggplot() + 
-  geom_sf(aes(geometry = geometry_distr, fill = compete_cookpvi)) +
-  geom_sf(aes(geometry = geometry_state), color = 'blue', size = 0.4, fill = NA) +
-  scale_fill_gradient(low = 'gray100', 
-                      high = 'purple') + 
-  theme(legend.position='bottom')
+map_plot(fill = 'compete_ideology',
+         data = candidates_sf)
 
-candidates_sf %>%
-  filter(state != 'HI',
-         state != 'AK',
-         state != 'PR') %>%
-  ggplot() + 
-  geom_sf(aes(geometry = geometry_distr, fill = compete_eff_gap)) +
-  geom_sf(aes(geometry = geometry_state), color = 'blue', size = 0.4, fill = NA) +
-  scale_fill_gradient(low = 'gray100', 
-                      high = 'purple') + 
-  theme(legend.position='bottom')
+map_plot(fill = 'compete_cookpvi',
+         data = candidates_sf)
+
+map_plot(fill = 'compete_eff_gap',
+         data = candidates_sf)
 ```
 
 Efficiency and Partisanship
@@ -172,20 +200,20 @@ scatterplot <- function(x,y) {
                      str_remove_all(y, 'partisan_score|_')))
 }
 
-var_grid <- expand_grid(
+var_grid_continous <- expand_grid(
   x = colnames(select(candidates, contains('compete'))),
   y = colnames(select(candidates, contains('partisan')))
 )
 
 plot_list <- list()
 
-for (row in 1:nrow(var_grid)) {
+for (row in 1:nrow(var_grid_continous)) {
   plot <- scatterplot(as.character(var_grid[row,'x']),
                       as.character(var_grid[row,'y']))
   plot_list[[row]] <- plot
 }
 
-plot_grid(plotlist = plot_list, nrow = 3, ncol = 3)
+plot_grid(plotlist = plot_list[c(4,7,1,9,3,6,8,2,5)], nrow = 3, ncol = 3)
 ```
 
 Summary Stats
@@ -197,6 +225,12 @@ cat('\nDistrict Cook PVI\n')
 summary(candidates$compete_cookpvi)
 cat('\nDistrict Effiency Gap\n')
 summary(candidates$compete_eff_gap)
+
+
+
+summary(candidates$compete_cookpvi)
+summary(candidates$compete_eff_gap)
+summary(candidates$compete_ideology)
 ```
 
 Binary Independent Variables
@@ -204,12 +238,18 @@ Binary Independent Variables
 ```{r}
 candidates <- candidates %>%
   mutate(
-    compete_ideology_binary = if_else(compete_ideology > median(
-      candidates$compete_ideology, na.rm = TRUE), 'high', 'low'),
-    compete_cookpvi_binary = if_else(compete_cookpvi > median(
-      candidates$compete_cookpvi, na.rm = TRUE), 'high', 'low'),
-    compete_eff_gap_binary = if_else(compete_eff_gap > median(
-      candidates$compete_eff_gap, na.rm = TRUE), 'high', 'low'))
+    compete_ideology_binary = factor(if_else(compete_ideology > median(
+      candidates$compete_ideology, na.rm = TRUE), 'high', 'low'), 
+      levels = c('low','high'),
+      ordered = TRUE),
+    compete_cookpvi_binary = factor(if_else(compete_cookpvi > median(
+      candidates$compete_cookpvi, na.rm = TRUE), 'high', 'low'), 
+      levels = c('low','high'),
+      ordered = TRUE),
+    compete_eff_gap_binary = factor(if_else(compete_eff_gap > median(
+      candidates$compete_eff_gap, na.rm = TRUE), 'high', 'low'), 
+      levels = c('low','high'),
+      ordered = TRUE))
 
 boxplot <- function(x,y) {
   candidates %>%
@@ -227,7 +267,8 @@ boxplot <- function(x,y) {
 var_grid <- expand_grid(
   x = colnames(select(candidates, (contains('compete') & contains('binary')))),
   y = colnames(select(candidates, contains('partisan')))
-)
+) %>%
+  arrange(x,y)
 
 plot_list <- list()
 
@@ -237,10 +278,10 @@ for (row in 1:nrow(var_grid)) {
   plot_list[[row]] <- plot
 }
 
-plot_grid(plotlist = plot_list, nrow = 3, ncol = 3)
+plot_grid(plotlist = plot_list[c(3,6,9,2,5,8,1,4,7)], nrow = 3, ncol = 3)
 ```
 
-## Hypothesis Test
+## Inference
 
 Define functions
 
@@ -276,14 +317,16 @@ hyp_diff_means <- function(x, y,
   
   results <- list(p_value = pval$p_value,
                   lower_ci = ci$lower_ci,
-                  upper_ci = ci$upper_ci)
+                  upper_ci = ci$upper_ci,
+                  mean_diff = mean_diff$stat)
   
   return(results)
 }
 
-grid_hyp_test <- function(data, grid) {
+grid_hyp_test <- function(data, grid, ...) {
   
-  results_df <- data.frame(grid, p_value = NA, lower_ci = NA, upper_ci = NA)
+  results_df <- data.frame(grid, p_value = NA, lower_ci = NA, 
+                           upper_ci = NA, mean_diff = NA)
   
   for (row in 1:nrow(grid)) {
     
@@ -309,31 +352,38 @@ grid_hyp_test <- function(data, grid) {
         upper_ci = replace(upper_ci,
                            x == as.character(grid[row,'x']) &
                              y == as.character(grid[row,'y']),
-                           result$upper_ci))
+                           result$upper_ci),
+        mean_diff = replace(mean_diff,
+                           x == as.character(grid[row,'x']) &
+                             y == as.character(grid[row,'y']),
+                           result$mean_diff))
   }
   
   return(results_df)
   
 }
 
-hyp_test_heatmap <- function(results_df) {
+hyp_test_heatmap <- function(results_df, upper_limit = 0.1) {
   results_df %>%
     mutate(x = str_remove_all(x, 'compete|binary|_'),
            y = str_remove_all(y, 'partisan_score|_')) %>% 
     ggplot(aes(x, y)) +
     geom_tile(aes(fill = p_value)) +
-    geom_text(aes(label = str_c('p-value: ',
+    geom_text(aes(label = str_c('Obs. Diff.: ', round(mean_diff,3),
+                                '\np-value: ',
                                 if_else(p_value == 0, '<0.000', 
                                         format(round(p_value,3), nsmall=3)),
-                                '\n95% CI: ',round(lower_ci,3),
-                                ' to ',round(upper_ci,3)))) +
+                                '\n95% CI: ', round(lower_ci,3),
+                                ' to ', round(upper_ci,3)))) +
     xlab('District Competition Measures') +
     ylab('Candidate Partisanship Measures') +
     theme(axis.text.y = element_text(angle = 90, hjust = 0.5)) +
     scale_fill_gradient(low = 'darkslategray1', 
                         high = 'gray100',
-                        limits = c(0,0.1),
+                        limits = c(0,upper_limit),
                         oob = scales::squish)
+                        # na.value = 'grey50')
+                        
 }
 ```
 
@@ -349,34 +399,37 @@ Split by party
 ```{r}
 results_dem <- grid_hyp_test(data = filter(candidates,
                                            party == 'DEMOCRATIC PARTY'), 
-                             grid = var_grid)
-hyp_test_heatmap(results_dem)
+                             grid = var_grid,
+                             conf_level = 0.975)
+
 
 results_rep <- grid_hyp_test(data = filter(candidates,
                                            party == 'REPUBLICAN PARTY'), 
-                             grid = var_grid)
-hyp_test_heatmap(results_rep)
+                             grid = var_grid,
+                             conf_level = 0.975)
+
+hyp_test_heatmap(results_dem, upper_limit = 0.05) + 
+  labs(title = 'Democrats')
+hyp_test_heatmap(results_rep, upper_limit = 0.05) +
+  labs(title = 'Republicans')
 ```
 
 ## Linear Regression
 
 ```{r}
-var_grid_continous <- data.frame(
-  x = var_grid$x %>%
-    str_remove_all('_binary'),
-  y = var_grid$y %>%
-    str_remove_all('_binary'))
-
 results_df <- data.frame(var_grid_continous,
                          beta_coef = NA,
                          predictor_pval = NA,
                          r_squared = NA)
+model_list <- list()
 
 for (row in 1:nrow(var_grid_continous)) {
   x = as.character(var_grid_continous[row,'x'])
   y = as.character(var_grid_continous[row,'y'])
   
   model <- lm(data = candidates, formula = as.formula(paste(y,'~',x)))
+  
+  model_list[[row]] <- model
 
   results_df <- results_df %>%
       mutate(
@@ -404,40 +457,66 @@ results_df %>%
   ggplot(aes(x,y)) +
   geom_tile(aes(fill = ifelse(predictor_pval < 0.1, r_squared, NA))) +
   geom_text(aes(label = str_c('R^2: ',round(r_squared,3),
-                              '\nPredictor pval: ',round(predictor_pval,3),
+                              '\nPredictor pval: ',format(round(predictor_pval,3), nsmall=3),
                               '\nBeta: ',round(beta_coef,3)))) +
   xlab('District Competition Measures') +
   ylab('Candidate Partisanship Measures') +
   scale_fill_gradient(low = 'gray100', 
                       high = 'darkslategray1',
+                      limits = c(0,0.5),
                       na.value = 'grey50') + 
   theme(axis.text.y = element_text(angle = 90, hjust = 0.5)) +
   labs(fill = 'R^2')
 ```
 
+Residual Plots
+
 ```{r}
-map_plot <- function(fill, 
-                     color = 'purple', 
-                     data = candidates_sf) {
-  data %>%
-    filter(state != 'HI',
-           state != 'AK',
-           state != 'PR') %>%
-    ggplot() + 
-    geom_sf(aes(geometry = geometry_distr, fill = !!sym(fill))) +
-    geom_sf(aes(geometry = geometry_state), color = 'blue', size = 0.4, fill = NA) +
-    scale_fill_gradient(low = 'gray100', 
-                        high = color) + 
-    theme(legend.position='bottom')
+for (i in c(5, 6, 2, 9)) {
+  
+  p1 <- ggplot(data =   model_list[[i]], aes(x = .resid)) +
+    geom_histogram(bins = 25) +
+    xlab("Residuals")
+  
+  p2 <- ggplot(data =   model_list[[i]], aes(sample = .resid)) +
+    stat_qq() + 
+    geom_abline(intercept = mean(model_list[[i]]$residuals), 
+                slope = sd(model_list[[i]]$residuals),
+                color = 'red', linetype = 'dashed')
+  
+  
+  p3 <- ggplot(data = model_list[[i]], aes(x = .fitted, y = .resid)) +
+    geom_point() +
+    geom_hline(yintercept = 0, linetype = "dashed") +
+    xlab("Fitted values") +
+    ylab("Residuals")
+  
+  formula <- str_c(as.character(model_list[[i]]$terms[1])[2],' ',
+                   as.character(model_list[[i]]$terms[1])[1],' ',
+                   as.character(model_list[[i]]$terms[1])[3])
+  
+  title <- ggdraw() + 
+    draw_label(formula, fontface = 'bold', x = 0, hjust = -0.1)
+  
+  print(plot_grid(title, plot_grid(p1, p2), p3, 
+                  nrow = 3, ncol = 1, rel_heights = c(0.15,1,1)))
 }
 
+for (i in c(5, 6, 2, 9)) {
+  
+  print(summary(model_list[[i]]))
+  
+}
+```
+
+Correlation
+
+```{r}
 candidates_sf <- candidates_sf %>%
-  mutate(compete_cookpvi_norm = 
-           (compete_cookpvi - min(compete_cookpvi, na.rm = T)) / 
-           (max(compete_cookpvi, na.rm = T) - min(compete_cookpvi, na.rm = T)),
-         cookpvi_nominate = abs(compete_cookpvi_norm - partisan_score_nominate),
-         cookpvi_govtrack = abs(compete_cookpvi_norm - partisan_score_govtrack),
-         ideology_nominate = abs(compete_ideology - partisan_score_nominate))
+  mutate(
+    cookpvi_nominate = abs(compete_cookpvi - partisan_score_nominate),
+    cookpvi_govtrack = abs(compete_cookpvi - partisan_score_govtrack),
+    ideology_nominate = abs(compete_ideology - partisan_score_nominate))
 
 candidates_sf_summarized <- candidates_sf %>%
   group_by(state, district, geometry_state, geometry_distr) %>%
@@ -449,3 +528,5 @@ candidates_sf_summarized <- candidates_sf %>%
 map_plot(fill = 'cookpvi_govtrack',
          data = candidates_sf_summarized)
 ```
+
+## Conclusion

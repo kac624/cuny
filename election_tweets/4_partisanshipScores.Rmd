@@ -561,9 +561,15 @@ candidates %>%
   mutate(dupe = duplicated(name)) %>%
   filter(dupe == FALSE) %>%
   ggplot() +
-  geom_freqpoly(aes(partisan_score_twitter), color = 'blue') +
-  geom_freqpoly(aes(partisan_score_nominate), color = 'green') +
-  geom_freqpoly(aes(partisan_score_govtrack), color = 'red')
+  geom_freqpoly(aes(partisan_score_twitter, after_stat(density), color = 'blue')) +
+  geom_freqpoly(aes(partisan_score_nominate, after_stat(density), color = 'green')) +
+  geom_freqpoly(aes(partisan_score_govtrack, after_stat(density), color = 'red')) +
+  scale_colour_manual(name = 'Variable', 
+                      values = c('blue' = 'blue', 'green' = 'green', 'red' = 'red'), 
+                      labels = c('twitter','nominate', 'govtrack')) +
+  xlab('Partisan Score') +
+  ylab('Density') +  
+  theme(legend.position = 'bottom')
 ```
 
 Comparisons
