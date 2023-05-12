@@ -10,8 +10,8 @@ Below is a walkthrough of the six primary notebooks.
 In conclusion, this analysis provides limited evidence of a persistent relationship between districts’ competitiveness and the partisan leanings of their candidates. 
 
 Citations
-[1] Warshaw, Christopher, and Chris Tausanovitch. "Subnational ideology and presidential vote estimates (v2022)." Harvard Dataverse, 2022. https://doi.org/10.7910/DVN/BQKU4M.
-[2] The Cook Political Report. "The 2022 Cook Partisan Voting Index (Cook PVI) | Cook Political Report.“ 2022. https://www.cookpolitical.com/cook-pvi/2022-partisan-voting-index. 
+[1] Warshaw, Christopher, and Chris Tausanovitch. "Subnational ideology and presidential vote estimates (v2022)." Harvard Dataverse, 2022. https://doi.org/10.7910/DVN/BQKU4M.  
+[2] The Cook Political Report. "The 2022 Cook Partisan Voting Index (Cook PVI) | Cook Political Report.“ 2022. https://www.cookpolitical.com/cook-pvi/2022-partisan-voting-index.  
 [3] Stephanopoulos, Nicholas, and Eric McGhee. "Partisan Gerrymandering and the Efficiency Gap." University of Chicago Law Review 82 (2014): 831–900.
-[4] Lewis, Jeffrey B., Keith Poole, Howard Rosenthal, Adam Boche, Aaron Rudkin, and Luke Sonnet. "Voteview: Congressional Roll-Call Votes Database." 2023. https://voteview.com/.
+[4] Lewis, Jeffrey B., Keith Poole, Howard Rosenthal, Adam Boche, Aaron Rudkin, and Luke Sonnet. "Voteview: Congressional Roll-Call Votes Database." 2023. https://voteview.com/.  
 [5] GovTrack.us. "Ideology Analysis of Members of Congress." 2013. https://www.govtrack.us/about/analysis.
