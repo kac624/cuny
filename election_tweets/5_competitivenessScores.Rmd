@@ -14,8 +14,12 @@ library(sf)
 
 ## District-Level Ideology Survey
 
-https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/BQKU4M
-"We orient our ideal points so that lower values are associated with politically left preferences and higher values with politically right preferences."
+This notebook collects a number of measures of district competitiveness / ideological leanings and maps them to the candidates dataframe from previous notebooks. The output of this notebook will serve as the final dataset for this project's ultimate statistical analysis. 
+
+## Survey-Based District-Level Ideology Scores
+
+The first measure comes from a 2022 study gathering more than a decade of survey data to model ideology at the district level (https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/BQKU4M). As with many of the partisanship scores, the scale is oriented such that "lower values are associated with politically left preferences and higher values with politically right preferences." So, I will normalize the scores between -1 and 1, then take the absolute value. The results scores will then be oriented such that 0 indicates closeness to the political center and 1 indicates closeness to ideological wings, matching the orientation of the partisanship scores from notebook 4.
+
 ```{r}
 load('data/aip_district_ideology_v2022a.RData')
 district_ideology <- table
@@ -58,7 +62,8 @@ district_ideology %>%
 
 ## Cook Partisan Voting Index
 
-https://www.cookpolitical.com/cook-pvi/2022-partisan-voting-index/district-map-and-list
+The next measure is the Cook PVI (https://www.cookpolitical.com/cook-pvi/2022-partisan-voting-index/district-map-and-list). This measure uses historical voting results to assign each congressional district a score from far left to far right. As above, we'll normalize the score between -1 and 1 and take the absolutely value 
+
 ```{r}
 cookpvi <- read_csv('data/cook_pvi.csv')
 
@@ -89,8 +94,9 @@ cookpvi %>%
 
 ## Efficiency Gap
 
-Efficiency Gap
-https://electionlab.mit.edu/data
+The final measure is the Efficiency Gap. This metric is frequently cited in political science literature as a measure of gerrymandering (see Stephanopoulos, Nicholas, and McGhee. "Partisan Gerrymandering and the Efficiency Gap."). The Efficiency Gap measures "wasted" votes, framed as the amount of (i) votes cast for a candidate who didn't win, or (ii) votes cast for a candidate who did win *in excess* of the number of votes required to win.
+
+I was unable to locate a readily available measure of the effiency gap, so I'll calculate my own using historical election data from the MIT Election Lab (https://electionlab.mit.edu/data).
 
 ```{r}
 elections <- read_csv('data/1976-2020-house.csv')
@@ -147,25 +153,17 @@ eff_gap %>%
   arrange(desc(avg_eff_gap))
 ```
 
-## Compactness Score
-
-https://fivethirtyeight.com/features/we-drew-2568-congressional-districts-by-hand-heres-how/
-
-## Election-Demographic Discrepancy
-
-My own measure? Difference between partisan split of population and actual split of elected officials
-
 ## Unified Dataset
 
-Prep data for joins
+Finally, I'll combine datasets together and map them to the candidates dataframe.
 
-First account for states with 1 district
+First, I need to account for states that have only a single congressional district, as the naming convention used to identify that district differs across datasets.
 
 ```{r}
 one_dist_state_regex <- 'AK|WY|ND|SD|VT|DE|DC|MT'
 ```
 
-Then prep the dfs themselves
+Then, I'll prepare the dataframes themselves, aligning the naming of states and districts.
 
 ```{r}
 district_ideology <- district_ideology %>%
@@ -199,7 +197,7 @@ eff_gap <- eff_gap %>%
   rename(compete_eff_gap = avg_eff_gap_norm)
 ``` 
 
-Read in candidates and join
+Finally, I'll read in the candidates data and perform the join.
 
 ```{r}
 candidates <- read_csv('data/candidates_partisanship.csv')
@@ -253,13 +251,7 @@ candidates_sf <- candidates %>%
   )
 ```
 
-Mapping
-https://cran.r-project.org/web/packages/tigris/tigris.pdf
-https://ballotpedia.org/New_congressional_districts_created_after_the_2020_census
-
-
-https://cdmaps.polisci.ucla.edu/
-https://www.census.gov/geographies/mapping-files/time-series/geo/tiger-line-file.html
+I'll also put together a few geographic visuals, mapping scores onto a map. I'll use the `tigris` package (https://cran.r-project.org/web/packages/tigris/tigris.pdf).
 
 ```{r}
 candidates_sf %>%
@@ -293,6 +285,8 @@ candidates_sf %>%
                       high = 'purple') + 
   theme(legend.position="bottom")
 ```
+
+
 
 ```{r}
 candidates %>%

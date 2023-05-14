@@ -18,10 +18,13 @@ library(jsonlite)
 library(fuzzyjoin)
 ```
 
-## Initial Universe of Candidates
+## Intro
 
-https://api.open.fec.gov/developers/
-https://github.com/stephenholzman/tidyusafec
+The goal of this notebook is to create a list of candidates that we'll use for further analysis. I'll use data from the Federal Election Committee (FEC) to provide a baseline list of candidates registered for elections for the House of Representatives in the 2022 midterms. The FEC data has most of the key features we need: name, party, state and district. However, I'll eventually want to scrape tweets for these candidates, so I need Twitter handles. I'll therefore grab a few additional datasets to map in Twitter handles wherever possible. 
+
+## Query FEC
+
+The FEC provides an API (https://api.open.fec.gov/developers/) to query data. 
 
 ```{r}
 year = 2022
@@ -40,7 +43,7 @@ parsed_response <- fromJSON(content(initial_response, "text", encoding="UTF-8"),
 total_pages <- parsed_response$pagination$pages
 ```
 
-Loop through pages to get total responses
+The response is a heavily nested JSON, so I need to loop through each page and extract the actual data.
 
 ```{r}
 response <- list()
@@ -61,7 +64,7 @@ for (i in 1:total_pages) {
 }
 ```
 
-Loop through responses and grab individual observations
+I can now loop through the data from each page and add the required features to a dataframe.
 
 ```{r}
 candidates <- map(response, function(x) x$results) %>%
@@ -83,9 +86,11 @@ candidates %>% head()
 
 ## Congress Bio, Poliwoops, and Ballotpedia Twitter IDs
 
-https://github.com/unitedstates/congress-legislators
-https://www.propublica.org/datastore/dataset/politicians-tracked-by-politwoops
-https://ballotpedia.org/List_of_congressional_candidates_in_the_2022_elections
+To map in Twitter handles / IDs, I'll use three datasets, the third of which I scraped myself in notebook 1.
+
+The @unitedstates project (members of Congress only): https://github.com/unitedstates/congress-legislators  
+Politwoops (members of Congress only): https://www.propublica.org/datastore/dataset/politicians-tracked-by-politwoops  
+Ballotpedia (Member and candidates): https://ballotpedia.org/List_of_congressional_candidates_in_the_2022_elections  
 
 ```{r, message = FALSE}
 congress_current <- read_csv('https://theunitedstates.io/congress-legislators/legislators-current.csv')
@@ -107,7 +112,7 @@ ballotpedia <- ballotpedia[!duplicated(ballotpedia),] %>%
            str_replace_all('_', ' '))
 ```
 
-Join
+I'll perform a simple join using several unique keys: the FEC ID, the Bioguide ID, the Ballotpedia ID, and the GovTrack ID.
 
 ```{r}
 candidates <- candidates %>%
@@ -137,6 +142,8 @@ candidates %>% head()
 ```
 
 ## Fuzzy Matching for Ballotpedia Names
+
+Unfortuantely, the Ballotpedia IDs mapped in from @unitedstates resulted in very few matches. So, to supplement this, I'll use fuzzy matching based on names. I'll set the threshold quite high, which could lead to some erroneous matches. However, I'll also use party, state and district fields as "helpers" to narrow down potential matches and support accurate mappings.
 
 https://www.rdocumentation.org/packages/stringdist/versions/0.9.10/topics/stringdist-metrics
 
@@ -200,6 +207,8 @@ candidates <- candidates %>%
 
 ## Cleanup
 
+All of these joins created quite a bit of duplication, and we have Twitter IDs / handles spread across several columns in different formats, with potential duplication. So, I'll pivot individuals values into seperate columns, then unite them into a single comma-separated string, then finally pivot the names / IDs longer.
+
 ```{r}
 ## Convert IDs/Names to list, then unnest to long format
 candidates <- candidates %>%
@@ -225,7 +234,7 @@ candidates %>%
 candidates
 ```
 
-Final checks and manual adjustments
+I performed a close read of twitter names mapped to multiple candidates during the fuzzy join, as these rows most likely involve some erronous matches. After manually confirming the accuracy of many of these, I'll perform some targeted clean up to address the errors.
 
 ```{r}
 candidates[!is.na(candidates$twitter_name) &
@@ -269,7 +278,7 @@ candidates <- candidates %>%
   mutate(across(everything(), as.character))
 ```
 
-Write to csv
+With the final datatset ready to pass on to a Jupyter notebook for scraping, I'll export the `candidates` dataframe.
 
 ```{r}
 write_csv(candidates, paste0('data/candidates',year,'.csv'))

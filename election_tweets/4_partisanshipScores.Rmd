@@ -15,9 +15,13 @@ library(e1071)
 library(data.table)
 ```
 
-This analysis will aim to predict a political candidate's party based on the language used in their tweets. I'll use a collection of over 3 million tweets scraped from over a thousand candidates running for House seats in the 2022 midterm elections. The data is hosted here on Kaggle: https://www.kaggle.com/datasets/kac624/politicaltweets. See https://github.com/kac624/cuny/tree/main/election_tweets for additional details on the collection of this data.
+## Intro
 
-I'll begin by reading in the data from kaggle, cleaning the tweets, then mapping in data on party affiliation (sourced from the Federal Election Committee (FEC)). I'll then engineer features by calculating the Term Frequency - Inverse Document Frequency (TF-IDF) statistic for key terms and transforming the corpus into a matrix. That matrix will provide training data for three classifier models (logistic regression, Naive-Bayes, and XGBoost), all implemented with the `superml` package. For the sake of this exercise, I'll focus only on binary classification of candidates as Democrat (0) or Republican (1). 
+This notebook collects a number of measures of partisanship / political polarization and maps them to the candidates dataframe from previous notebooks. The majority of the notebook will focus on the Twitter-based partisanship score. 
+
+For that score, I will fit a number of models to predict a political candidate's party based on the language used in their tweets. I'll use a collection of over 3 million tweets scraped from over a thousand candidates running for House seats in the 2022 midterm elections. The data is hosted here on Kaggle: https://www.kaggle.com/datasets/kac624/politicaltweets. See https://github.com/kac624/cuny/tree/main/election_tweets for additional details on the collection of this data. I'll begin by reading in the data from kaggle, cleaning the tweets, then mapping in data on party affiliation (sourced from the Federal Election Committee (FEC)). I'll then engineer features by calculating the Term Frequency - Inverse Document Frequency (TF-IDF) statistic for key terms and transforming the corpus into a matrix. That matrix will provide training data for three classifier models (logistic regression, Naive-Bayes, and XGBoost), all implemented with the `superml` package. For the sake of this exercise, I'll focus only on binary classification of candidates as Democrat (0) or Republican (1).
+
+After normalizing those results to generate an even distribution of scores, I'll also gather data on two other partisanship / ideology scores. Once complete, all three will be mapped to the candidates dataframe.
 
 ## Data
 
@@ -349,10 +353,9 @@ data.frame(pred = svm_combo_pred) %>%
   geom_histogram(bins = 100)
 ```
 
-
 ## Generating Partisanship Scores
 
-Comparing classifications
+I'll now compile the probabilities for classification produced by each model for all candidates into a single dataframe. We'll take the average probability from all models as a starting point for our partisanship score.
 
 ```{r, warning=FALSE}
 scores <- data.frame(
@@ -384,7 +387,9 @@ scores %>%
   geom_histogram(bins = 100)
 ```
 
-Normalizing logit results between -1 and 1
+The ultimate purpose of this score is to measure partisanship / political polarization *in general*, rather than on a party basis. In other words, the score should not be situated on a left-right orientation. Instead, it should be situated to show distance from the political center, whether that means further left or further right. In other words, the score should range from 0 to 1, with 0 indicating low partisanship / closeness to the politcal center and 1 indicating high partisanship / closeness to party fringes.
+
+To accomplish this, I first normalize the score between -1 and 1 to oriente the score around 0. I then take the absolute value of the score to eliminate party discrepancies. I use the formulas below to normalize. The resulting distribution is heavily skewed, due to the high accuracy of the models. To address this, I also rank all scores and then "project" them onto a normal distribution to create a more even spread of scores.
 
 $$ x = (b-a) \frac{x - \min x}{\max x - \min x} + a $$
 
@@ -420,32 +425,9 @@ scores %>%
   geom_freqpoly(aes(norm_rank))
 ```
 
-MANUAL REVIEW
-
-https://medium.com/@jon.reynolds30/comparing-classification-models-using-lending-clubs-peer-toloan-data-615153db2124
-https://fivethirtyeight.com/features/the-5-main-factions-of-the-house-gop/
-https://fivethirtyeight.com/features/what-drove-9-moderate-house-democrats-to-hold-up-their-partys-agenda/
-
-```{r}
-scores %>% filter(str_detect(name, 'COSTA'))
-scores %>% filter(score_norm_abs > 0.9)
-scores %>% filter(party == 0, logit_combo > 0.5)
-scores %>% filter(party == 1, logit_combo < 0.5)
-
-test <- logit2$model$predict(rbind(tfv_combo_train, tfv_combo_test))
-caret::confusionMatrix(as.factor(as.numeric(test > 0.5)),
-                       as.factor(rbind(tfv_combo_train, tfv_combo_test)$party))
-
-scores %>%
-  mutate(score_norm_abs_rank = min_rank(score_norm_abs)) %>%
-  ggplot(aes(score_norm_abs_rank)) +
-  geom_histogram()
-```
-
 ## Additional Sources
 
-Vote View NOMINATE Ideology scores
-https://voteview.com/data
+Finally, I want to add on a few additional measures of partisanship to our dataset. I'll start y reading in to Poole-Rosenthaw NOMINATE Ideology scores, produced by VoteView (https://voteview.com/data). This score uses Reps' voting records to generate a measure of how far left or right leaning they are. Again, this score is situtated on a left-right 0 to 1 scale, so I'll once again normalize the ratings between -1 and 1 and take the absolute value.
 
 ```{r}
 voteview <- read_csv('data/voteview_ideology_scores.csv')
@@ -487,9 +469,7 @@ voteview %>%
   geom_freqpoly(aes(nominate_avg_abs), bins = 20, color = 'black')
 ```
 
-GovTrack Ideology Score
-https://www.govtrack.us/congress/members/report-cards/2022/house/ideology
-https://www.govtrack.us/data/analysis/by-congress/
+Our final dataset is the GovTrack Ideology Score. This measure uses co-sponsorship patterns of legislators rather than voting records (https://www.govtrack.us/data/analysis/by-congress/). Again, I normalize between -1 and 1 and take the absolute value.
 
 ```{r, message = FALSE}
 govtrack <- data.frame(matrix(ncol = 11, nrow = 0))
@@ -537,7 +517,7 @@ govtrack %>%
 
 ## Union and Comparisons
 
-Unified dataset
+Finally, I'll map all three partisanship scores onto the candidates dataframe.
 
 ```{r}
 candidates <- read_csv('data/candidates2022_clean.csv')
@@ -572,7 +552,7 @@ candidates %>%
   theme(legend.position = 'bottom')
 ```
 
-Comparisons
+I produce a few visuals to see how well the scores align. While the NOMINATE and GovTrack scores seem well aligned, the Twitter score seems slightly out of sync.
 
 ```{r}
 candidates %>%
@@ -591,13 +571,9 @@ candidates %>%
   geom_smooth(method = 'lm', formula = 'y ~ x')
 ```
 
-
 ## Export 
 
 ```{r}
 write_csv(candidates, 'data/candidates_partisanship.csv')
 ```
 
-## Conclusion
-
-It appears that the language used by Democratic and Republican candidates on Twitter is distinct, as one might expect. What is noteworthy is that this language is sufficiently distinct to allow even a simple logistic regression model to reliably predict the party of most candidates. I suspect that this model may be enhanced through the addition of other features that account for network  structures (e.g. likes, follows, retweets), as well as features related to tweeting behavior (e.g. tweet length, time/frequency of tweets). 
