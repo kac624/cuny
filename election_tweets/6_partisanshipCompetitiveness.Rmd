@@ -1,8 +1,14 @@
 ---
-title: "Election Tweets 2022 - Partisanship and Competitiveness"
+title: "Partisanship and Competitive Elections: Notebook 6"
 author: "Keith Colella"
 date: "`r Sys.Date()`"
 output: html_document
+knit: (function(input, ...) {
+    rmarkdown::render(
+      input,
+      output_dir = "../output"
+    )
+  })
 ---
 
 ```{r setup, message = FALSE}
@@ -208,8 +214,8 @@ var_grid_continous <- expand_grid(
 plot_list <- list()
 
 for (row in 1:nrow(var_grid_continous)) {
-  plot <- scatterplot(as.character(var_grid[row,'x']),
-                      as.character(var_grid[row,'y']))
+  plot <- scatterplot(as.character(var_grid_continous[row,'x']),
+                      as.character(var_grid_continous[row,'y']))
   plot_list[[row]] <- plot
 }
 
