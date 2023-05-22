@@ -6,8 +6,8 @@ output: pdf_document
 
 ```{r, eval=FALSE, echo=FALSE}
 # The following two commands will install a LaTeX installation so that the document can be compiled to PDF. These only need to be run once per R installation.
-install.packages(c('tinytex','kableExtra'))
-tinytex::install_tinytex()
+# install.packages(c('tinytex','kableExtra'))
+# tinytex::install_tinytex()
 ```
 
 ```{r, echo=FALSE}
@@ -18,16 +18,16 @@ options(digits = 4)
 
 Please put the answers for Part I next to the question number (please enter only the letter options; 4 points each):
 
-1.  
-2.  
-3.  
-4.   
-5.  
-6.  
-7.  
-8.  
-9.  
-10. 
+1.  C
+2.  A
+3.  D
+4.  E
+5.  B
+6.  E
+7.  D
+8.  E
+9.  B
+10. C
 
 # Part II
 
@@ -56,34 +56,34 @@ For each column, calculate (to four decimal places):
 #### a. The mean (for x and y separately; 5 pt).
 
 ```{r include=TRUE}
-data1.x.mean <- NA
-data1.y.mean <- NA
-data2.x.mean <- NA
-data2.y.mean <- NA
-data3.x.mean <- NA
-data3.y.mean <- NA
+data1.x.mean <- mean(data1$x)
+data1.y.mean <- mean(data1$y)
+data2.x.mean <- mean(data2$x)
+data2.y.mean <- mean(data2$y)
+data3.x.mean <- mean(data3$x)
+data3.y.mean <- mean(data3$y)
 ```
 
 #### b. The median (for x and y separately; 5 pt).
 
 ```{r include=TRUE}
-data1.x.median <- NA
-data1.y.median <- NA
-data2.x.median <- NA
-data2.y.median <- NA
-data3.x.median <- NA
-data3.y.median <- NA
+data1.x.median <- median(data1$x)
+data1.y.median <- median(data1$y)
+data2.x.median <- median(data2$x)
+data2.y.median <- median(data2$y)
+data3.x.median <- median(data3$x)
+data3.y.median <- median(data3$y)
 ```
 
 #### c. The standard deviation (for x and y separately; 5 pt).
 
 ```{r include=TRUE}
-data1.x.sd <- NA
-data1.y.sd <- NA
-data2.x.sd <- NA
-data2.y.sd <- NA
-data3.x.sd <- NA
-data3.y.sd <- NA
+data1.x.sd <- sd(data1$x)
+data1.y.sd <- sd(data1$y)
+data2.x.sd <- sd(data2$x)
+data2.y.sd <- sd(data2$y)
+data3.x.sd <- sd(data3$x)
+data3.y.sd <- sd(data3$y)
 ```
 
 #### For each x and y pair, calculate (also to two decimal places):
@@ -91,29 +91,29 @@ data3.y.sd <- NA
 #### d. The correlation (5 pt).
 
 ```{r include=TRUE}
-data1.correlation <- NA
-data2.correlation <- NA
-data3.correlation <- NA
+data1.correlation <- cor(data1$x, data1$y)
+data2.correlation <- cor(data2$x, data2$y)
+data3.correlation <- cor(data3$x, data3$y)
 ```
 
 #### e. Linear regression equation (5 points).
 
 ```{r include=TRUE}
-data1.slope <- NA
-data2.slope <- NA
-data3.slope <- NA
+data1.slope <- lm(y ~ x, data = data1)$coefficients[[2]]
+data2.slope <- lm(y ~ x, data = data2)$coefficients[[2]]
+data3.slope <- lm(y ~ x, data = data3)$coefficients[[2]]
 
-data1.intercept <- NA
-data2.intercept <- NA
-data3.intercept <- NA
+data1.intercept <- lm(y ~ x, data = data1)$coefficients[[1]]
+data2.intercept <- lm(y ~ x, data = data2)$coefficients[[1]]
+data3.intercept <- lm(y ~ x, data = data3)$coefficients[[1]]
 ```
 
 #### f. R-Squared (5 points).
 
 ```{r include=TRUE}
-data1.rsquared <- NA
-data2.rsquared <- NA
-data3.rsquared <- NA
+data1.rsquared <- summary(lm(y ~ x, data = data1))$r.squared
+data2.rsquared <- summary(lm(y ~ x, data = data2))$r.squared
+data3.rsquared <- summary(lm(y ~ x, data = data3))$r.squared
 ```
 
 Summary Table
@@ -153,9 +153,48 @@ kable(results, digits = 4,
 #### g. For each pair, is it appropriate to estimate a linear regression model? Why or why not? Be specific as to why for each pair and include appropriate plots! (15 points)
 
 ```{r}
+library(ggplot2)
 
+p1 <- ggplot(data1, aes(y,x)) + 
+  geom_point() +
+  geom_smooth(method = lm, formula = y ~ x)
+
+p2 <- ggplot(data2, aes(y,x)) + 
+  geom_point() +
+  geom_smooth(method = lm, formula = y ~ x)
+
+p3 <- ggplot(data3, aes(y,x)) + 
+  geom_point() +
+  geom_smooth(method = lm, formula = y ~ x)
+
+cowplot::plot_grid(p1, p2, p3, ncol = 3)
 ```
 
+Linear regression appears inappropriate for all three plots. In all three cases, the plots indicate that there is no linear relationship between x and y.
 
-#### h. Explain why it is important to include appropriate visualizations when analyzing data. Include any visualization(s) you create. (15 points)
+The first appears to be a dinosaur (hah!), and there is clearly no linear relationship.
 
+The second appears as a series of lines. The pattern indicates that a number of linear relationships may exist between certain segments of the data. Depending on what the data represent, it may be appropriate to segement the dataset and fit a series of linear models.
+
+The third appears to be randomly scattered around zero, with no apparent pattern. I'm not aware of any model that might appropraitely represent such a relationship.
+
+#### h. Explain why it is important to include appropriate visualizations when analyzing data. Include any visualization(s) you create. (15 points)  
+
+Visualizations are an important part of confirming the validity of inferred conclusions or modeled relationships. They serve as a "sanity" check to reveal potential issues that may not be apparent from statistical tests / summary statistics alone.
+
+For example, if we use a cubic function to relate x to y, our linear regression results may appear to indicate a solid linear relationship.
+
+```{r}
+y <- seq(-10, 10, length.out = 100)
+x <- y^3
+df <- data.frame(y = y, x = x)
+
+summary(lm(y~x, df))
+```
+
+The results above indicate a statistically significant relationship with a relatively high r-squared. If we plot that relationship, however, it becomes obvious that a regression equation with an exponential term would model the relationship much better.
+
+```{r}
+ggplot(df, aes(y,x)) +
+  geom_point()
+```
