@@ -173,7 +173,7 @@ Next, I'll use the `TfIdfVectorizer` to calculate TF-IDF scores and transform th
 
 WARNING: The fitting and transforming of this matrix can be time consuming.
 
-```{r, eval = FALSE}
+```{r, eval = TRUE}
 start <- Sys.time()
 
 tfv_text <- TfIdfVectorizer$new(min_df = 0.3, max_features = 30, remove_stopwords = F)
@@ -201,7 +201,7 @@ paste('Time:', duration)
 
 I'll perform the same process as above, but this time focusing only on hashtags. I only plan to use additional hashtag-related features to enhance the training set below, so I'll set the `min_df` and `max_features` parameters a bit more strictly.
 
-```{r, eval = FALSE}
+```{r, eval = TRUE}
 start <- Sys.time()
 
 tfv_hash <- TfIdfVectorizer$new(min_df = 0.5, max_features = 20)
@@ -227,7 +227,7 @@ duration <- difftime(Sys.time(), start)
 paste('Time:', duration)
 ```
 
-```{r, include=FALSE, echo=FALSE}
+```{r, include = FALSE, echo = FALSE, eval = FALSE}
 tfv_text_train <- read_csv('data/tfv_text_train.csv')
 tfv_text_test <- read_csv('data/tfv_text_test.csv')
 tfv_hash_train <- read_csv('data/tfv_hash_train.csv')
