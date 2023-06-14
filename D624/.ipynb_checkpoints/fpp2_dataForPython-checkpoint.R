@@ -28,5 +28,3 @@ ggAcf(myts)
 data(plastics)
 plastics_df <- data.frame(time = time(plastics), series = plastics)
 write.csv(plastics_df, 'data/plastics.csv', row.names = F)
-
-head(plastics_df)
