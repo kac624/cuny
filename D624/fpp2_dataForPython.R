@@ -25,8 +25,36 @@ ggsubseriesplot(myts)
 gglagplot(myts)
 ggAcf(myts)
 
+
 data(plastics)
 plastics_df <- data.frame(time = time(plastics), series = plastics)
 write.csv(plastics_df, 'data/plastics.csv', row.names = F)
 
-head(plastics_df)
+
+data(pigs)
+pigs_df <- data.frame(time = time(pigs), series = pigs)
+write.csv(pigs_df, 'data/pigs.csv', row.names = F)
+
+
+data(ibmclose)
+ibm_df <- data.frame(time = time(ibmclose), series = ibmclose)
+write.csv(ibm_df, 'data/ibm.csv', row.names = F)
+
+
+set.seed(42)
+e <- rnorm(100)
+write.csv(e, 'data/rnorm.csv', row.names = F)
+
+
+data(austa)
+austa_df <- data.frame(time = time(austa), series = austa)
+write.csv(austa_df, 'data/austa.csv', row.names = F)
+
+
+library(mlbench)
+
+data(Glass)
+write.csv(Glass, 'data/glass.csv', row.names = F)
+
+data(Soybean)
+write.csv(Soybean, 'data/soybean.csv', row.names = F)
