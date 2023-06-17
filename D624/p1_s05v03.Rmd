@@ -1,0 +1,205 @@
+---
+title: "s02v02"
+author: "Keith Colella"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup}
+library(tidyverse)
+library(readxl)
+library(forecast)
+library(urca)
+```
+
+Choice of variable
+
+```{r}
+category <- 'S02'
+```
+
+
+```{r}
+variable <- 'Var03'
+```
+
+Data
+
+```{r}
+xl <- read_excel('data/DATA624_Project1_Data_Schema.xlsx',
+                 sheet = category, skip = 2)
+
+series <- xl[1:1622,variable]
+```
+
+Convert to ts object and plot. Assume freq = 1 for now.
+
+```{r}
+series <- ts(deframe(series), frequency = 1)
+autoplot(series)
+```
+
+Split training and test sets
+
+```{r}
+train <- head(series, round(length(series) * 0.7))
+test <- tail(series, round(length(series) * 0.3))
+
+cat('Obs. in test set:',length(train),
+    '\nObs. in test set:',length(test),
+    '\nTotal observations:',length(series))
+    
+autoplot(train)
+autoplot(test)
+```
+
+Split training and test sets with differenced series
+
+```{r}
+train_diff <- diff(train)
+test_diff <- diff(test)
+
+autoplot(train_diff)
+autoplot(test_diff)
+```
+
+Baseline forecasts - Naive, Average and ETS
+
+```{r}
+naive_model <- naive(train, h = length(test), level = 0)
+autoplot(naive_model) + 
+  autolayer(test, alpha = 0.5)
+
+mean_model <- meanf(train, h = length(test), level = 0)
+autoplot(mean_model) + 
+  autolayer(test, alpha = 0.5)
+
+ets_model <- ets(train)
+ets_forecast <- forecast(ets_model, h = length(test), PI = FALSE)
+autoplot(ets_forecast) + 
+  autolayer(test, alpha = 0.5)
+```
+
+Baseline forecasts on differenced series
+
+```{r}
+naive_model_d <- naive(train_diff, h = length(test), level = 0)
+autoplot(naive_model_d) + 
+  autolayer(test_diff, alpha = 0.5)
+
+mean_model_d <- meanf(train_diff, h = length(test), level = 0)
+autoplot(mean_model_d) + 
+  autolayer(test_diff, alpha = 0.5)
+
+ets_model_d <- ets(train_diff)
+ets_forecast_d <- forecast(ets_model_d, h = length(test), PI = FALSE)
+autoplot(ets_forecast_d) + 
+  autolayer(test_diff, alpha = 0.5)
+```
+
+Check for skewness
+
+```{r}
+ggplot(data.frame(data = train)) +
+  geom_histogram(aes(data), bins = 50)
+
+ggplot(data.frame(data = train_diff)) +
+  geom_histogram(aes(data), bins = 50)
+```
+
+Check for seasonality
+
+```{r}
+for (period in c(5,20,252)) {
+  print(stl(ts(train, frequency = period),
+            s.window = period,
+            t.window = 250,
+            robust = TRUE) %>%
+        autoplot())
+}
+```
+
+Check for outliers
+
+```{r}
+length(boxplot.stats(train, coef = 2.5)$out)
+length(boxplot.stats(train_diff, coef = 2.5)$out)
+```
+
+Check for stationarity
+
+```{r}
+ur.kpss(train) %>% summary()
+```
+
+Check ACF/PACF
+
+```{r}
+ggAcf(train)
+ggPacf(train)
+
+ggAcf(train_diff)
+ggPacf(train_diff)
+```
+
+Manual ARIMA model fit
+
+```{r}
+arima_model <- Arima(train, order = c(1,1,1), include.drift = TRUE)
+summary(arima_model)
+checkresiduals(arima_model)
+arima_forecast <- forecast(arima_model, h = length(test))
+autoplot(arima_forecast) +
+  autolayer(test)
+```
+
+Auto ARIMA
+
+```{r}
+autoarima_model <- auto.arima(train, 
+                              approximation = FALSE, 
+                              stepwise = FALSE)
+summary(autoarima_model)
+checkresiduals(autoarima_model)
+autoarima_forecast <- forecast(autoarima_model, h = length(test))
+autoplot(autoarima_forecast) +
+  autolayer(test)
+```
+
+Seasonal Modeling
+
+```{r}
+# TBD
+```
+
+Evaluation
+
+```{r}
+naive_mape <- mean(abs(naive_model$mean - test) / test, na.rm = TRUE)
+naive_mape_d <- mean(abs(naive_model_d$mean - test) / test, na.rm = TRUE)
+mean_mape <- mean(abs(mean_model$mean - test) / test, na.rm = TRUE)
+mean_mape_d <- mean(abs(mean_model_d$mean - test) / test, na.rm = TRUE)
+ets_mape <- mean(abs(ets_forecast$mean - test) / test, na.rm = TRUE)
+ets_mape_d <- mean(abs(ets_forecast_d$mean - test) / test, na.rm = TRUE)
+
+arima_mape <- mean(
+  abs(arima_forecast$mean - test) / test, na.rm = TRUE)
+
+autoarima_mape <- mean(
+  abs(autoarima_forecast$mean - test) / test, na.rm = TRUE)
+
+results <- data.frame(
+  model = c('naive','naive_d',
+            'mean','mean_d',
+            'ets','ets_d',
+            'arima','autoarima'),
+  mape = c(naive_mape, naive_mape_d,
+           mean_mape, mean_mape_d,
+           ets_mape, ets_mape_d,
+           arima_mape, autoarima_mape)
+)
+
+results %>%
+  arrange(mape)
+```
+
