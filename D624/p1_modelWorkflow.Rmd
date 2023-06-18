@@ -1,43 +1,77 @@
 ---
-title: "s02v02"
+title: "Project 1 - Model Workflow"
 author: "Keith Colella"
 date: "`r Sys.Date()`"
 output: html_document
 ---
 
-```{r setup}
+```{r setup, message = FALSE}
 library(tidyverse)
-library(readxl)
 library(forecast)
 library(urca)
 ```
 
-Choice of variable
+Choice of variable / model parameters
 
 ```{r}
+# knitting
+show_code <- FALSE
+
+# data
 category <- 'S02'
 variable <- 'Var02'
+frequency <- 21
+
+# outliers
+outlier_removal <- TRUE
+
+# missing values (method must be 'linear' or 'spline')
+interpolate <- TRUE
+missing_method <- 'linear' 
+
+# skewness (method must be 'BoxCox' or 'log')
+transform <- FALSE
+trans_method <- 'BoxCox'
+transform_diff <- FALSE
+trans_method_diff <- 'BoxCox'
+
+# seasonality
+seasonal_periods <- c(5,21,252)
+
+# arima
+p <- 2
+d <- 1
+q <- 2
+drift <- FALSE
+
+# auto arima
+approximation <- FALSE
+stepwise <- FALSE
+
+# seasonal arima
+p_s <- 1
+d_s <- 0
+q_s <- 1
+drift_s <- FALSE
 ```
 
-Data
+Read in data. Convert to ts object and plot.
 
-```{r}
-xl <- read_excel('data/DATA624_Project1_Data_Schema.xlsx',
+```{r, echo = show_code}
+xl <- readxl::read_excel('data/DATA624_Project1_Data_Schema.xlsx',
                  sheet = category, skip = 2)
 
 series <- xl[1:1622,variable]
-```
 
-Convert to ts object and plot. Assume freq = 1 for now.
+series <- ts(deframe(series), frequency = frequency)
 
-```{r}
-series <- ts(deframe(series), frequency = 1)
+head(series)
 autoplot(series)
 ```
 
 Split training and test sets
 
-```{r}
+```{r, echo = show_code}
 train <- head(series, round(length(series) * 0.7))
 test <- tail(series, round(length(series) * 0.3))
 
@@ -51,7 +85,7 @@ autoplot(test)
 
 Split training and test sets with differenced series
 
-```{r}
+```{r, echo = show_code}
 train_diff <- diff(train)
 test_diff <- diff(test)
 
@@ -61,7 +95,7 @@ autoplot(test_diff)
 
 Baseline forecasts - Naive, Average and ETS
 
-```{r}
+```{r, echo = show_code}
 naive_model <- naive(train, h = length(test), level = 0)
 autoplot(naive_model) + 
   autolayer(test, alpha = 0.5)
@@ -70,74 +104,139 @@ mean_model <- meanf(train, h = length(test), level = 0)
 autoplot(mean_model) + 
   autolayer(test, alpha = 0.5)
 
-ets_model <- ets(train)
+ets_model <- ets(train, na.action = 'na.interp')
 ets_forecast <- forecast(ets_model, h = length(test), PI = FALSE)
-autoplot(ets_forecast) + 
+autoplot(ets_forecast) +
   autolayer(test, alpha = 0.5)
 ```
 
 Baseline forecasts on differenced series
 
-```{r}
+```{r, echo = show_code}
 naive_model_d <- naive(train_diff, h = length(test), level = 0)
-autoplot(naive_model_d) + 
-  autolayer(test_diff, alpha = 0.5)
+naive_model_d_levels <- ts(cumsum(c(tail(train,1), naive_model_d$mean)),
+                           frequency = frequency, start = time(test)[1])
+autoplot(train) + 
+  autolayer(naive_model_d_levels) + 
+  autolayer(test, alpha = 0.5) + 
+  scale_color_manual(values = c('blue','red'),
+                     label = c('actual','prediction'))
 
 mean_model_d <- meanf(train_diff, h = length(test), level = 0)
-autoplot(mean_model_d) + 
-  autolayer(test_diff, alpha = 0.5)
+mean_model_d_levels <- ts(cumsum(c(tail(train,1), mean_model_d$mean)),
+                          frequency = frequency, start = time(test)[1])
+autoplot(train) + 
+  autolayer(mean_model_d_levels) + 
+  autolayer(test, alpha = 0.5) + 
+  scale_color_manual(values = c('blue','red'),
+                     label = c('actual','prediction'))
 
 ets_model_d <- ets(train_diff)
 ets_forecast_d <- forecast(ets_model_d, h = length(test), PI = FALSE)
-autoplot(ets_forecast_d) + 
-  autolayer(test_diff, alpha = 0.5)
+ets_model_d_levels <- ts(cumsum(c(tail(train,1), ets_forecast_d$mean)),
+                         frequency = frequency, start = time(test)[1])
+autoplot(train, na.action = 'na.interp') + 
+  autolayer(ets_model_d_levels) + 
+  autolayer(test, alpha = 0.5) + 
+  scale_color_manual(values = c('blue','red'),
+                     label = c('actual','prediction'))
+```
+
+Check for outliers
+
+```{r, echo = show_code}
+ggplot(fortify(train), aes(x,y)) +
+  geom_point(
+    color = if_else(time(train) %in% tsoutliers(train)$index,
+                    'red', 'black'))
+
+ggplot(fortify(train_diff), aes(x,y)) +
+  geom_point(
+    color = if_else(time(train_diff) %in% tsoutliers(train_diff)$index,
+                    'red', 'black'))
+
+if (outlier_removal == TRUE) {
+  train <- tsclean(train, replace.missing = FALSE)
+  train_diff <- tsclean(train_diff, replace.missing = FALSE)
+  cat('Outliers removed.')
+}
+```
+
+Check for missing values
+
+```{r, echo = show_code}
+length(train[is.na(train)])
+
+if (interpolate == TRUE) {
+  if (missing_method == 'linear') {
+    train <- zoo::na.approx(train)
+    train_diff <- zoo::na.approx(train_diff)
+  } else if (missing_method == 'spline') {
+    train <- zoo::na.spline(train)
+    train_diff <- zoo::na.spline(train_diff)
+  }
+  cat('Missing values replaced using',missing_method,'method')
+}
 ```
 
 Check for skewness
 
-```{r}
-ggplot(data.frame(data = train)) +
-  geom_histogram(aes(data), bins = 50)
+```{r, echo = show_code}
+ggplot(fortify(train), aes(y)) +
+  geom_histogram(bins = 50)
 
-ggplot(data.frame(data = train_diff)) +
-  geom_histogram(aes(data), bins = 50)
+if (transform == TRUE) {
+  if (trans_method == 'BoxCox') {
+    train <- BoxCox(train, 
+                    lambda = BoxCox.lambda(transform, method = 'loglik'))
+  } else if (method == 'log') {
+    train <- log(train)
+  }
+  cat('Series transformed using',trans_method)
+}
+
+ggplot(fortify(train_diff), aes(y)) +
+  geom_histogram(bins = 50)
+
+if (transform_diff == TRUE) {
+  if (trans_method_diff == 'BoxCox') {
+    train_diff <- BoxCox(train_diff, 
+                         lambda = BoxCox.lambda(transform, method = 'loglik'))
+  } else if (trans_method_diff == 'log') {
+    train_diff <- log(train_diff)
+  }
+  cat('Differenced series transformed using',trans_method_diff)
+}
 ```
 
 Check for stationarity
 
-```{r}
-ur.kpss(train) %>% summary()
+```{r, echo = show_code}
+summary(ur.kpss(train))
 
-cat('################################',
+cat('\n################################',
     '\nSuggested number of differences:',
     ndiffs(train))
 ```
 
 Check for seasonality
 
-```{r}
-for (period in c(5,20,252)) {
+```{r, echo = show_code}
+for (period in seasonal_periods) {
   seasonal_ts <- ts(train, frequency = period)
   cat('\nSuggested number of seasonal diffs for freq =',period,'-',
       nsdiffs(seasonal_ts))
   print(stl(seasonal_ts,
             s.window = period,
-            t.window = 250,
+            t.window = period,
             robust = TRUE) %>%
         autoplot())
 }
 ```
 
-Check for outliers
-
-```{r}
-length(boxplot.stats(train, coef = 2.5)$out)
-length(boxplot.stats(train_diff, coef = 2.5)$out)
-```
-
 Check ACF/PACF
 
-```{r}
+```{r, echo = show_code}
 ggAcf(train)
 ggPacf(train)
 
@@ -147,46 +246,57 @@ ggPacf(train_diff)
 
 Manual ARIMA model fit
 
-```{r}
-arima_model <- Arima(train, order = c(2,1,5), include.drift = FALSE)
+```{r, echo = show_code}
+arima_model <- Arima(train, order = c(p,d,q), include.drift = drift)
 summary(arima_model)
 checkresiduals(arima_model)
 arima_forecast <- forecast(arima_model, h = length(test))
 autoplot(arima_forecast) +
-  autolayer(test)
+  autolayer(test, alpha = 0.5)
+```
+
+Manual seasonal ARIMA fit
+
+```{r, echo = show_code}
+arima_model_s <- Arima(train, 
+                       order = c(p,d,q), 
+                       seasonal = c(p_s,d_s,q_s), 
+                       include.drift = drift_s)
+summary(arima_model_s)
+checkresiduals(arima_model_s)
+arima_forecast_s <- forecast(arima_model_s, h = length(test))
+autoplot(arima_forecast_s) +
+  autolayer(test, alpha = 0.5)
 ```
 
 Auto ARIMA
 
-```{r}
+```{r, echo = show_code}
 autoarima_model <- auto.arima(train, 
-                              approximation = FALSE, 
-                              stepwise = FALSE)
+                              approximation = approximation, 
+                              stepwise = stepwise)
 summary(autoarima_model)
 checkresiduals(autoarima_model)
 autoarima_forecast <- forecast(autoarima_model, h = length(test))
 autoplot(autoarima_forecast) +
-  autolayer(test)
-```
-
-Seasonal Modeling
-
-```{r}
-# TBD
+  autolayer(test, alpha = 0.5)
 ```
 
 Evaluation
 
-```{r}
+```{r, echo = show_code}
 naive_mape <- mean(abs(naive_model$mean - test) / test, na.rm = TRUE)
-naive_mape_d <- mean(abs(naive_model_d$mean - test) / test, na.rm = TRUE)
+naive_mape_d <- mean(abs(naive_model_d_levels - test) / test, na.rm = TRUE)
 mean_mape <- mean(abs(mean_model$mean - test) / test, na.rm = TRUE)
-mean_mape_d <- mean(abs(mean_model_d$mean - test) / test, na.rm = TRUE)
+mean_mape_d <- mean(abs(mean_model_d_levels - test) / test, na.rm = TRUE)
 ets_mape <- mean(abs(ets_forecast$mean - test) / test, na.rm = TRUE)
-ets_mape_d <- mean(abs(ets_forecast_d$mean - test) / test, na.rm = TRUE)
+ets_mape_d <- mean(abs(ets_model_d_levels - test) / test, na.rm = TRUE)
 
 arima_mape <- mean(
   abs(arima_forecast$mean - test) / test, na.rm = TRUE)
+
+arima_mape_s <- mean(
+  abs(arima_forecast_s$mean - test) / test, na.rm = TRUE)
 
 autoarima_mape <- mean(
   abs(autoarima_forecast$mean - test) / test, na.rm = TRUE)
@@ -195,11 +305,11 @@ results <- data.frame(
   model = c('naive','naive_d',
             'mean','mean_d',
             'ets','ets_d',
-            'arima','autoarima'),
+            'arima','seasonal arima', 'autoarima'),
   mape = c(naive_mape, naive_mape_d,
            mean_mape, mean_mape_d,
            ets_mape, ets_mape_d,
-           arima_mape, autoarima_mape)
+           arima_mape, arima_mape_s, autoarima_mape)
 )
 
 results %>%
