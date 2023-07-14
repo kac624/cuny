@@ -1,0 +1,98 @@
+---
+title: "Homework2_Week6"
+output: html_document
+date: "2023-07-13"
+---
+
+https://www.datacamp.com/tutorial/market-basket-analysis-r
+https://towardsdatascience.com/making-recommendations-using-association-rules-r-programming-1fd891dc8d2e
+
+```{r setup}
+library(arules)
+library(arulesViz)
+library(tidyverse)
+library(readxl)
+# library(knitr)
+library(lubridate)
+```
+
+Data
+
+```{r}
+retail <- read_excel('data/OnlineRetail.xlsx') %>%
+  mutate(Description = as.factor(Description),
+         Date = as.Date(InvoiceDate))
+
+retail <- retail[complete.cases(retail), ]
+
+glimpse(retail)
+```
+
+Convert df to transaction data
+
+```{r, message = FALSE, warning = FALSE}
+transactionData <- retail %>%
+  group_by(InvoiceNo, Date) %>%
+  mutate(items = paste0(Description, collapse = ',')) %>%
+  ungroup() %>%
+  select(InvoiceNo, Date, items)
+
+transactionData <- transactionData[
+  !duplicated(transactionData), 
+] %>%
+  select(items)
+
+write.csv(
+  transactionData,
+  'data/transactionData.csv',
+  quote = F,
+  row.names = F
+)
+
+tr <- read.transactions(
+  'data/transactionData.csv',
+  format = 'basket', 
+  sep = ','
+)
+
+summary(tr)
+```
+
+Plot
+
+```{r}
+itemFrequencyPlot(
+  tr, topN = 20, type = 'relative',
+  main = 'Absolute Item Freq'
+)
+```
+
+Rules
+
+```{r}
+association.rules <- apriori(
+  tr, parameter = list(
+    supp = 0.001,
+    conf = 0.8,
+    maxlen = 10
+  )
+)
+
+summary(association.rules)
+```
+
+Review Rules
+
+```{r}
+inspect(association.rules[1:10])
+```
+
+Top 10
+
+```{r}
+association.rules %>%
+  sort(by = 'lift', descreasing = True) %>%
+  head(10) %>%
+  inspect()
+```
+

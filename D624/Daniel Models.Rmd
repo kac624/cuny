@@ -1,0 +1,756 @@
+---
+title: "Project Notes"
+author: "Daniel Craig"
+date: "2023-07-09"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(caret)
+library(e1071)#skewness()
+library(earth)#?
+library(mice) #for imputing
+library(MLmetrics) #for MAPE
+library(pls) # for pls
+library(lars) # for lars
+library(elasticnet) # for ridge
+```
+
+Todo List:
+7/12/22
+- MARS needs to have his predictions be compared to the correct test partition. The test partition was based on processed data. It wasn't meant to be processed as it was for all the forests. MARS doesn't need any pre processing, so we were going to use the original test partition. In the future, probably best to separate the response variable out of partitioning etc.
+
+- Pick up at line 545 and finish up getting accuracy for everything
+- Probably need to re-run the forests model generation as well
+
+
+Stuff I'd like to see on a graph in EDA:
+1. Skewness of some variables
+2. Normality of some variables
+3. Correlation of variables
+
+
+Attempting different methods list:
+1. Removing Hyd Pressure 1 - we left this in, its near zero var
+2. Leaving the dummy categorical variables in fraction form, imputing them put them to fractions, we chose to round them to either 0 or 1
+3. Remove the "kendall" method in correlation and deal with the highly correlated variables
+
+
+PLS
+Penalty ( LARS, Lasso, Ridge)
+RandomForest
+
+
+## Processing
+```{r}
+rawData <- read_csv("data/StudentData - TO MODEL.csv")
+
+rawData$`Brand Code` <- as_factor(rawData$`Brand Code`)
+
+colnames(rawData)[1:33] <- c("brandCode","carbVol","fillOz","pcVol","carbPressure","carbTemp","PSC","pscFill","pscCO2","mnfFlow","carbPressure1","fillPressure","hydPressure1","hydPressure2","hydPressure3","hydPressure4","fillerLvl","fillerSpeed","temp","usageCont","carbFlow","density","MFR","balling","pressureVacuum","PH","oxyFiller","bowlSetpoint","pressureSetpoint","airPressurer","alchRel","carbRel","ballingLvl")
+```
+
+
+```{r NA Counts}
+#Check for NAs
+which(is.na(rawData[,1]))
+which(is.na(rawData))
+
+rawData[,26]
+
+#Not that many are missing
+missing <- unlist(lapply(rawData, function(x) sum(is.na(x))))/nrow(rawData)
+```
+
+```{r miceImpute}
+#Mice will handle transforming our brandCode column from a factor into dummy variables!
+#It wont like it if we do that for it beforehand and pass it a data frame with 
+#Imputation was handled using logreg for categorical variables and pmm from mice
+# can make use of a procedure called predictive mean matching (PMM) to select which values are imputed. PMM involves selecting a datapoint from the original, nonmissing data which has a predicted value close to the predicted value of the missing sample
+
+miceImpute <- mice(rawData)
+
+#miceImpute2 <- mice(dummyData,method = miceImpute$method)
+
+imputedData <- complete(miceImpute)
+```
+
+```{r PreProcessing for Trees}
+#Trees dont need any
+
+```
+
+
+```{r Partitioning Data}
+#Trees don't need centering,scaling, or transformations so we can partition the data and move on.
+trainPart <- createDataPartition(imputedData$PH, p=0.7, list=F)
+
+train <- imputedData[trainPart, ]
+test <- imputedData[-trainPart, ]
+```
+## Model Fitting Trees
+
+
+```{r CART Single Trees}
+#rpartTree <- rpart(PH ~., data = train)
+ctrl <- trainControl(method = "cv")
+tuneDepth <- expand.grid(maxdepth= seq(1,10,by=1))
+tuneCP <- expand.grid(cp = c(.01,.05,.1,.2))
+
+
+#method = "rpart"
+rpartTree <- train(PH ~., 
+                 data = train, 
+                 method = "rpart",
+                 tuneGrid = tuneCP,
+                 trControl = ctrl)
+
+(cartCPRMSE <- min(rpartTree$results$RMSE))
+(cartCPRsq  <- max(rpartTree$results$Rsquared))
+
+#rpart2 to train over max depth
+rpart2Tree <- train(PH ~., 
+                 data = train, 
+                 method = "rpart2",
+                 tuneGrid = tuneDepth,
+                 trControl = ctrl) 
+
+(cartDepthRMSE <- min(rpart2Tree$results$RMSE))
+(cartDepthRsq  <- max(rpart2Tree$results$Rsquared))
+
+#Complexity Parameter performed better(rpartTree), we will use that one in comparisons, both performed poorly
+```
+
+```{r M5 Reg Model}
+# library(RWeka)
+# yesno <- c("Yes", "No")
+# tuneM5 <- expand.grid(pruned = yesno, smoothed = yesno, rules = yesno)
+# 
+# m5Tune <- train(PH ~.,
+#                 data = train,
+#                  method = "M5", #or "M5Rules"
+#                  trControl = ctrl,
+#                 control = Weka_control(M=10),
+#                 tuneGrid = tuneM5
+#                  )
+# 
+# m5RMSE <- min(m5Tune$results$RMSE)
+# m5Rsq <- max(m5Tune$results$Rsquared)
+# 
+# 
+# tuneM5Rules <- expand.grid(pruned = yesno, smoothed = yesno)
+# m5RulesTune <- train(PH ~.,
+#                 data = train,
+#                  method = "M5Rules", #or "M5Rules"
+#                  trControl = ctrl,
+#                 control = Weka_control(M=10),
+#                 tuneGrid = tuneM5Rules
+#                  )
+# 
+# #M5 metrics
+# min(m5Tune$results$RMSE)
+# max(m5Tune$results$Rsquared)
+# 
+# #M5 Rules outperformed on RMSE, but lost a substantial amount in Rsqr, thus we will not use the Rules version
+# min(m5RulesTune$results$RMSE) #better by .02
+# min(m5RulesTune$results$Rsquared) #worse by .2
+```
+
+
+```{r BAG}
+# library(kernlab)
+# n <- ncol(train)
+# tuneVars <- data.frame(vars = seq(2,n,10))
+# 
+# predfunct<-function (object, x)
+# {
+#  if (is.character(lev(object))) {
+#     out <- predict(object, as.matrix(x), type = "probabilities")
+#     colnames(out) <- lev(object)
+#     rownames(out) <- NULL
+#   }
+#   else out <- predict(object, as.matrix(x))[, 1]
+#   out
+# }
+# 
+# 
+# svmBagCtrl <- bagControl(fit = svmBag$fit,
+#                       predict = predfunct,
+#                       aggregate= svmBag$aggregate)
+# 
+# citBagCtrl <- bagControl(fit = ctreeBag$fit,
+#                       predict = ctreeBag$pred,
+#                       aggregate= ctreeBag$aggregate)
+# 
+# #Attempted using SVM bag ctrl method but it gave many warnings/errors
+# 
+# svmBagTune <- train(PH ~.,
+#                   data = train,
+#                   method = "bag",
+#                   trControl = trainControl(method = "boot",number = 10),
+#                   tuneGrid = tuneVars,
+#                   bagControl= svmBagCtrl
+#                   )
+# 
+# citBagTune <- train(PH ~., 
+#                   data = train,
+#                   method = "bag",
+#                   trControl = trainControl(method = "boot",number = 10),
+#                   tuneGrid = tuneVars,
+#                   bagControl= citBagCtrl
+#                   )
+# 
+# #Looks like svm bag tune did better
+# (svmBagRMSE <- min(svmBagTune$results$RMSE))
+# (svmBagRsq <- min(svmBagTune$results$Rsquared))
+# 
+# (bagRMSE <- min(citBagTune$results$RMSE))
+# (bagRsq <- min(citBagTune$results$Rsquared))
+
+```
+
+```{r RandomForest}
+
+gridRF <- expand.grid(mtry = seq(2,20, by = 2))
+
+tuneRF <- train(PH ~., 
+                  data = train,
+                  method = "rf",
+                  trControl = trainControl(method = "boot",number = 10),
+                  tuneGrid = gridRF,
+                  bagControl= citBagCtrl
+                  )
+(rfRMSE <- min(tuneRF$results$RMSE))
+(rfRsq <- min(tuneRF$results$Rsquared))
+```
+
+```{r SGB}
+#Example grid from book, but added n.minobsinnode
+gbmGrid <- expand.grid(
+  interaction.depth = seq(1,7, by = 2),
+  n.trees = seq(100,1000,by = 50),
+  shrinkage = c(.01,.1),
+  n.minobsinnode=10
+  )
+
+sgbTune <- train(PH ~., data = train,
+                 method = "gbm", 
+                 tuneGrid = gbmGrid,
+                 trControl = trainControl(method = "boot", number = 10),
+                 verbose=F)
+
+(sgbRMSE <- min(sgbTune$results$RMSE))
+(sgbRsq <- max(sgbTune$results$Rsquared))
+```
+
+```{r Cubist}
+
+cubistGrid <- expand.grid(
+  committees = seq(1,100, by = 10),
+  neighbors = seq(1,10, by =2)
+  )
+
+cubistTune <- train(PH ~., data = train,
+                 method = "cubist", 
+                 tuneGrid = cubistGrid,
+                 trControl = trainControl(method = "boot", number = 10)
+                )
+
+(cubistRMSE <- min(cubistTune$results$RMSE))
+(cubistRsq <- max(cubistTune$results$Rsquared))
+```
+
+```{r Train Acc Dataframe}
+trainAcc <- data.frame( RMSE = c(cartDepthRMSE,rfRMSE,sgbRMSE,cubistRMSE),
+                        Rsq = c(cartDepthRsq,rfRsq,sgbRsq,cubistRsq),
+                        row.names = c("CART","ci","SGB","Cubist")
+                        )
+
+trainAcc
+```
+
+```{r Test Predictions}
+
+#PH is 26th column, we remove
+cartPreds <- predict(rpartTree, newdata = test[,-26])
+cart2Preds <- predict(rpart2Tree, newdata = test[,-26])
+
+m5TunePreds <- predict(m5Tune, newdata = test[,-26])
+m5RulesTunePreds <- predict(m5RulesTune, newdata = test[,-26])
+
+citBagPreds <- predict(citBagTune, newdata = test[,-26])
+svmBagPreds <- predict(svmBagTune, newdata = test[,-26])
+
+rfPreds <- predict(tuneRF, newdata = test[,-26])
+sgbPreds <- predict(sgbTune, newdata = test[,-26])
+cubistPreds <- predict(cubistTune, newdata = test[,-26])
+
+```
+
+```{r Test Accuracy}
+accTest <- data.frame(rbind(
+  postResample(pred = cartPreds, obs = test$PH),
+  postResample(pred = cart2Preds, obs = test$PH),
+  postResample(pred = m5TunePreds, obs = test$PH),
+  postResample(pred = m5RulesTunePreds, obs = test$PH),
+  postResample(pred = citBagPreds, obs = test$PH),
+  postResample(pred = svmBagPreds, obs = test$PH),
+  postResample(pred = rfPreds, obs = test$PH),
+  postResample(pred = sgbPreds, obs = test$PH),
+  postResample(pred = cubistPreds, obs = test$PH)),
+  row.names =  c("CART CP","CART DEPTH","M5","M5NoR","CitBAG","SVM Bag","RF","SGB","CUBIST")
+  )
+
+preds <- data.frame(cart=cartPreds,cart2=cart2Preds,m5=m5TunePreds,m5R=m5RulesTunePreds,citBag=citBagPreds,svmBag=svmBagPreds,rf=rfPreds,sgb=sgbPreds,cubist=cubistPreds)
+
+mapePreds <- function(x) {
+  MAPE(x,test$PH)
+}
+
+(mapeResults <- apply(preds, FUN = mapePreds, MARGIN = 2))
+
+mapeResults <- data.frame(MAPE = c(mapeResults[1],mapeResults[2],mapeResults[3],mapeResults[4],mapeResults[5],
+                     mapeResults[6], mapeResults[7], mapeResults[8],mapeResults[9]),
+                  row.names = c("CART CP","CART DEPTH","M5",
+                                "M5R","CitBAG","SVM Bag",
+                                "RF","SGB","CUBIST")
+)
+
+accTestFull <- data.frame(accTest, MAPE = mapeResults)
+
+accTestFull %>% arrange(MAPE, RMSE, MAE, desc(Rsquared))
+#Remember we want:
+# RMSE - small
+# MAPE - small
+# MAE - small
+# Rsq - Big
+
+#Look like RF performed the best with Cubist and M5 runner ups
+```
+
+## Non Tree Models
+
+```{r preProcess for Others}
+#LinReg - CS, NZV, Cor
+#PLS - CS
+#Ridge - CS, NZV
+#Lasso - CS, NZV
+
+#NNet - CS, NZV, Corr
+#SVM - CS (Does assume linear normality, maybe transformation needed?)
+#Mars - None (Can use tree)
+#KNN - CS,NZV
+
+#Removing PH from the processing at [,-26]
+#This ensures any transformation doesn't happen to PH
+
+regProcess <- preProcess(imputedData[,-26], method = c("center","scale","nzv","corr"))
+plsProcess <- preProcess(imputedData[,-26], method = c("center","scale"))
+ridgeLassoProcess <- preProcess(imputedData[,-26], method = c("center","scale","nzv"))
+#
+nnetProcess <- preProcess(imputedData[,-26], method = c("nzv","zv","corr"))
+svmProcess <- preProcess(imputedData[,-26], method =c("center","scale"))
+knnProcess <- preProcess(imputedData[,-26], method = c("center","scale","nzv"))
+#
+#
+# When using predict, we are able to re-introduce our PH column to the data so we've combined our transformed data and our predictor without it being changed
+regProcessed <- predict(regProcess, imputedData)
+plsProcessed <- predict(plsProcess, imputedData)
+rlProcessed <- predict(ridgeLassoProcess, imputedData)
+#
+nnetProcessed <- predict(nnetProcess, imputedData)
+svmProcessed <- predict(svmProcess, imputedData)
+knnProcessed <- predict(knnProcess, imputedData)
+
+```
+
+```{r Partition}
+
+trainReg <- regProcessed[trainPart, ]
+testReg <- regProcessed[-trainPart, ]
+
+trainPLS <- regProcessed[trainPart, ]
+testPLS <- regProcessed[-trainPart, ]
+
+trainRL <- rlProcessed[trainPart, ]
+testRL <- rlProcessed[-trainPart, ]
+
+###
+trainNNET <- nnetProcessed[trainPart,]
+testNNET <- nnetProcessed[-trainPart,]
+
+
+trainSVM <- svmProcessed[trainPart,]
+testSVM <- svmProcessed[-trainPart,]
+
+trainKNN <- knnProcessed[trainPart,]
+testKNN <- knnProcessed[-trainPart,]
+
+nrow(testReg)
+nrow(testPLS)
+nrow(testRL)
+nrow(testNNET)
+nrow(testSVM)
+nrow(testKNN)
+
+```
+
+
+
+### Neural Net
+
+```{r}
+ctrl <- trainControl(method = "cv")
+
+#Checking correlation at .75 after the default .9
+(tooHigh <- findCorrelation(cor(trainNNET[,-1]), cutoff = .75))
+
+
+
+##Create a specific candidate set of models to evaluate:
+nnetGrid <- expand.grid(  .decay = c(0, 0.01, .1), 
+                          .size = c(1:10),  
+                          .bag = FALSE) #option is to use bagging instead of different random seeds.  
+set.seed(100) 
+
+nnetTune <- train(trainNNET[,-20], trainNNET[,20],
+                  method = "avNNet",  
+                  tuneGrid = nnetGrid,  
+                  trControl = ctrl,
+                  linout = TRUE, trace = FALSE, 
+                  MaxNWts = 10 * (ncol(trainNNET[,-1]) + 1) + 10 + 1, maxit = 500)
+
+
+
+nnPreds <- predict(nnetTune, newdata = testNNET[,-20])
+
+postResample(pred = nnPreds, obs = testNNET[,20])
+
+length(nnPreds)
+```
+
+### MARS
+
+```{r}
+ #Define the candidate models to test with options from earth package
+marsGrid <- expand.grid(.degree = 1:2, .nprune = 2:38)
+set.seed(100)
+
+#MARS needs no processing, so we will stick with the train dataset used for the forests
+
+marsTuned <- train(PH ~., data = train,  
+                    method = "earth",  
+                    tuneGrid = marsGrid,  #Explicitly declare the candidate models to test  
+                    trControl = trainControl(method = "cv")
+                   ) 
+
+#Test set performance
+marsPreds <- predict(marsTuned, newdata = test[,-26])
+
+nrow(marsPreds)
+postResample(pred = marsPreds, obs = test$PH)
+
+marsTuned$finalModel
+
+varImp(marsTuned)
+
+#featurePlot(data[,important],data[,1])
+```
+
+
+### SVM
+
+```{r}
+testSVM
+
+svmRTuned <- train(PH ~., trainSVM,
+                   method = "svmRadial",
+                   tuneLength = 14,
+                   trControl = trainControl(method = "cv")
+                   )
+svmRTuned$bestTune
+
+print(paste0("RMSE: ",round(min(svmRTuned$results$RMSE),2)))
+print(paste0("Rsq: ",round(min(svmRTuned$results$Rsquared),2)))
+print(paste0("MAE: ",round(min(svmRTuned$results$MAE),2)))
+svmRTuned$finalModel
+
+length(svmRPreds)
+
+#Test set performance
+svmRPreds <- predict(svmRTuned, newdata = testSVM[,-26])
+
+postResample(pred = svmRPreds, obs = testSVM$PH)
+
+varImp(svmRTuned)
+```
+
+### KNN
+
+```{r}
+#KNN needs dummy variables
+dummies <- dummyVars(PH ~ ., data = trainKNN)
+dummyTrain <- predict(dummies, newdata = trainKNN)
+dummyTrainKNN <- as.data.frame(cbind(trainKNN[,25], dummyTrain))
+
+
+dummiesTest <- dummyVars(PH ~ ., data = testKNN)
+dummyTest <- predict(dummiesTest, newdata = testKNN)
+dummyTestKNN <- as.data.frame(cbind(testKNN[,25], dummyTest))
+
+
+knnModel <- train(dummyTrainKNN[,-1], dummyTrainKNN[,1],
+                   method = "knn",
+                   tuneLength =10)
+
+
+knnPreds <- predict(knnModel, newdata = dummyTestKNN[,-1])
+
+#postResample gets test set performance values
+postResample(pred = knnPreds, obs = dummyTestKNN$V1)
+```
+
+
+#### Variable Importance
+
+
+```{r}
+varImp(marsTuned)
+varImp(knnModel)
+varImp(svmRTuned)
+varImp(nnetTune)
+```
+
+
+
+```{r Test Acc for NonLin Reg Models}
+
+
+accTest2 <- data.frame(
+  rbind(
+  nnet <- postResample(pred = nnPreds, obs = testNNET[,20]),
+  mars <- postResample(pred = marsPreds, obs = test$PH),
+  svm <-postResample(pred = svmRPreds, obs = testSVM$PH),
+  knn <- postResample(pred = knnPreds, obs = dummyTestKNN$V1)
+  ),
+  row.names = c("NNet","MARS","SVM","KNN")
+)
+
+
+preds2 <- data.frame(NNet=nnPreds, MARS=marsPreds,svm=svmRPreds,knn=knnPreds)
+length(marsPreds)
+length(nnPreds)
+length(svmRPreds)
+length(knnPreds)
+
+## Pick up here
+mapePreds <- function(x) {
+  MAPE(x,test$PH)
+}
+
+(mapeResults2 <- apply(preds2, FUN = mapePreds, MARGIN = 2))
+
+mapeResults2 <- data.frame(
+                      MAPE = c(mapeResults2[1],mapeResults2[2],mapeResults2[3],mapeResults2[4]),
+                  row.names = c("NNet","MARS","SVM","KNN")
+                  )
+
+accTestFull2 <- data.frame(accTest2, MAPE = mapeResults2)
+
+accTestFull2 %>% arrange(MAPE, RMSE, MAE, desc(Rsquared))
+#Remember we want:
+# RMSE - small
+# MAPE - small
+# MAE - small
+# Rsq - Big
+```
+
+### Linear Reg Models
+
+
+### PLS
+
+```{r}
+plsProcess <- preProcess(imputedData[,-26], method = c("YeoJohnson","center","scale","zv","nzv"))
+plsData <- predict(plsProcess,imputedData)
+#Need to check the column PH is on
+
+trainPLSPart <- createDataPartition(plsData[,26], p=0.7, list=F)
+length(trainPLSPart)
+trainPLS <- plsData[trainPLSPart, ]
+testPLS <- plsData[-trainPLSPart, ]
+
+
+set.seed(100)
+ctrl <- trainControl(method = "cv", number =10)
+
+plsTune <- train(trainPLS[,-26], trainPLS[,26], 
+                 method = "pls", 
+                 tuneLength = 33,  
+                trControl = ctrl
+)
+
+plsPreds <- predict(plsTune, testPLS)
+
+#plsTune #ncomp = 13
+min(plsTune$results$RMSE)
+max(plsTune$results$Rsquared)
+
+postResample(pred = plsPreds, obs = testPLS$PH)
+
+```
+### LARS
+```{r}
+
+larsProcess <- preProcess(imputedData[,-26], method = c("center","scale","zv","nzv"))
+larsData <- predict(larsProcess,imputedData)
+
+#Create Dummy Variables
+larsData <- dummyVars(PH ~ .,larsData)
+dummyLarsData <- as.data.frame(predict(larsData,plsData))
+dummyLarsData <- cbind(PH=plsData$PH,dummyLarsData)
+
+#Partition using PLS, so that they all have the same number of rows in obs and predictions, that way we dont have any dimension issues later in creating our accuracy chart
+trainLars <- dummyLarsData[trainPLSPart, ]
+testLars <- dummyLarsData[-trainPLSPart, ]
+
+larsTune <- train(trainLars[,-1], trainLars[,1], 
+                 method = "lars", 
+                 tuneLength = 20,  
+                trControl = ctrl
+)
+
+larsPreds <- predict(larsTune, testLars)
+
+#larsTune #lambda = .0068
+min(larsTune$results$RMSE)
+max(larsTune$results$Rsquared)
+
+postResample(pred = larsPreds, obs = testLars$PH)
+
+
+```
+
+#### Ridge
+
+```{r}
+## Ridge will use same processing as LARS
+ridgeGrid <- data.frame(.lambda = seq(0, .1, length = 15))  
+set.seed(100) 
+ridgeRegFit <- train(trainLars[,-1],trainLars[,1],
+                     method = "ridge",
+                     tuneGrid = ridgeGrid,
+                     trControl = ctrl
+)
+
+#ridgeRegFit
+
+min(ridgeRegFit$results$RMSE)
+max(ridgeRegFit$results$Rsquared)
+
+ridgePreds <- predict(ridgeRegFit, testLars)
+
+postResample(pred = ridgePreds, obs = testLars$PH)
+
+```
+
+#### Lasso
+
+```{r}
+## LASSO will use the same processing as LARS
+lassoGrid <- expand.grid(alpha = 1,
+                         lambda = seq(0.01, 1, by = 0.01))
+
+set.seed(100) 
+lassoFit <- train(trainLars[,-1],trainLars[,1],
+                     method = "glmnet",
+                     tuneGrid = lassoGrid,
+                     trControl = ctrl
+)
+
+#lassoFit
+
+min(lassoFit$results$RMSE)
+max(lassoFit$results$Rsquared)
+
+lassoPreds <- predict(lassoFit, testLars)
+
+postResample(pred = lassoPreds, obs = testLars$PH)
+```
+
+
+### Linear Regression Acc
+```{r}
+accTest3 <- data.frame(rbind(
+  postResample(pred = plsPreds, obs = testPLS$PH),
+  postResample(pred = larsPreds, obs = testLars$PH),
+  postResample(pred = ridgePreds, obs = testLars$PH),
+  postResample(pred = lassoPreds, obs = testLars$PH)
+  ),  row.names =  c("PLS","CART","Ridge","LASSO")
+)
+
+
+preds3 <- data.frame(pls=plsPreds,lars=larsPreds,ridge=ridgePreds,lasso=lassoPreds)
+
+
+mapePreds3 <- function(x) {
+  MAPE(x,test$PH)
+}
+
+(mapeResults3 <- apply(preds, FUN = mapePreds, MARGIN = 2))
+
+mapeResults3 <- data.frame(MAPE = c(mapeResults3[1],mapeResults3[2],mapeResults3[3],mapeResults3[4]),
+                  row.names = c("PLS","LARS","Ridge","LASSO")
+                  )
+
+accTestFull3 <- data.frame(accTest3, MAPE = mapeResults3)
+
+accTestFull3 %>% arrange(MAPE, RMSE, MAE, desc(Rsquared))
+```
+
+```{r Final Acc Table}
+accTestFull
+accTestFull2
+accTestFull3
+
+voltron <- rbind(accTestFull,accTestFull2,accTestFull3)
+(voltron <-  voltron %>% arrange(MAPE, RMSE, MAE, desc(Rsquared)))
+```
+
+# Predictions
+```{r}
+#Import data to predict on
+rawPredict <- read_csv("C:\\Users\\dcrai\\source\\repos\\DATA624\\Project 2\\Materials\\StudentEvaluation- TO PREDICT.csv")
+
+#Rename columns for ease of use
+colnames(rawPredict)[1:33] <- c("brandCode","carbVol","fillOz","pcVol","carbPressure","carbTemp","PSC","pscFill","pscCO2","mnfFlow","carbPressure1","fillPressure","hydPressure1","hydPressure2","hydPressure3","hydPressure4","fillerLvl","fillerSpeed","temp","usageCont","carbFlow","density","MFR","balling","pressureVacuum","PH","oxyFiller","bowlSetpoint","pressureSetpoint","airPressurer","alchRel","carbRel","ballingLvl")
+
+#Factorize our categorical variable
+rawPredict$brandCode <- as_factor(rawPredict$brandCode)
+```
+
+```{r MICE Impute}
+
+#Attempt 2
+## Imputed data
+rawImpute <- mice(rawPredict[,-26]) #Impute for all columns except our PH response column
+imputedRaw <- complete(rawImpute) #Get our data back
+imputedRawPH <- cbind(rawPredict$PH,imputedRaw) #Rejoin our PH response column
+
+svmFinalProcess <- preProcess(imputedRaw[,-26], method = c("center","scale")) #Center and scale all but our PH response column as SVM requires Center/Scaling
+svmFinalProcessed <- predict(svmFinalProcess, imputedRawPH) #Get data back
+colnames(svmFinalProcessed)[1] <- "PH" #Rename our column
+
+finalPreds2 <- as.data.frame( #Turn into a dataframe
+  predict(svmRTuned, newdata = svmFinalProcessed) #Generate predictions using the SVM Model we trained on the 
+                                                  # processed prediction data we just processed
+  )
+
+#Write our preds to a file for copy/pasting
+write_excel_csv(finalPreds2, "C:\\Users\\dcrai\\source\\repos\\DATA624\\Project 2\\Materials\\SVM Predictions.xlsx")
+
+```
+
+
