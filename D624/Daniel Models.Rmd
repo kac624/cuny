@@ -124,90 +124,90 @@ rpart2Tree <- train(PH ~.,
 ```
 
 ```{r M5 Reg Model}
-# library(RWeka)
-# yesno <- c("Yes", "No")
-# tuneM5 <- expand.grid(pruned = yesno, smoothed = yesno, rules = yesno)
-# 
-# m5Tune <- train(PH ~.,
-#                 data = train,
-#                  method = "M5", #or "M5Rules"
-#                  trControl = ctrl,
-#                 control = Weka_control(M=10),
-#                 tuneGrid = tuneM5
-#                  )
-# 
-# m5RMSE <- min(m5Tune$results$RMSE)
-# m5Rsq <- max(m5Tune$results$Rsquared)
-# 
-# 
-# tuneM5Rules <- expand.grid(pruned = yesno, smoothed = yesno)
-# m5RulesTune <- train(PH ~.,
-#                 data = train,
-#                  method = "M5Rules", #or "M5Rules"
-#                  trControl = ctrl,
-#                 control = Weka_control(M=10),
-#                 tuneGrid = tuneM5Rules
-#                  )
-# 
-# #M5 metrics
-# min(m5Tune$results$RMSE)
-# max(m5Tune$results$Rsquared)
-# 
-# #M5 Rules outperformed on RMSE, but lost a substantial amount in Rsqr, thus we will not use the Rules version
-# min(m5RulesTune$results$RMSE) #better by .02
-# min(m5RulesTune$results$Rsquared) #worse by .2
+library(RWeka)
+yesno <- c("Yes", "No")
+tuneM5 <- expand.grid(pruned = yesno, smoothed = yesno, rules = yesno)
+
+m5Tune <- train(PH ~.,
+                data = train,
+                 method = "M5", #or "M5Rules"
+                 trControl = ctrl,
+                control = Weka_control(M=10),
+                tuneGrid = tuneM5
+                 )
+
+m5RMSE <- min(m5Tune$results$RMSE)
+m5Rsq <- max(m5Tune$results$Rsquared)
+
+
+tuneM5Rules <- expand.grid(pruned = yesno, smoothed = yesno)
+m5RulesTune <- train(PH ~.,
+                data = train,
+                 method = "M5Rules", #or "M5Rules"
+                 trControl = ctrl,
+                control = Weka_control(M=10),
+                tuneGrid = tuneM5Rules
+                 )
+
+#M5 metrics
+min(m5Tune$results$RMSE)
+max(m5Tune$results$Rsquared)
+
+#M5 Rules outperformed on RMSE, but lost a substantial amount in Rsqr, thus we will not use the Rules version
+min(m5RulesTune$results$RMSE) #better by .02
+min(m5RulesTune$results$Rsquared) #worse by .2
 ```
 
 
 ```{r BAG}
-# library(kernlab)
-# n <- ncol(train)
-# tuneVars <- data.frame(vars = seq(2,n,10))
-# 
-# predfunct<-function (object, x)
-# {
-#  if (is.character(lev(object))) {
-#     out <- predict(object, as.matrix(x), type = "probabilities")
-#     colnames(out) <- lev(object)
-#     rownames(out) <- NULL
-#   }
-#   else out <- predict(object, as.matrix(x))[, 1]
-#   out
-# }
-# 
-# 
-# svmBagCtrl <- bagControl(fit = svmBag$fit,
-#                       predict = predfunct,
-#                       aggregate= svmBag$aggregate)
-# 
-# citBagCtrl <- bagControl(fit = ctreeBag$fit,
-#                       predict = ctreeBag$pred,
-#                       aggregate= ctreeBag$aggregate)
-# 
-# #Attempted using SVM bag ctrl method but it gave many warnings/errors
-# 
-# svmBagTune <- train(PH ~.,
-#                   data = train,
-#                   method = "bag",
-#                   trControl = trainControl(method = "boot",number = 10),
-#                   tuneGrid = tuneVars,
-#                   bagControl= svmBagCtrl
-#                   )
-# 
-# citBagTune <- train(PH ~., 
-#                   data = train,
-#                   method = "bag",
-#                   trControl = trainControl(method = "boot",number = 10),
-#                   tuneGrid = tuneVars,
-#                   bagControl= citBagCtrl
-#                   )
-# 
-# #Looks like svm bag tune did better
-# (svmBagRMSE <- min(svmBagTune$results$RMSE))
-# (svmBagRsq <- min(svmBagTune$results$Rsquared))
-# 
-# (bagRMSE <- min(citBagTune$results$RMSE))
-# (bagRsq <- min(citBagTune$results$Rsquared))
+library(kernlab)
+n <- ncol(train)
+tuneVars <- data.frame(vars = seq(2,n,10))
+
+predfunct<-function (object, x)
+{
+ if (is.character(lev(object))) {
+    out <- predict(object, as.matrix(x), type = "probabilities")
+    colnames(out) <- lev(object)
+    rownames(out) <- NULL
+  }
+  else out <- predict(object, as.matrix(x))[, 1]
+  out
+}
+
+
+svmBagCtrl <- bagControl(fit = svmBag$fit,
+                      predict = predfunct,
+                      aggregate= svmBag$aggregate)
+
+citBagCtrl <- bagControl(fit = ctreeBag$fit,
+                      predict = ctreeBag$pred,
+                      aggregate= ctreeBag$aggregate)
+
+#Attempted using SVM bag ctrl method but it gave many warnings/errors
+
+svmBagTune <- train(PH ~.,
+                  data = train,
+                  method = "bag",
+                  trControl = trainControl(method = "boot",number = 10),
+                  tuneGrid = tuneVars,
+                  bagControl= svmBagCtrl
+                  )
+
+citBagTune <- train(PH ~.,
+                  data = train,
+                  method = "bag",
+                  trControl = trainControl(method = "boot",number = 10),
+                  tuneGrid = tuneVars,
+                  bagControl= citBagCtrl
+                  )
+
+#Looks like svm bag tune did better
+(svmBagRMSE <- min(svmBagTune$results$RMSE))
+(svmBagRsq <- min(svmBagTune$results$Rsquared))
+
+(bagRMSE <- min(citBagTune$results$RMSE))
+(bagRsq <- min(citBagTune$results$Rsquared))
 
 ```
 
@@ -244,6 +244,7 @@ sgbTune <- train(PH ~., data = train,
 (sgbRMSE <- min(sgbTune$results$RMSE))
 (sgbRsq <- max(sgbTune$results$Rsquared))
 ```
+
 
 ```{r Cubist}
 

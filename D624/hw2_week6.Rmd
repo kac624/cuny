@@ -11,46 +11,25 @@ https://towardsdatascience.com/making-recommendations-using-association-rules-r-
 library(arules)
 library(arulesViz)
 library(tidyverse)
-library(readxl)
-# library(knitr)
-library(lubridate)
 ```
 
 Data
 
 ```{r}
-retail <- read_excel('data/OnlineRetail.xlsx') %>%
-  mutate(Description = as.factor(Description),
-         Date = as.Date(InvoiceDate))
-
-retail <- retail[complete.cases(retail), ]
-
-glimpse(retail)
-```
-
-Convert df to transaction data
-
-```{r, message = FALSE, warning = FALSE}
-transactionData <- retail %>%
-  group_by(InvoiceNo, Date) %>%
-  mutate(items = paste0(Description, collapse = ',')) %>%
-  ungroup() %>%
-  select(InvoiceNo, Date, items)
-
-transactionData <- transactionData[
-  !duplicated(transactionData), 
-] %>%
-  select(items)
-
-write.csv(
-  transactionData,
-  'data/transactionData.csv',
-  quote = F,
-  row.names = F
+retail <- read_csv(
+  'data/GroceryDataSet.csv',
+  col_names = FALSE
 )
 
+head(retail)
+```
+
+
+As transaction
+
+```{r}
 tr <- read.transactions(
-  'data/transactionData.csv',
+  'data/GroceryDataSet.csv',
   format = 'basket', 
   sep = ','
 )
@@ -62,16 +41,22 @@ Plot
 
 ```{r}
 itemFrequencyPlot(
-  tr, topN = 20, type = 'relative',
+  tr, topN = 20, type = 'absolute',
   main = 'Absolute Item Freq'
+)
+
+itemFrequencyPlot(
+  tr, topN = 20, type = 'relative',
+  main = 'Relative Item Freq'
 )
 ```
 
 Rules
-
+  
 ```{r}
 association.rules <- apriori(
-  tr, parameter = list(
+  tr, 
+  parameter = list(
     supp = 0.001,
     conf = 0.8,
     maxlen = 10
@@ -91,8 +76,24 @@ Top 10
 
 ```{r}
 association.rules %>%
-  sort(by = 'lift', descreasing = True) %>%
+  sort(by = 'lift', decreasing = TRUE) %>%
   head(10) %>%
   inspect()
 ```
+
+Alt Params
+
+```{r}
+association.rules <- apriori(
+  tr, 
+  parameter = list(
+    supp = 0.01,
+    conf = 0.8,
+    maxlen = 10
+  )
+)
+
+summary(association.rules)
+```
+
 
