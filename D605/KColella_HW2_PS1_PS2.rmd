@@ -1,0 +1,280 @@
+---
+title: "D605 HW2 - Keith Colella"
+output: html_document
+date: "2023-08-25"
+---
+
+```{r setup}
+library(matrixcalc)
+set.seed(42)
+```
+
+# Problem Set 1
+
+### Problem 1
+
+Show that $A^{T}A \neq AA^{T}$ in general. (Proof and demonstration.)
+
+### Response 1
+
+In general, we know that matrix multiplication is not commutative. We can look at Definition MM and Example MMNC from [1, Beezer] to confirm that $AB \neq BA$. Moreover, we know that, in general, $A \neq A^{T}$; we can again confirm this in [1, Beezer] with Definition TM and Example TM. It therefore follows that $A^{T}A \neq AA^{T}$.
+
+We can also highlight dimensionality as proof of incongruence. For non-square matrices, the products of $A^{T}A$ and $AA^{T}$ will have different dimensions. For example, if $M$ is a 3x4 matrix, then $A^{T}A$ will result in a 4x4 matrix, whereas $AA^{T}$ will result in a 3x3. In these cases, $A^{T}A$ will clearly not equal $AA^{T}$.
+
+We can confirm this point further with a few examples.
+
+#### Example 1
+
+```{r}
+sample_matrix <- round(matrix(runif(9,0,10), nrow = 3),0)
+A_At <- sample_matrix %*% t(sample_matrix)
+At_A <- t(sample_matrix) %*% sample_matrix
+sample_matrix
+A_At
+At_A
+all.equal(A_At, At_A)
+```
+
+#### Example 2
+
+```{r}
+sample_matrix <- round(matrix(runif(20,0,10), nrow = 4),0)
+A_At <- sample_matrix %*% t(sample_matrix)
+At_A <- t(sample_matrix) %*% sample_matrix
+sample_matrix
+A_At
+At_A
+all.equal(A_At, At_A)
+```
+
+#### Example 3
+
+```{r}
+sample_matrix <- round(matrix(runif(16,0,10), nrow = 4),0)
+A_At <- sample_matrix %*% t(sample_matrix)
+At_A <- t(sample_matrix) %*% sample_matrix
+sample_matrix
+A_At
+At_A
+all.equal(A_At, At_A)
+```
+
+#### Example 4
+
+```{r}
+sample_matrix <- round(matrix(runif(18,0,10), nrow = 6),0)
+A_At <- sample_matrix %*% t(sample_matrix)
+At_A <- t(sample_matrix) %*% sample_matrix
+sample_matrix
+A_At
+At_A
+all.equal(A_At, At_A)
+```
+
+In all of the above cases, we find that $A^{T}A \neq AA^{T}$.
+
+### Problem 2
+
+For a special type of square matrix $A$, we get $A^{T}A = AA^{T}$. Under what conditions could this be true? (Hint: The Identity matrix I is an example of such a matrix).
+
+### Response 2
+
+Any symmetric matrix will serve as an exception to the above rule, i.e. $A^{T}A = AA^{T}$ if $A$ is symmetric. We can prove this by simply referring to Definition SYM in [1, Beezer], which defines a symmetric matrix as a matrix that is equal to its tranpose. So, if $A = A^{T}$ and $AA = AA$, then $A^{T}A = AA^{T}$.
+
+Again, we look at a few examples to confirm.
+
+#### Example 5
+
+```{r}
+sample_matrix <- matrix(c(
+  2, 7,
+  7, 2
+), nrow = 2, byrow = TRUE)
+A_At <- sample_matrix %*% t(sample_matrix)
+At_A <- t(sample_matrix) %*% sample_matrix
+sample_matrix
+A_At
+At_A
+all.equal(A_At, At_A)
+```
+
+#### Example 6
+
+```{r}
+sample_matrix <- matrix(c(
+  3,-2, 6,
+  -2,2,-1,
+  6,-1, 3
+), nrow = 3, byrow = TRUE)
+A_At <- sample_matrix %*% t(sample_matrix)
+At_A <- t(sample_matrix) %*% sample_matrix
+sample_matrix
+A_At
+At_A
+all.equal(A_At, At_A)
+```
+
+#### Example 6
+
+```{r}
+sample_matrix <- matrix(c(
+  1, 0, 6, 1,
+  0, 1, 0,-1,
+  6, 0, 1, 0,
+  1,-1, 0, 1
+), nrow = 4, byrow = TRUE)
+A_At <- sample_matrix %*% t(sample_matrix)
+At_A <- t(sample_matrix) %*% sample_matrix
+sample_matrix
+A_At
+At_A
+all.equal(A_At, At_A)
+```
+
+# Problem Set 2
+
+### Problem
+
+Write an R function to factorize a square matrix A into LU or LDU, whichever you prefer.
+
+### Response
+
+I'll focus on LU decomposition.
+
+I'll start by defining a 3x3 matrix, $A$, and using the `lu.decomposition` function from the `matrixcalc` package to set a baseline.
+
+```{r}
+A = matrix(c(
+   1, 4,-3,
+  -2, 8, 5,
+   3, 4, 7
+), nrow = 3, byrow = TRUE)
+
+lu_A <- lu.decomposition(A)
+
+lu_A$L %*% lu_A$U
+```
+
+I'll then create the function to perform the LU decomposition. The overall logic is to follow the "shortcut" approach, focusing on row operations to convert the lower triangle of the original matrix to zeros. We start with the first column, using the first row to zero out all values in that column. Then we move to the second column, using the the second row to zero out the one remaining value in the lower triangle. The remaining row equivalent matrix serves as the decomposed Upper, and the scalars used in the row operations are plugged into their respective places in the Lower triangle (with ones added along the diagonal).
+
+```{r}
+lu_decomp <- function(input_matrix) {
+  U <- input_matrix
+
+  L <- matrix(
+    rep(0,length(input_matrix)),
+    nrow = dim(input_matrix)[1],
+    ncol = dim(input_matrix)[2]
+  )
+  diag(L) <- 1
+  
+  start <- 1
+  
+  for (col in 1:(ncol(input_matrix)-1)){
+    
+    vector_multiplier <- U[col,]
+    
+    for (row in start:(nrow(input_matrix)-1)) {
+      
+      scalar <- -(U[row+1,col] / U[col,col])
+      
+      U[row+1,] <- U[row+1,] + scalar * vector_multiplier
+      L[row+1,col] <- -scalar
+    }
+    
+    start <- start + 1
+    
+  }
+  
+  return(list(L = L, U = U))
+  
+}
+```
+
+Let's test out the function. Most importantly, I want to confirm that when we multiply $L$ by $U$, we get our original matrix back as the result.
+
+```{r}
+lu_A_KC <- lu_decomp(A)
+
+lu_A_KC$L
+lu_A_KC$U
+
+lu_A_KC$L %*% lu_A_KC$U
+```
+
+It works!
+
+I can now define a function to evaluate my function across a variety of matrices. The function with take a matrix, decompose it using my function as well as the `matrixcalc` function. We then evaluate the function by (1) confirming that the resulting $L*U$ correctly re-composes our original matrix, and (2) confirming that our results match those of the `lu.decomposition` function, for both $L$ and $U$. 
+
+```{r}
+evaluate_decomp_function <- function(input_matrix) {
+  lu_KC <- lu_decomp(input_matrix)
+  lu_matrixCalc <- lu.decomposition(input_matrix)
+  
+  print('Original matrix versus Reformed Matrix (L*U)')
+  print(round(input_matrix,2))
+  print(round(lu_KC$L %*% lu_KC$U,2))
+  print(ifelse(
+    all.equal(round(input_matrix,2),round(lu_KC$L %*% lu_KC$U,2)),
+    'MATCH',
+    'NO MATCH'
+    )
+  )
+  cat('\n')
+  print('Lower: matrixCalc versus KC')
+  print(round(lu_matrixCalc$L,2))
+  print(round(lu_KC$L,2))
+  print(ifelse(
+    all.equal(round(lu_matrixCalc$U,2),round(lu_KC$U,2)),
+    'MATCH',
+    'NO MATCH'
+    )
+  )
+  cat('\n')
+  print('Upper: matrixCalc versus KC')
+  print(round(lu_matrixCalc$U,2))
+  print(round(lu_KC$U,2))
+  print(ifelse(
+    all.equal(round(lu_matrixCalc$U,2),round(lu_KC$U,2)),
+    'MATCH',
+    'NO MATCH'
+    )
+  )
+  cat('\n')
+}
+```
+
+Then we can plug in some matrices!
+
+```{r}
+B <- matrix(c(
+  1, 3,
+  4, 2
+), nrow = 2, byrow = TRUE)
+
+evaluate_decomp_function(B)
+
+C <- round(matrix(c(runif(9,0,10)), nrow = 3),0)
+
+evaluate_decomp_function(C)
+
+D <- round(matrix(c(runif(16,0,10)), nrow = 4),0)
+
+evaluate_decomp_function(D)
+
+E <- round(matrix(c(runif(25,0,10)), nrow = 5),0)
+
+evaluate_decomp_function(E)
+
+G <- round(matrix(c(runif(36,0,10)), nrow = 6),0)
+
+evaluate_decomp_function(G)
+
+H <- round(matrix(c(runif(64,0,10)), nrow = 8),0)
+
+evaluate_decomp_function(H)
+```
+
+# Citations
+
+[1] Beezer, R. A. (2013). A First Course In Linear Algebra. OpenStax CNX.
