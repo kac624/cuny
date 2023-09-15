@@ -127,30 +127,23 @@ $$ \begin{bmatrix}
     0 & 0 & 0 & 1
 \end{bmatrix}$$
 
-I'll double check my math with a series of row operations.
+I'll double check my math by coding all of the row operations.
 
 ```{r}
 A_rref <- A
 A_rref[2,] <- A_rref[2,] + A_rref[1,]
-A_rref
 A_rref[4,] <- A_rref[4,] + -5*A_rref[1,]
 A_rref
 A_rref[3,] <- A_rref[3,] + -1/2*A_rref[2,]
-A_rref
 A_rref[4,] <- A_rref[4,] + 3*A_rref[2,]
-A_rref
 A_rref[4,] <- A_rref[4,] + -5/4*A_rref[3,]
 A_rref
 A_rref[1,] <- A_rref[1,] + -A_rref[2,]
-A_rref
 A_rref[1,] <- A_rref[1,] + -1/4*A_rref[3,]
-A_rref
 A_rref[1,] <- A_rref[1,] + 19/9*A_rref[4,]
 A_rref
 A_rref[2,] <- A_rref[2,] + A_rref[3,]
-A_rref
 A_rref[2,] <- A_rref[2,] + -4*A_rref[4,]
-A_rref
 A_rref[3,] <- A_rref[3,] + 20/9*A_rref[4,]
 A_rref
 A_rref[2,] <- A_rref[2,] * 1/2
@@ -165,7 +158,7 @@ Finally, I'll check my results against the `rref()` function from `pracma`.
 rref(A)
 ```
 
-Looks like we have the right reduced matrix. Based on this, we can see that A has a rank of 4, just based on the fact that the reduced form has 4 non-zero rows. We can also sat that the matrix is full rank.
+Looks like we have the right reduced matrix. We can now confirm that A has a rank of 4, based on the fact that the reduced form has 4 non-zero rows. We can also say that the matrix is full rank.
 
 We can run a quick check of this result using the `rankMatrix` function from the `Matrix` library.
 
@@ -242,7 +235,7 @@ As above, we can convert this matrix to reduced-row echelon form, then count the
 rref(B)
 ```
 
-We only have two non-zero rows, indicating that B has a rank of 2. We can run a quick check of this result using the `rankMatrix` function from the `Matrix` library.
+We only have two non-zero rows, indicating that B has a rank of 2. We again run a quick check of this result using the `rankMatrix` function from the `Matrix` library.
 
 ```{r}
 Matrix::rankMatrix(B)[1]
@@ -338,7 +331,7 @@ $$ \begin{bmatrix}
   0 & 0 & 0
 \end{bmatrix} $$
 
-We know that the eigenspace is a null space of our characteristic polynomial, i.e. $\mathcal{E}_{A}(3) =  \mathcal{N}(A-6I_{3})$. We used the reduced form of this matrix to express the eigenspace as the span of a basis. We apply a linear combination ($\times10$) to get to whole numbers.
+We know that the eigenspace is a null space of our characteristic polynomial, i.e. $\mathcal{E}_{A}(3) =  \mathcal{N}(A-6I_{3})$. So, we use the reduced form of this matrix to express the eigenspace as the span of a basis. We apply a linear combination ($\times10$) to get to whole numbers.
 
 $$ \mathcal{N}(A-6I_{3}) = 
 \begin{Bmatrix} 8/5 \\ 5/2 \\ 1 \end{Bmatrix} = 
@@ -398,9 +391,9 @@ eigenvectors = list(
 )
 
 for (i in 1:3) {
-  cat('For λ =', eigenvalues[[i]], '\n', 'Av\n')
+  cat('For lambda =', eigenvalues[[i]], '\n', 'Av\n')
   print(A %*% eigenvectors[[i]])
-  cat('λv\n')
+  cat('lambda*v\n')
   print(eigenvalues[i] * eigenvectors[[i]])
   cat('\n')
 }
@@ -416,7 +409,7 @@ eigen_A = eigen(A)
 eigen_A
 ```
 
-We can clean up the eigenvectors a bit by converting them to whole numbers, so we can more easily compare "apples to apples"...
+The eigenvalues clearly match. For the eigenvectors, we can clean them up  a bit by converting them to whole numbers, so we can more easily compare "apples to apples"...
 
 ```{r}
 eigen_A[[2]][,1] * 10 / eigen_A[[2]][3,1]
@@ -426,4 +419,4 @@ eigen_A[[2]][,2] * 2 / eigen_A[[2]][1,2]
 eigen_A[[2]][,3]
 ```
 
-They match!
+They match our results!
