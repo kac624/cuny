@@ -1,0 +1,429 @@
+---
+title: "D605 HW3 - Keith Colella"
+output: html_document
+date: "2023-09-11"
+---
+
+```{r setup}
+library(pracma)
+```
+
+# Problem Set 1
+
+### Problem 1
+
+What is the rank of matrix A? 
+$$ A = 
+\begin{bmatrix} 
+1 & 2 & 3 & 4\\
+-1 & 0 & 1 & 3\\
+0 & 1 & -2 & 1\\
+5 & 4 & -2 & -3
+\end{bmatrix} $$
+
+#### Response
+
+```{r}
+A = matrix(c(
+   1, 2, 3, 4,
+  -1, 0, 1, 3,
+   0, 1,-2, 1,
+   5, 4,-2,-3
+), nrow = 4, byrow = TRUE)
+
+A
+```
+
+To determine the rank, I'll first bring the matrix to reduced row echelon form.
+
+$$ \begin{bmatrix} 
+  1 & 2 & 3 & 4\\
+  -1 & 0 & 1 & 3\\
+  0 & 1 & -2 & 1\\
+  5 & 4 & -2 & -3
+\end{bmatrix}
+\xrightarrow{R_{1}+R_{2}}
+\begin{bmatrix}
+  1 & 2 & 3 & 4\\
+  0 & 2 & 4 & 7\\
+  0 & 1 & -2 & 1\\
+  5 & 4 & -2 & -3
+\end{bmatrix} 
+\xrightarrow{-5R_{1}+R_{4}}
+\begin{bmatrix}
+  1 & 2 & 3 & 4\\
+  0 & 2 & 4 & 7\\
+  0 & 1 & -2 & 1\\
+  0 & -6 & -17 & -23
+\end{bmatrix} \\
+\xrightarrow{-1/2R_{2}+R_{3}}
+\begin{bmatrix}
+    1 & 2 & 3 & 4\\
+    0 & 2 & 4 & 7\\
+    0 & 0 & -4 & -5/2\\
+    0 & -6 & -17 & -23
+\end{bmatrix} 
+\xrightarrow{3R_{2}+R_{4}}
+\begin{bmatrix}
+    1 & 2 & 3 & 4\\
+    0 & 2 & 4 & 7\\
+    0 & 0 & -4 & -5/2\\
+    0 & 0 & -5 & -2
+\end{bmatrix}
+\xrightarrow{-5/4R_{2}+R_{4}}
+\begin{bmatrix}
+    1 & 2 & 3 & 4\\
+    0 & 2 & 4 & 7\\
+    0 & 0 & -4 & -5/2\\
+    0 & 0 & 0 & 9/8
+\end{bmatrix} \\
+\xrightarrow{-R_{2}+R_{1}}
+\begin{bmatrix}
+    1 & 0 & -1 & -3\\
+    0 & 2 & 4 & 7\\
+    0 & 0 & -4 & -5/2\\
+    0 & 0 & 0 & 9/8
+\end{bmatrix}
+\xrightarrow{-1/4R_{3}+R_{1}}
+\begin{bmatrix}
+    1 & 0 & 0 & -19/8\\
+    0 & 2 & 4 & 7\\
+    0 & 0 & -4 & -5/2\\
+    0 & 0 & 0 & 9/8
+\end{bmatrix}
+\xrightarrow{19/9R_{4}+R_{1}}
+\begin{bmatrix}
+    1 & 0 & 0 & 0\\
+    0 & 2 & 4 & 7\\
+    0 & 0 & -4 & -5/2\\
+    0 & 0 & 0 & 9/8
+\end{bmatrix} \\
+\xrightarrow{R_{3}+R_{2}}
+\begin{bmatrix}
+    1 & 0 & 0 & 0\\
+    0 & 2 & 0 & 9/2\\
+    0 & 0 & -4 & -5/2\\
+    0 & 0 & 0 & 9/8
+\end{bmatrix}
+\xrightarrow{-4R_{3}+R_{2}}
+\begin{bmatrix}
+    1 & 0 & 0 & 0\\
+    0 & 2 & 0 & 0\\
+    0 & 0 & -4 & -5/2\\
+    0 & 0 & 0 & 9/8
+\end{bmatrix}
+\xrightarrow{20/9R_{4}+R_{3}}
+\begin{bmatrix}
+    1 & 0 & 0 & 0\\
+    0 & 2 & 0 & 0\\
+    0 & 0 & -4 & 0\\
+    0 & 0 & 0 & 9/8
+\end{bmatrix} \\
+\xrightarrow{1/2R_{2}, -1/4R_{3}, 8/9R_{4}}
+\begin{bmatrix}
+    1 & 0 & 0 & 0\\
+    0 & 1 & 0 & 0\\
+    0 & 0 & 1 & 0\\
+    0 & 0 & 0 & 1
+\end{bmatrix}$$
+
+I'll double check my math with a series of row operations.
+
+```{r}
+A_rref <- A
+A_rref[2,] <- A_rref[2,] + A_rref[1,]
+A_rref
+A_rref[4,] <- A_rref[4,] + -5*A_rref[1,]
+A_rref
+A_rref[3,] <- A_rref[3,] + -1/2*A_rref[2,]
+A_rref
+A_rref[4,] <- A_rref[4,] + 3*A_rref[2,]
+A_rref
+A_rref[4,] <- A_rref[4,] + -5/4*A_rref[3,]
+A_rref
+A_rref[1,] <- A_rref[1,] + -A_rref[2,]
+A_rref
+A_rref[1,] <- A_rref[1,] + -1/4*A_rref[3,]
+A_rref
+A_rref[1,] <- A_rref[1,] + 19/9*A_rref[4,]
+A_rref
+A_rref[2,] <- A_rref[2,] + A_rref[3,]
+A_rref
+A_rref[2,] <- A_rref[2,] + -4*A_rref[4,]
+A_rref
+A_rref[3,] <- A_rref[3,] + 20/9*A_rref[4,]
+A_rref
+A_rref[2,] <- A_rref[2,] * 1/2
+A_rref[3,] <- A_rref[3,] * -1/4
+A_rref[4,] <- A_rref[4,] * 8/9
+A_rref
+```
+
+Finally, I'll check my results against the `rref()` function from `pracma`.
+
+```{r}
+rref(A)
+```
+
+Looks like we have the right reduced matrix. Based on this, we can see that A has a rank of 4, just based on the fact that the reduced form has 4 non-zero rows. We can also sat that the matrix is full rank.
+
+We can run a quick check of this result using the `rankMatrix` function from the `Matrix` library.
+
+```{r}
+Matrix::rankMatrix(A)[1]
+```
+
+### Problem 2
+
+Given an $mxn$ matrix where $m > n$, what is the maximum rank? What is the minimum rank, assuming that the matrix is non-zero?
+
+#### Response
+
+The maximum rank is $n$. In general, the rank of a matrix cannot excede the number of rows or columns. So, if we have a matrix where $m > n$, then the number of columns, i.e. $n$, is our limiting factor. In other words, the rank cannot exceed $n$.
+
+We can demonstrate this with some examples. The rank of a matrix can be determined as the count of the number of non-zero rows in the row-reduced echelon form of that matrix. If we row reduce matrices with more rows than columns (i.e. $m > n$), we'll find that the number of non-zero rows never exceeds $n$.
+
+```{r}
+determine_rank <- function(input_matrix) {
+  reduced_matrix <- rref(input_matrix)
+  nz_rows <- 0
+  for (row in 1:dim(reduced_matrix)[1]) {
+    ifelse(
+      sum(reduced_matrix[row,]) != 0,
+      nz_rows <- nz_rows + 1, 0
+    )
+  }
+  return(nz_rows)
+}
+
+M <- round(matrix(runif(20,-10,10), nrow = 5),0)
+cat('Dimensions: ',dim(M),'\nNon-zero rows: ', determine_rank(M),'\n\n')
+
+M <- round(matrix(runif(18,-10,10), nrow = 6),0)
+cat('Dimensions: ',dim(M),'\nNon-zero rows: ', determine_rank(M),'\n\n')
+
+M <- round(matrix(runif(30,-10,10), nrow = 10),0)
+cat('Dimensions: ',dim(M),'\nNon-zero rows: ', determine_rank(M),'\n\n')
+
+M <- round(matrix(runif(28,-10,10), nrow = 7),0)
+cat('Dimensions: ',dim(M),'\nNon-zero rows: ', determine_rank(M),'\n\n')
+
+M <- round(matrix(runif(30,-10,10), nrow = 6),0)
+cat('Dimensions: ',dim(M),'\nNon-zero rows: ', determine_rank(M),'\n\n')
+```
+
+The minimum rank of such a matrix is 1 (assuming it is non-zero). Again, the rank of a matrix can be counted by the number of non-zero rows in the matrix's reduced form. So long as an matrix has one non-zero element in it, the reduced form will have at least one non-zero row. And in that case, the rank will be at least one.
+
+### Problem 3
+
+What is the rank of matrix B? 
+$$ B = 
+\begin{bmatrix} 
+1 & 2 & 1\\
+3 & 6 & 3\\
+2 & 4 & 2\\
+\end{bmatrix} $$
+
+#### Response
+
+```{r}
+B = matrix(c(
+   1, 2, 1,
+   3, 6, 3,
+   2, 3, 2
+), nrow = 3, byrow = TRUE)
+
+B
+```
+
+As above, we can convert this matrix to reduced-row echelon form, then count the number of non-zero rows.
+
+```{r}
+rref(B)
+```
+
+We only have two non-zero rows, indicating that B has a rank of 2. We can run a quick check of this result using the `rankMatrix` function from the `Matrix` library.
+
+```{r}
+Matrix::rankMatrix(B)[1]
+```
+
+
+# Problem Set 2
+
+Compute the eigenvalues and eigenvectors of the matrix A. You’ll need to show your work. You’ll need to write out the characteristic polynomial and show your solution.
+
+$$ A = 
+\begin{bmatrix} 
+1 & 2 & 3\\
+0 & 4 & 5\\
+0 & 0 & 6\\
+\end{bmatrix} $$
+
+#### Response
+
+```{r}
+A = matrix(c(
+   1, 2, 3,
+   0, 4, 5,
+   0, 0, 6
+), nrow = 3, byrow = TRUE)
+
+A
+```
+
+I'll use the characteristic polynomial of $A$: $p_{A}(x) = det(A-\lambda I)$. We can expand this further.
+
+$$ \begin{vmatrix}
+  1 - \lambda & 2 & 3 \\
+  0 & 4 - \lambda & 5 \\ 
+  0 & 0 & 6 - \lambda
+\end{vmatrix} $$
+
+We can then break this into a series of 2x2 determinants multiplied by the respective scalars.
+
+$$ 1-\lambda \begin{vmatrix}4-\lambda & 5 \\ 0 & 6-\lambda \end{vmatrix} + 
+  2 \begin{vmatrix}0 & 5 \\ 0 & 6-\lambda \end{vmatrix} +
+  3 \begin{vmatrix}0 & 4-\lambda \\ 0 & 0 \end{vmatrix} $$
+
+We can apply our $ad - bc$ rule for calculating 2x2 determinants to obtain the following.
+
+$$ (1-\lambda)[(4-\lambda)(6-\lambda)-5(0)] + 
+  2[0(6-\lambda)-5(0)] + 
+  3[0(0)-(4-\lambda)(0)] \\
+= (1-\lambda)(24-4\lambda-6\lambda-\lambda^2-0) +
+  2(0-0) + 3(0-0) \\
+= (1-\lambda)(\lambda^2-10\lambda+24)+0+0 \\
+= (1-\lambda)(\lambda-6)(\lambda-4) \\
+= -(\lambda-1)(\lambda-6)(\lambda-4) $$
+
+This indicates that our roots are $6$, $4$, and $1$, which corresponds to our three eigenvalues. 
+
+We can use these eigenvalues to find the corresponding eigenspaces (and from those, eigenvectors). We'll begin by substituting each $\lambda$ back into the expanded characteristic polynomial (i.e. $A-\lambda I_{3}$). Starting with $\lambda = 6$, we get the following.
+
+$$ \begin{bmatrix}
+  1 - 6 & 2 & 3 \\
+  0 & 4 - 6 & 5 \\ 
+  0 & 0 & 6 - 6
+\end{bmatrix} \\
+= \begin{bmatrix}
+  -5 & 2 & 3 \\
+  0 & -2 & 5 \\ 
+  0 & 0 & 0
+\end{bmatrix} $$
+
+We can then apply row operations to bring the matrix to reduced-row echelon form.
+
+$$ \begin{bmatrix}
+  -5 & 2 & 3 \\
+  0 & -2 & 5 \\ 
+  0 & 0 & 0
+\end{bmatrix} 
+\xrightarrow{R_{2}+R_{1}}
+\begin{bmatrix}
+  -5 & 0 & 8 \\
+  0 & -2 & 5 \\ 
+  0 & 0 & 0
+\end{bmatrix} 
+\xrightarrow{-1/2R_{2}}
+\begin{bmatrix}
+  -5 & 0 & 8 \\
+  0 & -2 & -5/2 \\ 
+  0 & 0 & 0
+\end{bmatrix} 
+\xrightarrow{-1/5R_{1}}
+\begin{bmatrix}
+  1 & 0 & -8/5 \\
+  0 & -2 & -5/2 \\ 
+  0 & 0 & 0
+\end{bmatrix} $$
+
+We know that the eigenspace is a null space of our characteristic polynomial, i.e. $\mathcal{E}_{A}(3) =  \mathcal{N}(A-6I_{3})$. We used the reduced form of this matrix to express the eigenspace as the span of a basis. We apply a linear combination ($\times10$) to get to whole numbers.
+
+$$ \mathcal{N}(A-6I_{3}) = 
+\begin{Bmatrix} 8/5 \\ 5/2 \\ 1 \end{Bmatrix} = 
+\begin{Bmatrix} 16 \\ 25 \\ 10 \end{Bmatrix} $$
+
+We can apply the same procedure with $\lambda = 4$.
+
+$$ \begin{bmatrix}
+  1 - 4 & 2 & 3 \\
+  0 & 4 - 4 & 5 \\ 
+  0 & 0 & 6 - 4
+\end{bmatrix}
+= \begin{bmatrix}
+  -3 & 2 & 3 \\
+  0 & 0 & 5 \\ 
+  0 & 0 & 2
+\end{bmatrix} 
+\xrightarrow{RREF}
+\begin{bmatrix}
+  1 & -2/3 & 0 \\
+  0 & 0 & 1 \\ 
+  0 & 0 & 0
+\end{bmatrix} \\~\\
+\mathcal{N}(A-3I_{3}) = 
+\begin{Bmatrix} 2/3 \\ 1 \\ 0 \end{Bmatrix} =
+\begin{Bmatrix} 2 \\ 3 \\ 0 \end{Bmatrix} $$
+
+And again with $\lambda = 1$.
+
+$$ \begin{bmatrix}
+  1 - 1 & 2 & 3 \\
+  0 & 4 - 1 & 5 \\ 
+  0 & 0 & 6 - 1
+\end{bmatrix}
+= \begin{bmatrix}
+  0 & 2 & 3 \\
+  0 & 3 & 5 \\ 
+  0 & 0 & 5
+\end{bmatrix} 
+\xrightarrow{RREF}
+\begin{bmatrix}
+  0 & 1 & 0 \\
+  0 & 0 & 1 \\ 
+  0 & 0 & 0
+\end{bmatrix} \\~\\
+\mathcal{N}(A-3I_{3}) = 
+\begin{Bmatrix} 1 \\ 0 \\ 0 \end{Bmatrix} $$
+
+We can now validate that our results observe the key properties of eigenvalues and eigenvectors. Namely, we'll confirm that $Av=\lambda v$ for all combinations of values and vectors.
+
+```{r}
+eigenvalues = c(6,4,1)
+eigenvectors = list(
+  matrix(c(16,25,10), nrow = 3),
+  matrix(c(2,3,0), nrow = 3),
+  matrix(c(1,0,0), nrow = 3)
+)
+
+for (i in 1:3) {
+  cat('For λ =', eigenvalues[[i]], '\n', 'Av\n')
+  print(A %*% eigenvectors[[i]])
+  cat('λv\n')
+  print(eigenvalues[i] * eigenvectors[[i]])
+  cat('\n')
+}
+```
+
+They match!
+
+Finally, we'll check our results against R's native `eigen` function.
+
+```{r}
+eigen_A = eigen(A)
+
+eigen_A
+```
+
+We can clean up the eigenvectors a bit by converting them to whole numbers, so we can more easily compare "apples to apples"...
+
+```{r}
+eigen_A[[2]][,1] * 10 / eigen_A[[2]][3,1]
+
+eigen_A[[2]][,2] * 2 / eigen_A[[2]][1,2]
+
+eigen_A[[2]][,3]
+```
+
+They match!
