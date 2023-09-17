@@ -382,15 +382,160 @@ A</code></pre>
 ## [2,]   -1    0    1    3
 ## [3,]    0    1   -2    1
 ## [4,]    5    4   -2   -3</code></pre>
-<p>Manually reduce to rref</p>
-<p>Check against pracma</p>
+<p>To determine the rank, I’ll first bring the matrix to reduced row
+echelon form.</p>
+<p><span class="math display">\[ \begin{bmatrix}
+  1 &amp; 2 &amp; 3 &amp; 4\\
+  -1 &amp; 0 &amp; 1 &amp; 3\\
+  0 &amp; 1 &amp; -2 &amp; 1\\
+  5 &amp; 4 &amp; -2 &amp; -3
+\end{bmatrix}
+\xrightarrow{R_{1}+R_{2}}
+\begin{bmatrix}
+  1 &amp; 2 &amp; 3 &amp; 4\\
+  0 &amp; 2 &amp; 4 &amp; 7\\
+  0 &amp; 1 &amp; -2 &amp; 1\\
+  5 &amp; 4 &amp; -2 &amp; -3
+\end{bmatrix}
+\xrightarrow{-5R_{1}+R_{4}}
+\begin{bmatrix}
+  1 &amp; 2 &amp; 3 &amp; 4\\
+  0 &amp; 2 &amp; 4 &amp; 7\\
+  0 &amp; 1 &amp; -2 &amp; 1\\
+  0 &amp; -6 &amp; -17 &amp; -23
+\end{bmatrix} \\
+\xrightarrow{-1/2R_{2}+R_{3}}
+\begin{bmatrix}
+    1 &amp; 2 &amp; 3 &amp; 4\\
+    0 &amp; 2 &amp; 4 &amp; 7\\
+    0 &amp; 0 &amp; -4 &amp; -5/2\\
+    0 &amp; -6 &amp; -17 &amp; -23
+\end{bmatrix}
+\xrightarrow{3R_{2}+R_{4}}
+\begin{bmatrix}
+    1 &amp; 2 &amp; 3 &amp; 4\\
+    0 &amp; 2 &amp; 4 &amp; 7\\
+    0 &amp; 0 &amp; -4 &amp; -5/2\\
+    0 &amp; 0 &amp; -5 &amp; -2
+\end{bmatrix}
+\xrightarrow{-5/4R_{2}+R_{4}}
+\begin{bmatrix}
+    1 &amp; 2 &amp; 3 &amp; 4\\
+    0 &amp; 2 &amp; 4 &amp; 7\\
+    0 &amp; 0 &amp; -4 &amp; -5/2\\
+    0 &amp; 0 &amp; 0 &amp; 9/8
+\end{bmatrix} \\
+\xrightarrow{-R_{2}+R_{1}}
+\begin{bmatrix}
+    1 &amp; 0 &amp; -1 &amp; -3\\
+    0 &amp; 2 &amp; 4 &amp; 7\\
+    0 &amp; 0 &amp; -4 &amp; -5/2\\
+    0 &amp; 0 &amp; 0 &amp; 9/8
+\end{bmatrix}
+\xrightarrow{-1/4R_{3}+R_{1}}
+\begin{bmatrix}
+    1 &amp; 0 &amp; 0 &amp; -19/8\\
+    0 &amp; 2 &amp; 4 &amp; 7\\
+    0 &amp; 0 &amp; -4 &amp; -5/2\\
+    0 &amp; 0 &amp; 0 &amp; 9/8
+\end{bmatrix}
+\xrightarrow{19/9R_{4}+R_{1}}
+\begin{bmatrix}
+    1 &amp; 0 &amp; 0 &amp; 0\\
+    0 &amp; 2 &amp; 4 &amp; 7\\
+    0 &amp; 0 &amp; -4 &amp; -5/2\\
+    0 &amp; 0 &amp; 0 &amp; 9/8
+\end{bmatrix} \\
+\xrightarrow{R_{3}+R_{2}}
+\begin{bmatrix}
+    1 &amp; 0 &amp; 0 &amp; 0\\
+    0 &amp; 2 &amp; 0 &amp; 9/2\\
+    0 &amp; 0 &amp; -4 &amp; -5/2\\
+    0 &amp; 0 &amp; 0 &amp; 9/8
+\end{bmatrix}
+\xrightarrow{-4R_{3}+R_{2}}
+\begin{bmatrix}
+    1 &amp; 0 &amp; 0 &amp; 0\\
+    0 &amp; 2 &amp; 0 &amp; 0\\
+    0 &amp; 0 &amp; -4 &amp; -5/2\\
+    0 &amp; 0 &amp; 0 &amp; 9/8
+\end{bmatrix}
+\xrightarrow{20/9R_{4}+R_{3}}
+\begin{bmatrix}
+    1 &amp; 0 &amp; 0 &amp; 0\\
+    0 &amp; 2 &amp; 0 &amp; 0\\
+    0 &amp; 0 &amp; -4 &amp; 0\\
+    0 &amp; 0 &amp; 0 &amp; 9/8
+\end{bmatrix} \\
+\xrightarrow{1/2R_{2}, -1/4R_{3}, 8/9R_{4}}
+\begin{bmatrix}
+    1 &amp; 0 &amp; 0 &amp; 0\\
+    0 &amp; 1 &amp; 0 &amp; 0\\
+    0 &amp; 0 &amp; 1 &amp; 0\\
+    0 &amp; 0 &amp; 0 &amp; 1
+\end{bmatrix}\]</span></p>
+<p>I’ll double check my math by coding all of the row operations.</p>
+<pre class="r"><code>A_rref &lt;- A
+A_rref[2,] &lt;- A_rref[2,] + A_rref[1,]
+A_rref[4,] &lt;- A_rref[4,] + -5*A_rref[1,]
+A_rref</code></pre>
+<pre><code>##      [,1] [,2] [,3] [,4]
+## [1,]    1    2    3    4
+## [2,]    0    2    4    7
+## [3,]    0    1   -2    1
+## [4,]    0   -6  -17  -23</code></pre>
+<pre class="r"><code>A_rref[3,] &lt;- A_rref[3,] + -1/2*A_rref[2,]
+A_rref[4,] &lt;- A_rref[4,] + 3*A_rref[2,]
+A_rref[4,] &lt;- A_rref[4,] + -5/4*A_rref[3,]
+A_rref</code></pre>
+<pre><code>##      [,1] [,2] [,3]   [,4]
+## [1,]    1    2    3  4.000
+## [2,]    0    2    4  7.000
+## [3,]    0    0   -4 -2.500
+## [4,]    0    0    0  1.125</code></pre>
+<pre class="r"><code>A_rref[1,] &lt;- A_rref[1,] + -A_rref[2,]
+A_rref[1,] &lt;- A_rref[1,] + -1/4*A_rref[3,]
+A_rref[1,] &lt;- A_rref[1,] + 19/9*A_rref[4,]
+A_rref</code></pre>
+<pre><code>##      [,1] [,2] [,3]   [,4]
+## [1,]    1    0    0  0.000
+## [2,]    0    2    4  7.000
+## [3,]    0    0   -4 -2.500
+## [4,]    0    0    0  1.125</code></pre>
+<pre class="r"><code>A_rref[2,] &lt;- A_rref[2,] + A_rref[3,]
+A_rref[2,] &lt;- A_rref[2,] + -4*A_rref[4,]
+A_rref[3,] &lt;- A_rref[3,] + 20/9*A_rref[4,]
+A_rref</code></pre>
+<pre><code>##      [,1] [,2] [,3]  [,4]
+## [1,]    1    0    0 0.000
+## [2,]    0    2    0 0.000
+## [3,]    0    0   -4 0.000
+## [4,]    0    0    0 1.125</code></pre>
+<pre class="r"><code>A_rref[2,] &lt;- A_rref[2,] * 1/2
+A_rref[3,] &lt;- A_rref[3,] * -1/4
+A_rref[4,] &lt;- A_rref[4,] * 8/9
+A_rref</code></pre>
+<pre><code>##      [,1] [,2] [,3] [,4]
+## [1,]    1    0    0    0
+## [2,]    0    1    0    0
+## [3,]    0    0    1    0
+## [4,]    0    0    0    1</code></pre>
+<p>Finally, I’ll check my results against the <code>rref()</code>
+function from <code>pracma</code>.</p>
 <pre class="r"><code>rref(A)</code></pre>
 <pre><code>##      [,1] [,2] [,3] [,4]
 ## [1,]    1    0    0    0
 ## [2,]    0    1    0    0
 ## [3,]    0    0    1    0
 ## [4,]    0    0    0    1</code></pre>
-<p>A has a rank of 4. We can also that it is full rank.</p>
+<p>Looks like we have the right reduced matrix. We can now confirm that
+A has a rank of 4, based on the fact that the reduced form has 4
+non-zero rows. We can also say that the matrix is full rank.</p>
+<p>We can run a quick check of this result using the
+<code>rankMatrix</code> function from the <code>Matrix</code>
+library.</p>
+<pre class="r"><code>Matrix::rankMatrix(A)[1]</code></pre>
+<pre><code>## [1] 4</code></pre>
 </div>
 </div>
 <div id="problem-2" class="section level3">
@@ -400,7 +545,7 @@ is the minimum rank, assuming that the matrix is non-zero?</p>
 <div id="response-1" class="section level4">
 <h4>Response</h4>
 <p>The maximum rank is <span class="math inline">\(n\)</span>. In
-general, the rank of a matrix cannot exceded the number of rows or
+general, the rank of a matrix cannot excede the number of rows or
 columns. So, if we have a matrix where <span class="math inline">\(m
 &gt; n\)</span>, then the number of columns, i.e. <span class="math inline">\(n\)</span>, is our limiting factor. In other
 words, the rank cannot exceed <span class="math inline">\(n\)</span>.</p>
@@ -477,7 +622,11 @@ then count the number of non-zero rows.</p>
 ## [1,]    1    0    1
 ## [2,]    0    1    0
 ## [3,]    0    0    0</code></pre>
-<p>B has a rank of 2.</p>
+<p>We only have two non-zero rows, indicating that B has a rank of 2. We
+again run a quick check of this result using the <code>rankMatrix</code>
+function from the <code>Matrix</code> library.</p>
+<pre class="r"><code>Matrix::rankMatrix(B)[1]</code></pre>
+<pre><code>## [1] 2</code></pre>
 </div>
 </div>
 </div>
@@ -505,7 +654,7 @@ A</code></pre>
 ## [1,]    1    2    3
 ## [2,]    0    4    5
 ## [3,]    0    0    6</code></pre>
-<p>Use the characteristic polynomial of <span class="math inline">\(A\)</span>: <span class="math inline">\(p_{A}(x) =
+<p>I’ll use the characteristic polynomial of <span class="math inline">\(A\)</span>: <span class="math inline">\(p_{A}(x) =
 det(A-\lambda I)\)</span>. We can expand this further.</p>
 <p><span class="math display">\[ \begin{vmatrix}
   1 - \lambda &amp; 2 &amp; 3 \\
@@ -574,10 +723,10 @@ echelon form.</p>
 \end{bmatrix} \]</span></p>
 <p>We know that the eigenspace is a null space of our characteristic
 polynomial, i.e. <span class="math inline">\(\mathcal{E}_{A}(3) =
-\mathcal{N}(A-6I_{3})\)</span>. We used the reduced form of this matrix
-to express the eigenspace as the span of a basis. We form a linear
-combination (<span class="math inline">\(\times10\)</span>) to get to
-whole numbers.</p>
+\mathcal{N}(A-6I_{3})\)</span>. So, we use the reduced form of this
+matrix to express the eigenspace as the span of a basis. We apply a
+linear combination (<span class="math inline">\(\times10\)</span>) to
+get to whole numbers.</p>
 <p><span class="math display">\[ \mathcal{N}(A-6I_{3}) =
 \begin{Bmatrix} 8/5 \\ 5/2 \\ 1 \end{Bmatrix} =
 \begin{Bmatrix} 16 \\ 25 \\ 10 \end{Bmatrix} \]</span></p>
@@ -620,6 +769,9 @@ whole numbers.</p>
 \end{bmatrix} \\~\\
 \mathcal{N}(A-3I_{3}) =
 \begin{Bmatrix} 1 \\ 0 \\ 0 \end{Bmatrix} \]</span></p>
+<p>We can now validate that our results observe the key properties of
+eigenvalues and eigenvectors. Namely, we’ll confirm that <span class="math inline">\(Av=\lambda v\)</span> for all combinations of
+values and vectors.</p>
 <pre class="r"><code>eigenvalues = c(6,4,1)
 eigenvectors = list(
   matrix(c(16,25,10), nrow = 3),
@@ -628,49 +780,50 @@ eigenvectors = list(
 )
 
 for (i in 1:3) {
-  cat(&#39;For λ =&#39;, eigenvalues[[i]], &#39;\n&#39;, &#39;Av\n&#39;)
+  cat(&#39;For lambda =&#39;, eigenvalues[[i]], &#39;\n&#39;, &#39;Av\n&#39;)
   print(A %*% eigenvectors[[i]])
-  cat(&#39;λv\n&#39;)
+  cat(&#39;lambda*v\n&#39;)
   print(eigenvalues[i] * eigenvectors[[i]])
   cat(&#39;\n&#39;)
 }</code></pre>
-<pre><code>## For λ = 6 
+<pre><code>## For lambda = 6 
 ##  Av
 ##      [,1]
 ## [1,]   96
 ## [2,]  150
 ## [3,]   60
-## λv
+## lambda*v
 ##      [,1]
 ## [1,]   96
 ## [2,]  150
 ## [3,]   60
 ## 
-## For λ = 4 
+## For lambda = 4 
 ##  Av
 ##      [,1]
 ## [1,]    8
 ## [2,]   12
 ## [3,]    0
-## λv
+## lambda*v
 ##      [,1]
 ## [1,]    8
 ## [2,]   12
 ## [3,]    0
 ## 
-## For λ = 1 
+## For lambda = 1 
 ##  Av
 ##      [,1]
 ## [1,]    1
 ## [2,]    0
 ## [3,]    0
-## λv
+## lambda*v
 ##      [,1]
 ## [1,]    1
 ## [2,]    0
 ## [3,]    0</code></pre>
-<p>Finally, we’ll check our week against R’s native <code>eigen</code>
-function.</p>
+<p>They match!</p>
+<p>Finally, we’ll check our results against R’s native
+<code>eigen</code> function.</p>
 <pre class="r"><code>eigen_A = eigen(A)
 
 eigen_A</code></pre>
@@ -683,14 +836,16 @@ eigen_A</code></pre>
 ## [1,] 0.5108407 0.5547002    1
 ## [2,] 0.7981886 0.8320503    0
 ## [3,] 0.3192754 0.0000000    0</code></pre>
-<p>We can clean up the eigenvectors a bit…</p>
+<p>The eigenvalues clearly match. For the eigenvectors, we can clean
+them up a bit by converting them to whole numbers, so we can more easily
+compare “apples to apples”…</p>
 <pre class="r"><code>eigen_A[[2]][,1] * 10 / eigen_A[[2]][3,1]</code></pre>
 <pre><code>## [1] 16 25 10</code></pre>
 <pre class="r"><code>eigen_A[[2]][,2] * 2 / eigen_A[[2]][1,2]</code></pre>
 <pre><code>## [1] 2 3 0</code></pre>
 <pre class="r"><code>eigen_A[[2]][,3]</code></pre>
 <pre><code>## [1] 1 0 0</code></pre>
-<p>They match!</p>
+<p>They match our results!</p>
 </div>
 </div>
 
