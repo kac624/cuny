@@ -1,0 +1,168 @@
+---
+title: "DATA605 - Assignment 5"
+author: "Keith Colella"
+date: "2023-09-28"
+output: html_document
+---
+
+```{r, message = FALSE}
+library(tidyverse)
+```
+
+## 1. (Bayesian)
+A new test for multinucleoside-resistant (MNR) human immunodeficiency virus type 1 (HIV-1) variants was recently developed. The test maintains 96% sensitivity, meaning that, for those with the disease, it will correctly report “positive” for 96% of them. The test is also 98% specific, meaning that, for those without the disease, 98% will be correctly reported as “negative.” MNR HIV-1 is considered to be rare (albeit emerging), with about a .1% or .001 prevalence rate. Given the prevalence rate, sensitivity, and specificity estimates, what is the probability that an individual who is reported as positive by the new test actually has the disease? If the median cost (consider this the best point estimate) is about \$100,000 per positive case total and the test itself costs $1000 per administration, what is the total first-year cost for treating 100,000 individuals? 
+
+#### Response
+
+For the first question, if $A$ is the probability that one has the disease, and $B$ is the probability they they test positive, then we are looking for $P(A|B)$. We can calculate this conditional probability as $P(A|B) = P(AB)/P(B)$.
+
+We know that $P(A)$ (the prevalance) is equal to 0.001, that $P(B'|A')$ (the specificity) is equal to 0.98, and that $P(B|A)$ (the sensitivity) is 0.96. Unfortunately, we don't yet know the values for $P(AB)$ or $P(B)$. 
+
+To find these two missing values, we'll put together a contigency table. We'll assume we're working with a test population of 100,000. We fill values using the probabilities we know ($P(A)$, $P(B|A)$, and $P(B'|A')$), then use the converse of these values to fill in the remainder of the table.
+
+```{r}
+n = 100000
+sensitivity = 0.96
+specificity = 0.98
+prevalance = 0.001
+
+contingency <- table(
+  factor(levels = c('sick','not sick','margin')), 
+  factor(levels = c('positive','negative','margin'))
+)
+
+contingency['sick', 'margin'] <- prevalance * n
+contingency['not sick', 'margin'] <- (1 - prevalance) * n
+
+contingency['sick', 'positive'] <- sensitivity * contingency['sick', 'margin']
+contingency['sick', 'negative'] <- (1 - sensitivity) * contingency['sick', 'margin']
+
+contingency['not sick', 'negative'] <- specificity * contingency['not sick', 'margin']
+contingency['not sick', 'positive'] <- (1 - specificity) * contingency['not sick', 'margin']
+
+contingency['margin', 'positive'] <- sum(contingency[,'positive'])
+contingency['margin', 'negative'] <- sum(contingency[,'negative'])
+
+round(contingency)
+```
+
+We can then convert these to probalities (marginal probabilities along the marjins, joint probabilities in the top-left square).
+
+```{r}
+contingency_freq <- contingency / n
+
+contingency_freq
+```
+
+Finally, we divide $P(AB)$ (i.e. the joint probability that one is sick and tests positive) by $P(B)$ (i.e. the marginal probabilities of testing positive) to get the probability that one is truly sick *given* that they have tested positive (i.e. $P(A|B)$).
+
+```{r}
+contingency_freq['sick','positive'] / contingency_freq['margin','positive']
+```
+
+That probability is ~4.58%.
+
+The second question asks for the expected cost if we test 100,000 individuals. The cost of testing is simply the cost per test (\$1000) times the number of tests (100,000). To get the cost of treatment, we multiply the marginal probability of testing positive ($P(A)$) by the number of individuals tested (100,000). The sum is our expected cost.
+
+```{r}
+test_cost = 100000 * 1000
+
+treatment_cost = contingency['margin', 'positive'] * 100000
+
+total_cost = test_cost + treatment_cost
+
+cat(
+  'Test cost: $', format(test_cost, big.mark = ',', scientific = FALSE),
+  '\nTreatment cost: $', format(treatment_cost, big.mark = ',', scientific = FALSE),
+  '\nTotal cost: $', format(total_cost, big.mark = ',', scientific = FALSE)
+)
+```
+
+## 2. (Binomial)
+The probability of your organization receiving a Joint Commission inspection in any given month is .05. What is the probability that, after 24 months, you received exactly 2 inspections? 
+
+```{r}
+dbinom(2, size = 24, prob = 0.5)
+```
+
+What is the probability that, after 24 months, you received 2 or more inspections? 
+
+```{r}
+1 - pbinom(2, size = 24, prob = 0.5)
+```
+
+What is the probability that your received fewer than 2 inspections? 
+
+```{r}
+pbinom(1, size = 24, prob = 0.5)
+```
+
+What is the expected number of inspections you should have received? 
+
+```{r}
+n = 24 
+p = 0.5
+n*p
+```  
+
+What is the standard deviation? 
+
+```{r}
+sqrt(n*p*(1-p))
+```
+
+## 3. (Poisson)
+You are modeling the family practice clinic and notice that patients arrive at a rate of 10 per hour. What is the probability that exactly 3 arrive in one hour? 
+
+```{r}
+dpois(3, lambda = 10)
+```
+
+What is the probability that more than 10 arrive in one hour? 
+
+```{r}
+1 - ppois(11, lambda = 10)
+```
+
+How many would you expect to arrive in 8 hours? 
+
+```{r}
+lambda = 10
+lambda
+```
+
+What is the standard deviation of the appropriate probability distribution? 
+
+```{r}
+lambda = 10
+lambda
+```
+
+If there are three family practice providers that can see 24 templated patients each day, what is the percent utilization and what are your recommendations?
+
+```{r}
+# TBD
+```
+
+## 4. (Hypergeometric)
+Your subordinate with 30 supervisors was recently accused of favoring nurses. 15 of the subordinate’s workers are nurses and 15 are other than nurses. As evidence of malfeasance, the accuser stated that there were 6 company-paid trips to Disney World for which everyone was eligible. The supervisor sent 5 nurses and 1 non-nurse. 
+
+If your subordinate acted innocently, what was the probability he/she would have selected five nurses for the trips? 
+
+
+
+How many nurses would we have expected your subordinate to send? 
+
+How many non-nurses would we have expected your subordinate to send? 
+
+## 5. (Geometric)
+The probability of being seriously injured in a car crash in an unspecified location is about .1% per hour. A driver is required to traverse this area for 1200 hours in the course of a year. What is the probability that the driver will be seriously injured during the course of the year? In the course of 15 months? What is the expected number of hours that a driver will drive before being seriously injured? Given that a driver has driven 1200 hours, what is the probability that he or she will be injured in the next 100 hours? 
+
+## 6. 
+You are working in a hospital that is running off of a primary generator which fails about once in 1000 hours. What is the probability that the generator will fail more than twice in 1000 hours? What is the expected value? 
+
+## 7.
+A surgical patient arrives for surgery precisely at a given time. Based on previous analysis (or a lack of knowledge assumption), you know that the waiting time is uniformly distributed from 0 to 30 minutes. What is the probability that this patient will wait more than 10 minutes? If the patient has already waited 10 minutes, what is the probability that he/she will wait at least another 5 minutes prior to being seen? What is the expected waiting time? 
+
+## 8.
+Your hospital owns an old MRI, which has a manufacturer’s lifetime of about 10 years (expected value). Based on previous studies, we know that the failure of most MRIs obeys an exponential distribution. What is the expected failure time? What is the standard deviation? What is the probability that your MRI will fail after 8 years? Now assume that you have owned the machine for 8 years. Given that you already owned the machine 8 years, what is the probability that it will fail in the next two years?
