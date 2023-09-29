@@ -147,22 +147,101 @@ If there are three family practice providers that can see 24 templated patients 
 ## 4. (Hypergeometric)
 Your subordinate with 30 supervisors was recently accused of favoring nurses. 15 of the subordinate’s workers are nurses and 15 are other than nurses. As evidence of malfeasance, the accuser stated that there were 6 company-paid trips to Disney World for which everyone was eligible. The supervisor sent 5 nurses and 1 non-nurse. 
 
+```{r}
+x = 5
+m = 15
+n = 15
+k = 6
+```
+
 If your subordinate acted innocently, what was the probability he/she would have selected five nurses for the trips? 
 
-
+```{r}
+dhyper(x, m, n, k)
+```
 
 How many nurses would we have expected your subordinate to send? 
 
+```{r}
+m*k / (m+n)
+```
+
 How many non-nurses would we have expected your subordinate to send? 
 
+```{r}
+n*k / (m+n)
+```
+
 ## 5. (Geometric)
-The probability of being seriously injured in a car crash in an unspecified location is about .1% per hour. A driver is required to traverse this area for 1200 hours in the course of a year. What is the probability that the driver will be seriously injured during the course of the year? In the course of 15 months? What is the expected number of hours that a driver will drive before being seriously injured? Given that a driver has driven 1200 hours, what is the probability that he or she will be injured in the next 100 hours? 
+The probability of being seriously injured in a car crash in an unspecified location is about .1% per hour. A driver is required to traverse this area for 1200 hours in the course of a year. 
+
+```{r}
+p = 0.001
+n = 1200
+```
+
+What is the probability that the driver will be seriously injured during the course of the year? 
+
+```{r}
+pgeom(q = n, prob = p)
+```
+
+In the course of 15 months? 
+
+```{r}
+pgeom(q = (n/12*15), prob = p)
+```
+
+What is the expected number of hours that a driver will drive before being seriously injured? 
+
+```{r}
+1 / p
+```
+
+Given that a driver has driven 1200 hours, what is the probability that he or she will be injured in the next 100 hours?
+
+```{r}
+AB = pgeom(q = (100), prob = p) * pgeom(q = n, prob = p)
+B = pgeom(q = n, prob = p)
+
+AB/B
+
+p*(1-p)^(1300-1200)
+```
 
 ## 6. 
-You are working in a hospital that is running off of a primary generator which fails about once in 1000 hours. What is the probability that the generator will fail more than twice in 1000 hours? What is the expected value? 
+You are working in a hospital that is running off of a primary generator which fails about once in 1000 hours. 
+
+```{r}
+p = 1/1000
+```
+
+What is the probability that the generator will fail more than twice in 1000 hours?
+
+```{r}
+1 - pbinom(3, prob = p, size = 1000)
+```
+
+What is the expected value?
+
+```{r}
+p * 1000
+```
 
 ## 7.
-A surgical patient arrives for surgery precisely at a given time. Based on previous analysis (or a lack of knowledge assumption), you know that the waiting time is uniformly distributed from 0 to 30 minutes. What is the probability that this patient will wait more than 10 minutes? If the patient has already waited 10 minutes, what is the probability that he/she will wait at least another 5 minutes prior to being seen? What is the expected waiting time? 
+A surgical patient arrives for surgery precisely at a given time. Based on previous analysis (or a lack of knowledge assumption), you know that the waiting time is uniformly distributed from 0 to 30 minutes. What is the probability that this patient will wait more than 10 minutes? 
+
+```{r}
+1 - punif(10, 0, 30)
+```
+
+If the patient has already waited 10 minutes, what is the probability that he/she will wait at least another 5 minutes prior to being seen? 
+
+```{r}
+(1 - punif(15, 0, 30)) - punif(10, 0, 30)
+```
+
+What is the expected waiting time?
 
 ## 8.
 Your hospital owns an old MRI, which has a manufacturer’s lifetime of about 10 years (expected value). Based on previous studies, we know that the failure of most MRIs obeys an exponential distribution. What is the expected failure time? What is the standard deviation? What is the probability that your MRI will fail after 8 years? Now assume that you have owned the machine for 8 years. Given that you already owned the machine 8 years, what is the probability that it will fail in the next two years?
