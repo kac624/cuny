@@ -1,8 +1,10 @@
 ---
 title: "DATA605 - Assignment 5"
 author: "Keith Colella"
-date: "2023-09-28"
-output: html_document
+date: '2023-09-28'
+output:
+  html_document: default
+  pdf_document: default
 ---
 
 ```{r, message = FALSE}
@@ -14,17 +16,28 @@ A new test for multinucleoside-resistant (MNR) human immunodeficiency virus type
 
 #### Response
 
-For the first question, if $A$ is the probability that one has the disease, and $B$ is the probability they they test positive, then we are looking for $P(A|B)$. We can calculate this conditional probability as $P(A|B) = P(AB)/P(B)$.
+For the first question, if $A$ is the probability that one has the disease, and $B$ is the probability they they test positive, then we are looking for $P(A|B)$. We can calculate this conditional probability as $P(A|B) = P(B|A)*P(A) /P(B)$.
 
-We know that $P(A)$ (the prevalance) is equal to 0.001, that $P(B'|A')$ (the specificity) is equal to 0.98, and that $P(B|A)$ (the sensitivity) is 0.96. Unfortunately, we don't yet know the values for $P(AB)$ or $P(B)$. 
+We know that $P(A)$ (the prevalance) is equal to 0.001, that $P(B'|A')$ (the specificity) is equal to 0.98, and that $P(B|A)$ (the sensitivity) is 0.96. We don't yet know the value for $P(B)$, but we can use an alternative definition of the conditional probability that using Bayes Rule: 
 
-To find these two missing values, we'll put together a contigency table. We'll assume we're working with a test population of 100,000. We fill values using the probabilities we know ($P(A)$, $P(B|A)$, and $P(B'|A')$), then use the converse of these values to fill in the remainder of the table.
+$$P(A|B) = \frac{P(B|A)*P(A)} {P(B|A)*P(A)+(P(B|A')*(P(A'))}$$
+
+We can calculate $P(B|A')$ as $1 - P(B'|A')$ and $P(A)$ as $1 - P(A)$. I put this all together below.
 
 ```{r}
-n = 100000
 sensitivity = 0.96
 specificity = 0.98
 prevalance = 0.001
+
+(sensitivity * prevalance) / (sensitivity * prevalance + (1 - specificity) * (1 - prevalance))
+```
+
+The resulting probability is ~4.58%.
+
+I'll also test this out with a more "empirical" approach and put together a contigency table. We'll assume we're working with a test population of 100,000. We fill values using the probabilities we know ($P(A)$, $P(B|A)$, and $P(B'|A')$), then use the converse of these values to fill in the remainder of the table.
+
+```{r}
+n = 100000
 
 contingency <- table(
   factor(levels = c('sick','not sick','margin')), 
@@ -60,20 +73,34 @@ Finally, we divide $P(AB)$ (i.e. the joint probability that one is sick and test
 contingency_freq['sick','positive'] / contingency_freq['margin','positive']
 ```
 
-That probability is ~4.58%.
+The result matches with ~4.58%.
 
-The second question asks for the expected cost if we test 100,000 individuals. The cost of testing is simply the cost per test (\$1000) times the number of tests (100,000). To get the cost of treatment, we multiply the marginal probability of testing positive ($P(A)$) by the number of individuals tested (100,000). The sum is our expected cost.
+The second question asks for the expected cost if we test 100,000 individuals. The cost of testing is simply the cost per test (\$1000) times the number of tests (100,000). To get the cost of treatment, there are two appraoches. If we assume that anyone who tests positive will require full treatment, then we multiply the *marginal* probability of testing positive ($P(A)$) by the number of individuals tested (100,000). 
 
 ```{r}
 test_cost = 100000 * 1000
 
-treatment_cost = contingency['margin', 'positive'] * 100000
+treatment_cost1 = contingency['margin', 'positive'] * 100000
 
-total_cost = test_cost + treatment_cost
+total_cost = test_cost + treatment_cost1
 
 cat(
   'Test cost: $', format(test_cost, big.mark = ',', scientific = FALSE),
-  '\nTreatment cost: $', format(treatment_cost, big.mark = ',', scientific = FALSE),
+  '\nTreatment cost: $', format(treatment_cost1, big.mark = ',', scientific = FALSE),
+  '\nTotal cost: $', format(total_cost, big.mark = ',', scientific = FALSE)
+)
+```
+
+However, if we assume that only individuals who are *truly* sick require the full \$100,000 treatment, then we multiply the *conditional* probability of testing positive ($P(A)$) by the number of individuals tested (100,000). 
+
+```{r}
+treatment_cost2 = contingency['sick', 'positive'] * 100000
+
+total_cost = test_cost + treatment_cost2
+
+cat(
+  'Test cost: $', format(test_cost, big.mark = ',', scientific = FALSE),
+  '\nTreatment cost: $', format(treatment_cost2, big.mark = ',', scientific = FALSE),
   '\nTotal cost: $', format(total_cost, big.mark = ',', scientific = FALSE)
 )
 ```
@@ -82,26 +109,26 @@ cat(
 The probability of your organization receiving a Joint Commission inspection in any given month is .05. What is the probability that, after 24 months, you received exactly 2 inspections? 
 
 ```{r}
-dbinom(2, size = 24, prob = 0.5)
+dbinom(2, size = 24, prob = 0.05)
 ```
 
 What is the probability that, after 24 months, you received 2 or more inspections? 
 
 ```{r}
-1 - pbinom(2, size = 24, prob = 0.5)
+1 - pbinom(2, size = 24, prob = 0.05)
 ```
 
 What is the probability that your received fewer than 2 inspections? 
 
 ```{r}
-pbinom(1, size = 24, prob = 0.5)
+pbinom(1, size = 24, prob = 0.05)
 ```
 
 What is the expected number of inspections you should have received? 
 
 ```{r}
 n = 24 
-p = 0.5
+p = 0.05
 n*p
 ```  
 
@@ -115,34 +142,37 @@ sqrt(n*p*(1-p))
 You are modeling the family practice clinic and notice that patients arrive at a rate of 10 per hour. What is the probability that exactly 3 arrive in one hour? 
 
 ```{r}
-dpois(3, lambda = 10)
+lambda = 10
+dpois(3, lambda = lambda)
 ```
 
 What is the probability that more than 10 arrive in one hour? 
 
 ```{r}
-1 - ppois(11, lambda = 10)
+1 - ppois(11, lambda = lambda)
 ```
 
 How many would you expect to arrive in 8 hours? 
 
 ```{r}
-lambda = 10
-lambda
+lambda * 8
 ```
 
 What is the standard deviation of the appropriate probability distribution? 
 
 ```{r}
-lambda = 10
-lambda
+sqrt(lambda)
 ```
 
 If there are three family practice providers that can see 24 templated patients each day, what is the percent utilization and what are your recommendations?
 
 ```{r}
-# TBD
+current_appointments = 24 * 3
+capacity = lambda * 8 * 3
+current_appointments / capacity
 ```
+
+This response assumes there are 8 working hours a day per clinic. Based on that, all three clinics should be able to handle a total of $\lambda * 8 * 3 = 24$ patients a day. This implies a low utilization rate of 30%. I would therefore recommend increasing the number of templated patients per day. The clinics may wish to retain some extra capacity for walk-ins, but they could increase the number of templated patients to 50 per clinic and put the utilization rate at only 62.5%. This level would still keep reasonable capacity for walk-ins.
 
 ## 4. (Hypergeometric)
 Your subordinate with 30 supervisors was recently accused of favoring nurses. 15 of the subordinate’s workers are nurses and 15 are other than nurses. As evidence of malfeasance, the accuser stated that there were 6 company-paid trips to Disney World for which everyone was eligible. The supervisor sent 5 nurses and 1 non-nurse. 
@@ -201,15 +231,12 @@ What is the expected number of hours that a driver will drive before being serio
 Given that a driver has driven 1200 hours, what is the probability that he or she will be injured in the next 100 hours?
 
 ```{r}
-AB = pgeom(q = (100), prob = p) * pgeom(q = n, prob = p)
-B = pgeom(q = n, prob = p)
-
-AB/B
-
-p*(1-p)^(1300-1200)
+(pgeom(q = 1300, prob = p) - pgeom(q = 1200, prob = p)) / pgeom(q = 1200, prob = p)
 ```
 
-## 6. 
+
+
+## 6. (Binomial)
 You are working in a hospital that is running off of a primary generator which fails about once in 1000 hours. 
 
 ```{r}
@@ -228,7 +255,7 @@ What is the expected value?
 p * 1000
 ```
 
-## 7.
+## 7. (Uniform)
 A surgical patient arrives for surgery precisely at a given time. Based on previous analysis (or a lack of knowledge assumption), you know that the waiting time is uniformly distributed from 0 to 30 minutes. What is the probability that this patient will wait more than 10 minutes? 
 
 ```{r}
@@ -238,10 +265,43 @@ A surgical patient arrives for surgery precisely at a given time. Based on previ
 If the patient has already waited 10 minutes, what is the probability that he/she will wait at least another 5 minutes prior to being seen? 
 
 ```{r}
-(1 - punif(15, 0, 30)) - punif(10, 0, 30)
+(1 - punif(15, 0, 30)) + punif(10, 0, 30)
 ```
 
 What is the expected waiting time?
 
-## 8.
-Your hospital owns an old MRI, which has a manufacturer’s lifetime of about 10 years (expected value). Based on previous studies, we know that the failure of most MRIs obeys an exponential distribution. What is the expected failure time? What is the standard deviation? What is the probability that your MRI will fail after 8 years? Now assume that you have owned the machine for 8 years. Given that you already owned the machine 8 years, what is the probability that it will fail in the next two years?
+```{r}
+(30 + 0) /2
+```
+
+## 8. (Exponential)
+Your hospital owns an old MRI, which has a manufacturer’s lifetime of about 10 years (expected value). Based on previous studies, we know that the failure of most MRIs obeys an exponential distribution. 
+
+```{r}
+rate = 1 / 10
+```
+
+What is the expected failure time? 
+
+```{r}
+1 / rate
+```
+
+What is the standard deviation? 
+
+```{r}
+1 / rate
+```
+
+What is the probability that your MRI will fail after 8 years? 
+
+```{r}
+1- pexp(q = 9, rate = rate)
+```
+
+Now assume that you have owned the machine for 8 years. Given that you already owned the machine 8 years, what is the probability that it will fail in the next two years?
+
+```{r}
+(pexp(q = 10, rate = rate) - pexp(q = 8, rate = rate)) / pexp(q = 8, rate = rate)
+```
+
