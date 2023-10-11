@@ -1,0 +1,451 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{lmodern}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\usepackage[margin=1in]{geometry}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same} % disable monospaced font for URLs
+\hypersetup{
+  pdftitle={DATA605 - Homework 6},
+  pdfauthor={Keith Colella},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+
+\title{DATA605 - Homework 6}
+\author{Keith Colella}
+\date{2023-10-08}
+
+\begin{document}
+\maketitle
+
+\hypertarget{exercise-1}{%
+\section{Exercise 1}\label{exercise-1}}
+
+A bag contains 5 green and 7 red jellybeans. How many ways can 5
+jellybeans be withdrawn from the bag so that the number of green ones
+withdrawn will be less than 2?
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{n\_green }\OtherTok{\textless{}{-}} \DecValTok{5}
+\NormalTok{n\_red }\OtherTok{\textless{}{-}} \DecValTok{7}
+
+\NormalTok{no\_green }\OtherTok{\textless{}{-}} \FunctionTok{choose}\NormalTok{(n\_green, }\DecValTok{0}\NormalTok{) }\SpecialCharTok{*} \FunctionTok{choose}\NormalTok{(n\_red, }\DecValTok{5}\NormalTok{)}
+\NormalTok{one\_green }\OtherTok{\textless{}{-}} \FunctionTok{choose}\NormalTok{(n\_green, }\DecValTok{1}\NormalTok{) }\SpecialCharTok{*} \FunctionTok{choose}\NormalTok{(n\_red, }\DecValTok{4}\NormalTok{)}
+
+\NormalTok{no\_green }\SpecialCharTok{+}\NormalTok{ one\_green}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 196
+\end{verbatim}
+
+\hypertarget{exercise-2}{%
+\section{Exercise 2}\label{exercise-2}}
+
+A certain congressional committee consists of 14 senators and 13
+representatives. How many ways can a subcommittee of 5 be formed if at
+least 4 of the members must be representatives?
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{n\_senators }\OtherTok{\textless{}{-}} \DecValTok{14}
+\NormalTok{n\_reps }\OtherTok{\textless{}{-}} \DecValTok{13}
+
+\NormalTok{all\_reps }\OtherTok{\textless{}{-}} \FunctionTok{choose}\NormalTok{(n\_reps, }\DecValTok{5}\NormalTok{)}
+\NormalTok{one\_sen }\OtherTok{\textless{}{-}} \FunctionTok{choose}\NormalTok{(n\_reps, }\DecValTok{4}\NormalTok{) }\SpecialCharTok{*} \FunctionTok{choose}\NormalTok{(n\_senators, }\DecValTok{1}\NormalTok{)}
+
+\NormalTok{all\_reps }\SpecialCharTok{+}\NormalTok{ one\_sen}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 11297
+\end{verbatim}
+
+\hypertarget{exercise-3}{%
+\section{Exercise 3}\label{exercise-3}}
+
+If a coin is tossed 5 times, and then a standard six-sided die is rolled
+2 times, and finally a group of three cards are drawn from a standard
+deck of 52 cards without replacement, how many different outcomes are
+possible?
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{coins }\OtherTok{\textless{}{-}} \DecValTok{2}\SpecialCharTok{\^{}}\DecValTok{5}
+\NormalTok{dice }\OtherTok{\textless{}{-}} \DecValTok{6}\SpecialCharTok{\^{}}\DecValTok{2}
+\NormalTok{cards }\OtherTok{\textless{}{-}} \FunctionTok{choose}\NormalTok{(}\DecValTok{52}\NormalTok{, }\DecValTok{3}\NormalTok{)}
+
+\NormalTok{coins }\SpecialCharTok{*}\NormalTok{ dice }\SpecialCharTok{*}\NormalTok{ cards}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 25459200
+\end{verbatim}
+
+\hypertarget{exercise-4}{%
+\section{Exercise 4}\label{exercise-4}}
+
+Three cards are drawn from a standard deck without replacement. What is
+the probability that at least one of the cards drawn is a 3? Express
+your answer as a fraction or a decimal number rounded to four decimal
+places.
+
+\hypertarget{solving-directly}{%
+\subsection{Solving Directly}\label{solving-directly}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{p\_3\_x\_x }\OtherTok{\textless{}{-}} \DecValTok{4}\SpecialCharTok{/}\DecValTok{52} \SpecialCharTok{*}\NormalTok{ (}\DecValTok{51{-}3}\NormalTok{)}\SpecialCharTok{/}\DecValTok{51} \SpecialCharTok{*}\NormalTok{ (}\DecValTok{50{-}3}\NormalTok{)}\SpecialCharTok{/}\DecValTok{50}
+\NormalTok{p\_x\_3\_x }\OtherTok{\textless{}{-}}\NormalTok{ (}\DecValTok{52{-}4}\NormalTok{)}\SpecialCharTok{/}\DecValTok{52} \SpecialCharTok{*} \DecValTok{4}\SpecialCharTok{/}\DecValTok{51} \SpecialCharTok{*}\NormalTok{ (}\DecValTok{50{-}3}\NormalTok{)}\SpecialCharTok{/}\DecValTok{50}
+\NormalTok{p\_x\_x\_3 }\OtherTok{\textless{}{-}}\NormalTok{ (}\DecValTok{52{-}4}\NormalTok{)}\SpecialCharTok{/}\DecValTok{52} \SpecialCharTok{*}\NormalTok{ (}\DecValTok{51{-}4}\NormalTok{)}\SpecialCharTok{/}\DecValTok{51} \SpecialCharTok{*} \DecValTok{4}\SpecialCharTok{/}\DecValTok{50}
+\NormalTok{p\_3\_3\_x }\OtherTok{\textless{}{-}} \DecValTok{4}\SpecialCharTok{/}\DecValTok{52} \SpecialCharTok{*} \DecValTok{3}\SpecialCharTok{/}\DecValTok{51} \SpecialCharTok{*}\NormalTok{ (}\DecValTok{50{-}2}\NormalTok{)}\SpecialCharTok{/}\DecValTok{50}
+\NormalTok{p\_x\_3\_3 }\OtherTok{\textless{}{-}}\NormalTok{ (}\DecValTok{52{-}4}\NormalTok{)}\SpecialCharTok{/}\DecValTok{52} \SpecialCharTok{*} \DecValTok{4}\SpecialCharTok{/}\DecValTok{51} \SpecialCharTok{*} \DecValTok{3}\SpecialCharTok{/}\DecValTok{50}
+\NormalTok{p\_3\_x\_3 }\OtherTok{\textless{}{-}} \DecValTok{4}\SpecialCharTok{/}\DecValTok{52} \SpecialCharTok{*}\NormalTok{ (}\DecValTok{51{-}3}\NormalTok{)}\SpecialCharTok{/}\DecValTok{51} \SpecialCharTok{*} \DecValTok{3}\SpecialCharTok{/}\DecValTok{50}
+\NormalTok{p\_3\_3\_3 }\OtherTok{\textless{}{-}} \DecValTok{4}\SpecialCharTok{/}\DecValTok{52} \SpecialCharTok{*} \DecValTok{3}\SpecialCharTok{/}\DecValTok{51} \SpecialCharTok{*} \DecValTok{2}\SpecialCharTok{/}\DecValTok{50}
+
+\FunctionTok{sum}\NormalTok{(}
+\NormalTok{  p\_3\_x\_x,}
+\NormalTok{  p\_x\_3\_x,}
+\NormalTok{  p\_x\_x\_3,}
+\NormalTok{  p\_3\_3\_x,}
+\NormalTok{  p\_x\_3\_3,}
+\NormalTok{  p\_3\_x\_3,}
+\NormalTok{  p\_3\_3\_3}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.2173756
+\end{verbatim}
+
+\hypertarget{solving-for-the-complement}{%
+\subsection{Solving for the
+Complement}\label{solving-for-the-complement}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{first }\OtherTok{\textless{}{-}}\NormalTok{ (}\DecValTok{52} \SpecialCharTok{{-}} \DecValTok{4}\NormalTok{) }\SpecialCharTok{/} \DecValTok{52}
+\NormalTok{second }\OtherTok{\textless{}{-}}\NormalTok{ (}\DecValTok{51} \SpecialCharTok{{-}} \DecValTok{4}\NormalTok{) }\SpecialCharTok{/} \DecValTok{51}
+\NormalTok{third }\OtherTok{\textless{}{-}}\NormalTok{ (}\DecValTok{50} \SpecialCharTok{{-}} \DecValTok{4}\NormalTok{) }\SpecialCharTok{/} \DecValTok{50}
+
+\NormalTok{p\_no\_threes }\OtherTok{\textless{}{-}}\NormalTok{ first }\SpecialCharTok{*}\NormalTok{ second }\SpecialCharTok{*}\NormalTok{ third}
+
+\DecValTok{1} \SpecialCharTok{{-}}\NormalTok{ p\_no\_threes}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.2173756
+\end{verbatim}
+
+\hypertarget{exercise-5}{%
+\section{Exercise 5}\label{exercise-5}}
+
+Lorenzo is picking out some movies to rent, and he is primarily
+interested in documentaries and mysteries. He has narrowed down his
+selections to 17 documentaries and 14 mysteries.
+
+\hypertarget{step-1}{%
+\subsection{Step 1}\label{step-1}}
+
+How many different combinations of 5 movies can he rent?
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{n\_docs }\OtherTok{\textless{}{-}} \DecValTok{17}
+\NormalTok{n\_myst }\OtherTok{\textless{}{-}} \DecValTok{14}
+
+\FunctionTok{choose}\NormalTok{(n\_docs }\SpecialCharTok{+}\NormalTok{ n\_myst, }\DecValTok{5}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 169911
+\end{verbatim}
+
+\hypertarget{step-2}{%
+\subsection{Step 2}\label{step-2}}
+
+How many different combinations of 5 movies can he rent if he wants at
+least one mystery?
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{one\_myst }\OtherTok{\textless{}{-}} \FunctionTok{choose}\NormalTok{(n\_myst, }\DecValTok{1}\NormalTok{) }\SpecialCharTok{*} \FunctionTok{choose}\NormalTok{(n\_docs, }\DecValTok{4}\NormalTok{)}
+\NormalTok{two\_myst }\OtherTok{\textless{}{-}} \FunctionTok{choose}\NormalTok{(n\_myst, }\DecValTok{2}\NormalTok{) }\SpecialCharTok{*} \FunctionTok{choose}\NormalTok{(n\_docs, }\DecValTok{3}\NormalTok{)}
+\NormalTok{three\_myst }\OtherTok{\textless{}{-}} \FunctionTok{choose}\NormalTok{(n\_myst, }\DecValTok{3}\NormalTok{) }\SpecialCharTok{*} \FunctionTok{choose}\NormalTok{(n\_docs, }\DecValTok{2}\NormalTok{)}
+\NormalTok{four\_myst }\OtherTok{\textless{}{-}} \FunctionTok{choose}\NormalTok{(n\_myst, }\DecValTok{4}\NormalTok{) }\SpecialCharTok{*} \FunctionTok{choose}\NormalTok{(n\_docs, }\DecValTok{1}\NormalTok{)}
+\NormalTok{five\_myst }\OtherTok{\textless{}{-}} \FunctionTok{choose}\NormalTok{(n\_myst, }\DecValTok{5}\NormalTok{)}
+
+\FunctionTok{sum}\NormalTok{(one\_myst, two\_myst, three\_myst, four\_myst, five\_myst)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 163723
+\end{verbatim}
+
+\hypertarget{exercise-6}{%
+\section{Exercise 6}\label{exercise-6}}
+
+In choosing what music to play at a charity fund raising event, Cory
+needs to have an equal number of symphonies from Brahms, Haydn, and
+Mendelssohn. If he is setting up a schedule of the 9 symphonies to be
+played, and he has 4 Brahms, 104 Haydn, and 17 Mendelssohn symphonies
+from which to choose, how many different schedules are possible? Express
+your answer in scientific notation rounding to the hundredths place.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{n\_brahms }\OtherTok{\textless{}{-}} \DecValTok{4}
+\NormalTok{n\_hadyn }\OtherTok{\textless{}{-}} \DecValTok{104}
+\NormalTok{n\_mendel }\OtherTok{\textless{}{-}} \DecValTok{17}
+
+\NormalTok{song\_schedule }\OtherTok{\textless{}{-}} \FunctionTok{choose}\NormalTok{(n\_brahms, }\DecValTok{3}\NormalTok{) }\SpecialCharTok{*} 
+  \FunctionTok{choose}\NormalTok{(n\_hadyn, }\DecValTok{3}\NormalTok{) }\SpecialCharTok{*} 
+  \FunctionTok{choose}\NormalTok{(n\_mendel, }\DecValTok{3}\NormalTok{) }\SpecialCharTok{*} 
+  \FunctionTok{factorial}\NormalTok{(}\DecValTok{9}\NormalTok{)}
+
+\FunctionTok{formatC}\NormalTok{(song\_schedule, }\AttributeTok{format=}\StringTok{"e"}\NormalTok{, }\AttributeTok{digits=}\DecValTok{2}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "1.80e+14"
+\end{verbatim}
+
+\hypertarget{exercise-7}{%
+\section{Exercise 7}\label{exercise-7}}
+
+An English teacher needs to pick 13 books to put on his reading list for
+the next school year, and he needs to plan the order in which they
+should be read. He has narrowed down his choices to 6 novels, 6 plays, 7
+poetry books, and 5 nonfiction books.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{n\_novels }\OtherTok{\textless{}{-}} \DecValTok{6}
+\NormalTok{n\_plays }\OtherTok{\textless{}{-}} \DecValTok{6}
+\NormalTok{n\_poems }\OtherTok{\textless{}{-}} \DecValTok{7}
+\NormalTok{n\_nonfict }\OtherTok{\textless{}{-}} \DecValTok{5}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{step-1-1}{%
+\subsection{Step 1}\label{step-1-1}}
+
+If he wants to include no more than 4 nonfiction books, how many
+different reading schedules are possible? Express your answer in
+scientific notation rounding to the hundredths place.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{n\_other }\OtherTok{\textless{}{-}}\NormalTok{ n\_novels }\SpecialCharTok{+}\NormalTok{ n\_plays }\SpecialCharTok{+}\NormalTok{ n\_poems}
+
+\NormalTok{reading\_schedule1 }\OtherTok{\textless{}{-}} \FunctionTok{sum}\NormalTok{(}
+  \FunctionTok{choose}\NormalTok{(n\_nonfict, }\DecValTok{4}\NormalTok{) }\SpecialCharTok{*} \FunctionTok{choose}\NormalTok{(n\_other, }\DecValTok{13} \SpecialCharTok{{-}} \DecValTok{4}\NormalTok{) }\SpecialCharTok{*} \FunctionTok{factorial}\NormalTok{(}\DecValTok{13}\NormalTok{),}
+  \FunctionTok{choose}\NormalTok{(n\_nonfict, }\DecValTok{3}\NormalTok{) }\SpecialCharTok{*} \FunctionTok{choose}\NormalTok{(n\_other, }\DecValTok{13} \SpecialCharTok{{-}} \DecValTok{3}\NormalTok{) }\SpecialCharTok{*} \FunctionTok{factorial}\NormalTok{(}\DecValTok{13}\NormalTok{),}
+  \FunctionTok{choose}\NormalTok{(n\_nonfict, }\DecValTok{2}\NormalTok{) }\SpecialCharTok{*} \FunctionTok{choose}\NormalTok{(n\_other, }\DecValTok{13} \SpecialCharTok{{-}} \DecValTok{2}\NormalTok{) }\SpecialCharTok{*} \FunctionTok{factorial}\NormalTok{(}\DecValTok{13}\NormalTok{),}
+  \FunctionTok{choose}\NormalTok{(n\_nonfict, }\DecValTok{1}\NormalTok{) }\SpecialCharTok{*} \FunctionTok{choose}\NormalTok{(n\_other, }\DecValTok{13} \SpecialCharTok{{-}} \DecValTok{1}\NormalTok{) }\SpecialCharTok{*} \FunctionTok{factorial}\NormalTok{(}\DecValTok{13}\NormalTok{),}
+  \FunctionTok{choose}\NormalTok{(n\_other, }\DecValTok{13}\NormalTok{) }\SpecialCharTok{*} \FunctionTok{factorial}\NormalTok{(}\DecValTok{13}\NormalTok{)}
+\NormalTok{)}
+
+\FunctionTok{formatC}\NormalTok{(reading\_schedule1, }\AttributeTok{format=}\StringTok{"e"}\NormalTok{, }\AttributeTok{digits=}\DecValTok{2}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "1.51e+16"
+\end{verbatim}
+
+\hypertarget{step-2-1}{%
+\subsection{Step 2}\label{step-2-1}}
+
+If he wants to include all 6 plays, how many different reading schedules
+are possible? Express your answer in scientific notation rounding to the
+hundredths place.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{n\_not\_play }\OtherTok{\textless{}{-}}\NormalTok{ n\_novels }\SpecialCharTok{+}\NormalTok{ n\_poems }\SpecialCharTok{+}\NormalTok{ n\_nonfict}
+
+\NormalTok{reading\_schedule2 }\OtherTok{\textless{}{-}} \FunctionTok{choose}\NormalTok{(n\_not\_play, }\DecValTok{13}\SpecialCharTok{{-}} \DecValTok{6}\NormalTok{) }\SpecialCharTok{*} \FunctionTok{factorial}\NormalTok{(}\DecValTok{13}\NormalTok{)}
+
+\FunctionTok{formatC}\NormalTok{(reading\_schedule2, }\AttributeTok{format=}\StringTok{"e"}\NormalTok{, }\AttributeTok{digits=}\DecValTok{2}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "1.98e+14"
+\end{verbatim}
+
+\hypertarget{exercise-8}{%
+\section{Exercise 8}\label{exercise-8}}
+
+Zane is planting trees along his driveway, and he has 5 sycamores and 5
+cypress trees to plant in one row. What is the probability that he
+randomly plants the trees so that all 5 sycamores are next to each other
+and all 5 cypress trees are next to each other? Express your answer as a
+fraction or a decimal number rounded to four decimal places.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{total\_plant\_orders }\OtherTok{\textless{}{-}} \FunctionTok{factorial}\NormalTok{(}\DecValTok{10}\NormalTok{)}
+
+\NormalTok{grouped\_plant\_orders }\OtherTok{\textless{}{-}} \FunctionTok{factorial}\NormalTok{(}\DecValTok{2}\NormalTok{) }\SpecialCharTok{*} \FunctionTok{factorial}\NormalTok{(}\DecValTok{5}\NormalTok{) }\SpecialCharTok{*} \FunctionTok{factorial}\NormalTok{(}\DecValTok{5}\NormalTok{)}
+
+\NormalTok{p\_grouped\_plants }\OtherTok{\textless{}{-}}\NormalTok{ grouped\_plant\_orders }\SpecialCharTok{/}\NormalTok{ total\_plant\_orders}
+
+\FunctionTok{round}\NormalTok{(p\_grouped\_plants, }\DecValTok{4}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.0079
+\end{verbatim}
+
+\hypertarget{exercise-9}{%
+\section{Exercise 9}\label{exercise-9}}
+
+If you draw a queen or lower from a standard deck of cards, I will pay
+you \$4. If not, you pay me \$16. (Aces are considered the highest card
+in the deck.)
+
+\hypertarget{step-1-2}{%
+\subsection{Step 1}\label{step-1-2}}
+
+Find the expected value of the proposition. Round your answer to two
+decimal places. Losses must be expressed as negative values.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{win }\OtherTok{\textless{}{-}}\NormalTok{ (}\DecValTok{52{-}8}\NormalTok{)}\SpecialCharTok{/}\DecValTok{52} \SpecialCharTok{*} \DecValTok{4}
+\NormalTok{lose }\OtherTok{\textless{}{-}} \DecValTok{8}\SpecialCharTok{/}\DecValTok{52} \SpecialCharTok{*} \DecValTok{16}
+
+\NormalTok{expected\_value }\OtherTok{\textless{}{-}}\NormalTok{ win }\SpecialCharTok{{-}}\NormalTok{ lose}
+
+\FunctionTok{round}\NormalTok{(expected\_value, }\DecValTok{2}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.92
+\end{verbatim}
+
+\hypertarget{step-2-2}{%
+\subsection{Step 2}\label{step-2-2}}
+
+If you played this game 833 times how much would you expect to win or
+lose? Round your answer to two decimal places. Losses must be expressed
+as negative values.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{total\_winnings }\OtherTok{\textless{}{-}}\NormalTok{ expected\_value }\SpecialCharTok{*} \DecValTok{833}
+
+\FunctionTok{round}\NormalTok{(total\_winnings, }\DecValTok{2}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 768.92
+\end{verbatim}
+
+\end{document}

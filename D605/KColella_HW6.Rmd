@@ -1,0 +1,222 @@
+---
+title: "DATA605 - Homework 6"
+author: "Keith Colella"
+date: "2023-10-08"
+output: html_document
+---
+
+```{r}
+
+```
+
+# Exercise 1
+
+A bag contains 5 green and 7 red jellybeans. How many ways can 5 jellybeans be withdrawn from the bag so that the number of green ones withdrawn will be less than 2?
+
+```{r}
+n_green <- 5
+n_red <- 7
+
+no_green <- choose(n_green, 0) * choose(n_red, 5)
+one_green <- choose(n_green, 1) * choose(n_red, 4)
+
+no_green + one_green
+```
+
+# Exercise 2
+
+A certain congressional committee consists of 14 senators and 13 representatives. How many ways can a subcommittee of 5 be formed if at least 4 of the members must be representatives?
+
+```{r}
+n_senators <- 14
+n_reps <- 13
+
+all_reps <- choose(n_reps, 5)
+one_sen <- choose(n_reps, 4) * choose(n_senators, 1)
+
+all_reps + one_sen
+```
+
+# Exercise 3
+
+If a coin is tossed 5 times, and then a standard six-sided die is rolled 2 times, and finally a group of three cards are drawn from a standard deck of 52 cards without replacement, how many different outcomes are possible?
+
+```{r}
+coins <- 2^5
+dice <- 6^2
+cards <- choose(52, 3)
+
+coins * dice * cards
+```
+
+# Exercise 4 {.tabset}
+
+Three cards are drawn from a standard deck without replacement. What is the probability that at least one of the cards drawn is a 3? Express your answer as a fraction or a decimal number rounded to four decimal places.
+
+## Solving Directly
+
+```{r}
+p_3_x_x <- 4/52 * (51-3)/51 * (50-3)/50
+p_x_3_x <- (52-4)/52 * 4/51 * (50-3)/50
+p_x_x_3 <- (52-4)/52 * (51-4)/51 * 4/50
+p_3_3_x <- 4/52 * 3/51 * (50-2)/50
+p_x_3_3 <- (52-4)/52 * 4/51 * 3/50
+p_3_x_3 <- 4/52 * (51-3)/51 * 3/50
+p_3_3_3 <- 4/52 * 3/51 * 2/50
+
+sum(
+  p_3_x_x,
+  p_x_3_x,
+  p_x_x_3,
+  p_3_3_x,
+  p_x_3_3,
+  p_3_x_3,
+  p_3_3_3
+)
+```
+
+## Solving for the Complement
+
+```{r}
+first <- (52 - 4) / 52
+second <- (51 - 4) / 51
+third <- (50 - 4) / 50
+
+p_no_threes <- first * second * third
+
+1 - p_no_threes
+```
+
+# Exercise 5 {.tabset}
+
+Lorenzo is picking out some movies to rent, and he is primarily interested in documentaries and mysteries. He has narrowed down his selections to 17 documentaries and 14 mysteries.
+
+## Step 1
+
+How many different combinations of 5 movies can he rent?
+
+```{r}
+n_docs <- 17
+n_myst <- 14
+
+choose(n_docs + n_myst, 5)
+```
+
+
+## Step 2
+
+How many different combinations of 5 movies can he rent if he wants at least one mystery?
+
+```{r}
+one_myst <- choose(n_myst, 1) * choose(n_docs, 4)
+two_myst <- choose(n_myst, 2) * choose(n_docs, 3)
+three_myst <- choose(n_myst, 3) * choose(n_docs, 2)
+four_myst <- choose(n_myst, 4) * choose(n_docs, 1)
+five_myst <- choose(n_myst, 5)
+
+sum(one_myst, two_myst, three_myst, four_myst, five_myst)
+```
+
+# Exercise 6
+
+In choosing what music to play at a charity fund raising event, Cory needs to have an equal number of symphonies from Brahms, Haydn, and Mendelssohn. If he is setting up a schedule of the 9 symphonies to be played, and he has 4 Brahms, 104 Haydn, and 17 Mendelssohn symphonies from which to choose, how many different schedules are possible? Express your answer in scientific notation rounding to the hundredths place.
+
+```{r}
+n_brahms <- 4
+n_hadyn <- 104
+n_mendel <- 17
+
+song_schedule <- choose(n_brahms, 3) * 
+  choose(n_hadyn, 3) * 
+  choose(n_mendel, 3) * 
+  factorial(9)
+
+formatC(song_schedule, format="e", digits=2)
+```
+
+# Exercise 7 {.tabset}
+
+An English teacher needs to pick 13 books to put on his reading list for the next school year, and he needs to plan the order in which they should be read. He has narrowed down his choices to 6 novels, 6 plays, 7 poetry books, and 5 nonfiction books.
+
+```{r}
+n_novels <- 6
+n_plays <- 6
+n_poems <- 7
+n_nonfict <- 5
+```
+
+
+## Step 1
+
+If he wants to include no more than 4 nonfiction books, how many different reading schedules are possible? Express your answer in scientific notation rounding to the hundredths place.
+
+```{r}
+n_other <- n_novels + n_plays + n_poems
+
+reading_schedule1 <- sum(
+  choose(n_nonfict, 4) * choose(n_other, 13 - 4) * factorial(13),
+  choose(n_nonfict, 3) * choose(n_other, 13 - 3) * factorial(13),
+  choose(n_nonfict, 2) * choose(n_other, 13 - 2) * factorial(13),
+  choose(n_nonfict, 1) * choose(n_other, 13 - 1) * factorial(13),
+  choose(n_other, 13) * factorial(13)
+)
+
+formatC(reading_schedule1, format="e", digits=2)
+```
+
+## Step 2
+
+If he wants to include all 6 plays, how many different reading schedules are possible? Express your answer in scientific notation rounding to the hundredths place.
+
+```{r}
+n_not_play <- n_novels + n_poems + n_nonfict
+
+reading_schedule2 <- choose(n_not_play, 13- 6) * factorial(13)
+
+formatC(reading_schedule2, format="e", digits=2)
+```
+
+# Exercise 8
+
+Zane is planting trees along his driveway, and he has 5 sycamores and 5 cypress trees to plant in one row. What is the probability that he randomly plants the trees so that all 5 sycamores are next to each other and all 5 cypress trees are next to each other? Express your answer as a fraction or a decimal number rounded to four decimal places.
+
+```{r}
+total_plant_orders <- factorial(10)
+
+grouped_plant_orders <- factorial(2) * factorial(5) * factorial(5)
+
+p_grouped_plants <- grouped_plant_orders / total_plant_orders
+
+round(p_grouped_plants, 4)
+```
+
+# Exercise 9 {.tabset}
+
+If you draw a queen or lower from a standard deck of cards, I will pay you \$4. If not, you pay me \$16. (Aces are considered the highest card in the deck.)
+
+## Step 1
+
+Find the expected value of the proposition. Round your answer to two decimal 
+places. Losses must be expressed as negative values.
+
+```{r}
+win <- (52-8)/52 * 4
+lose <- 8/52 * 16
+
+expected_value <- win - lose
+
+round(expected_value, 2)
+```
+
+## Step 2
+
+If you played this game 833 times how much would you expect to win or lose? 
+Round your answer to two decimal places. Losses must be expressed as negative 
+values.
+
+```{r}
+total_winnings <- expected_value * 833
+
+round(total_winnings, 2)
+```
+
