@@ -1,0 +1,76 @@
+---
+title: "DATA605 Homework 7"
+author: "Keith Colella"
+date: "2023-10-16"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Question 1
+
+Let $X_1$, $X_2$, . . . , $X_n$ be n mutually independent random variables, each of which is uniformly distributed on the integers from 1 to $k$. Let $Y$ denote the minimum of the $X_i$’s. Find the distribution of $Y$.
+
+### Response
+
+Our goal is to 
+
+# Question 2
+
+Your organization owns a copier (future lawyers, etc.) or MRI (future doctors). This machine has a manufacturer’s expected lifetime of 10 years. This means that we expect one failure every ten years. (Include the probability statements and R Code for each part.)
+
+## Part A
+
+What is the probability that the machine will fail after 8 years? Provide also the expected value and standard deviation. Model as a geometric.
+*Hint: the probability is equivalent to not failing during the first 8 years.*
+
+### Response
+
+```{r}
+# Parameters
+p <- 1/10
+q <- 1 - p
+
+# Calculations
+prob_fail_after_8 <- (q^8) * p
+prob_fail_after_8 <- (q^8) * p
+expected_value <- 1/p
+standard_deviation <- sqrt(q/p^2)
+
+# Results
+cat("Probability of failure after 8 years:", prob_fail_after_8, "\n")
+cat("Expected value:", expected_value, "\n")
+cat("Standard deviation:", standard_deviation, "\n")
+```
+
+```{r}
+prob_fail_after_8 <- pgeom(q, p, lower.tail = FALSE)
+cat("Probability of failure after 8 years:", prob_fail_after_8, "\n")
+```
+
+
+## Part B
+
+What is the probability that the machine will fail after 8 years?. Provide also the expected value and standard deviation. Model as an exponential.
+
+### Response
+
+TBD
+
+## Part C
+
+What is the probability that the machine will fail after 8 years?. Provide also the expected value and standard deviation. Model as a binomial (*Hint: 0 success in 8 years*).
+
+### Response
+
+TBD
+
+## Part D
+
+What is the probability that the machine will fail after 8 years?. Provide also the expected value and standard deviation. Model as a Poisson.
+
+### Response
+
+TBHD
