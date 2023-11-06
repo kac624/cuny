@@ -1,0 +1,268 @@
+---
+title: "DATA605 Homework 10"
+author: "Keith Colella"
+date: "2023-11-05"
+output: html_document
+---
+
+```{r, message = FALSE, warning = FALSE}
+library(tidyverse)
+library(expm) # to make use of %^% for matrix exponents
+set.seed(42)
+```
+
+# Assignment
+
+Smith is in jail and has 1 dollar; he can get out on bail if he has 8 dollars. A guard agrees to make a series of bets with him. If Smith bets A dollars, he wins A dollars with probability .4 and loses A dollars with probability .6. Find the probability that he wins 8 dollars before losing all of his money if
+
+(a) he bets 1 dollar each time (timid strategy).  
+
+(b) he bets, each time, as much as possible but not more than necessary to bring his fortune up to 8 dollars (bold strategy).  
+
+(c) Which strategy gives Smith the better chance of getting out of jail?
+
+# Response
+
+This problem can be solved a few ways. My immediate thought was a straighforward simulation, but given the week's focus on markov chains, I'll also provide a response that attempts to model the gamble as a markov process.
+
+### Response 1 - Simulation
+
+We'll start by setting some key parameters. I'll chose the number of simulations (10,000), Smith's starting balance (\$1), and the probabilities of winning and losing (0.4 and 0.6, respectively).
+
+```{r}
+n_sims <- 10^4
+balance <- 1
+p_win <- 0.4
+p_lose <- 0.6
+```
+
+First, we'll simulate the timid strategy. This is straightforward, as Smith simply bets $1 each time. Each iteration will have a break condition. If Smith runs out of money (i.e. `balance = 0`) or if he obtains enough money for bail (i.e. `balance = 8`), then that iteration breaks. We'll aggregate his ending balance and the result (free or not free) for each iteration.
+
+```{r}
+results <- data.frame()
+wager <- 1
+  
+for (n in 1:n_sims) {
+  balance <- 1
+  n_rounds <- 0 
+  while (balance > 0 & balance < 8) {
+    win_lose <- sample(x = c(1,0), size = 1, prob = c(p_win, p_lose))
+    balance <- ifelse(
+      win_lose == 1,
+      balance + wager,
+      balance - wager
+    )
+    n_rounds <- n_rounds + 1
+  }
+  
+  free_notfree <- ifelse(
+    balance == 8,
+    'free', 'not_free'
+  )
+  
+  result <- list(
+    balance = balance,
+    result = free_notfree,
+    n_rounds = n_rounds
+  )
+  
+  results <- rbind(results, result)
+}
+
+cat(
+  'No. of simulations in which Smith is free: ',
+  nrow(filter(results, result == 'free')), '\n',
+  'No. of simulations overall: ', 
+  n_sims, '\n',
+  'Probability of freedom with timid strategy: ',
+  round(nrow(filter(results, result == 'free')) / n_sims * 100, 3),'%',
+  sep = ''
+)
+```
+
+Let's try it again, but with the bold strategy. This time, the wager will be the minimum of either Smith's current balance, or 8 minus that balance. For example, if Smith has $3, he will bet all three dollars. If he has \$5, he will bet only the three dollars required to get him to \$8 (i.e. 8 - 5 = 3).
+
+```{r}
+results <- data.frame()
+  
+for (n in 1:n_sims) {
+  balance <- 1
+  n_rounds <- 0
+  while (balance > 0 & balance < 8) {
+    wager <- min(balance, 8 - balance)
+    win_lose <- sample(x = c(1,0), size = 1, prob = c(p_win, p_lose))
+    balance <- ifelse(
+      win_lose == 1,
+      balance + wager,
+      balance - wager
+    )
+    n_rounds <- n_rounds + 1
+  }
+  
+  free_notfree <- ifelse(
+    balance == 8,
+    'free', 'not_free'
+  )
+  
+  result <- list(
+    balance = balance,
+    result = free_notfree,
+    n_rounds = n_rounds
+  )
+  
+  results <- rbind(results, result)
+}
+
+cat(
+  'No. of simulations in which Smith is free: ',
+  nrow(filter(results, result == 'free')), '\n',
+  'No. of simulations overall: ', 
+  n_sims, '\n',
+  'Probability of freedom with bold strategy: ',
+  round(nrow(filter(results, result == 'free')) / n_sims * 100, 3),'%',
+  sep = ''
+)
+```
+
+Based on this simulation, Smith is better off with the bold strategy! It gives him a ~6.76% chance of freedom, while the timid strategy only gives him a ~2.1% chance.
+
+### Response 2 - Simulation with Markov Process
+
+Let's try the same exercise, but modeling the bet as a markov process. Each state will represent a certain balance for Smith (i.e. having one dollar, having two dollars, etc.). For each strategy, we'll require a transition matrix to detail the probabilities of moving up or down in a state.
+
+For the timid strategy, each row of the transition matrix will only have two non-zero values, corresponding to the probability of moving up a state (i.e. winning a dollar, with a probability of 0.4) or moving down a state (i.e. losing a dollar, with a probability of 0.6). The only exceptions are the first and last rows, which correspond to absorbing states. If Smith's balance falls to zero dollars, he can no longer bet, so he has a probability of 1 of remaining in that state. Similarly, if Smith gets \$8, he will stop betting because he'll be free. So the probability of remaining in that state is also 1.
+
+```{r}
+timid_probs <- matrix(0, nrow = 9, ncol = 9)
+
+for (i in 1:8) {
+  if (i > 1) timid_probs[i, i-1] <- 0.6
+  if (i < 9 & i > 1) timid_probs[i, i+1] <- 0.4
+}
+
+timid_probs[1, 1] <- 1
+timid_probs[9, 9] <- 1 
+
+timid_probs
+```
+
+With this matrix, we can again run a simulation. We'll use the same framework as before, but instead of randomly sampling a win or loss for each bet, we'll randomly choose a new state based on the transition probabilities for the row corresponding to the balance at the beginning of each turn.
+
+```{r}
+results <- data.frame()
+  
+for (n in 1:n_sims) {
+  balance <- 1
+  n_rounds <- 0 
+  while (balance > 0 & balance < 8) {
+    balance <- sample(x = c(0:8), size = 1, prob = timid_probs[balance+1,])
+    n_rounds <- n_rounds + 1
+  }
+  
+  free_notfree <- ifelse(
+    balance == 8,
+    'free', 'not_free'
+  )
+  
+  result <- list(
+    balance = balance,
+    result = free_notfree,
+    n_rounds = n_rounds
+  )
+  
+  results <- rbind(results, result)
+}
+
+cat(
+  'No. of simulations in which Smith is free: ',
+  nrow(filter(results, result == 'free')), '\n',
+  'No. of simulations overall: ', 
+  n_sims, '\n',
+  'Probability of freedom with timid strategy: ',
+  round(nrow(filter(results, result == 'free')) / n_sims * 100, 3),'%',
+  sep = ''
+)
+```
+
+Our result is pretty close to the original simulation!
+
+We can also raise our transition matrix to a large power to simulate a steady state, then grab the probability of transitioning from \$1 to \$8 (i.e. from state 2 to state 9).
+
+```{r}
+p_success <- (timid_probs %^% n_sims)[2, 9]
+
+cat('Probability of freedom: ', round(p_success*100, 3),'%', sep = '')
+```
+
+Again, we see a similar probability of success for the timid strategy.
+
+Let's move to the bold strategy. Our transition matrix for this strategy will differ a bit. Now, whenever Smith wins, he will move up not by one state, but by the size of his wager, which differs based on his current balance. Similarly, when he loses, he will fall down by the number of states equal to his wager. As with the original simulation, this wager can be defined as minimum of either Smith's current balance, or 8 minus that balance (we'll use 9 to account for the indexing of the matrix). We'll also set the first and final states as absorbing states once again.
+
+```{r}
+bold_probs <- matrix(0, nrow = 9, ncol = 9)
+
+for (i in 1:8) {
+  wager <- min (i-1, 9-i)
+  bold_probs[i, i-wager] <- 0.6
+  bold_probs[i, i+wager] <- 0.4
+}
+
+bold_probs[1, 1] <- 1
+bold_probs[9, 9] <- 1 
+
+bold_probs
+```
+
+Let's simulate! We can use the same exact set-up, but plug in the transition matrix corresponding to the bold strategy.
+
+```{r}
+results <- data.frame()
+  
+for (n in 1:n_sims) {
+  balance <- 1
+  n_rounds <- 0 
+  while (balance > 0 & balance < 8) {
+    balance <- sample(x = c(0:8), size = 1, prob = bold_probs[balance+1,])
+    n_rounds <- n_rounds + 1
+  }
+  
+  free_notfree <- ifelse(
+    balance == 8,
+    'free', 'not_free'
+  )
+  
+  result <- list(
+    balance = balance,
+    result = free_notfree,
+    n_rounds = n_rounds
+  )
+  
+  results <- rbind(results, result)
+}
+
+cat(
+  'No. of simulations in which Smith is free: ',
+  nrow(filter(results, result == 'free')), '\n',
+  'No. of simulations overall: ', 
+  n_sims, '\n',
+  'Probability of freedom with timid strategy: ',
+  round(nrow(filter(results, result == 'free')) / n_sims * 100, 3),'%',
+  sep = ''
+)
+```
+
+We again see a higher probability of success for the bold strategy.
+
+And again, we can approximate a steady state by raising our transition matrix to a high power and looking at the probability of moving from state 2 (having \$1) to state 9 (having \$8).
+
+```{r}
+p_success <- (bold_probs %^% n_sims)[2, 9]
+
+cat('Probability of freedom: ', round(p_success*100, 3),'%', sep = '')
+```
+
+Similar results!
+
+## Conclusion
+
+With either simulation approach, we reach the same conclusion: Smith has a better probability of gaining enough money for bail with the bold strategy.
