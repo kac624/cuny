@@ -1,0 +1,18 @@
+---
+title: "dicussion12"
+author: "Keith Colella"
+date: "2023-11-16"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(car)
+```
+
+# Assignment
+
+Using R, build a multiple regression model for data that interests you.  Include in this model at least one quadratic term, one dichotomous term, and one dichotomous vs. quantitative interaction term.  Interpret all coefficients. Conduct residual analysis.  Was the linear model appropriate? Why or why not?
+
+# Response
+
