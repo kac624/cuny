@@ -1,0 +1,82 @@
+---
+title: "DATA605 Homework 11"
+author: "Keith Colella"
+date: "2023-11-12"
+output: html_document
+---
+
+```{r, message = FALSE, warning = FALSE}
+library(tidyverse)
+```
+
+# Assignment
+
+Using the “cars” dataset in R, build a linear model for stopping distance as a function of speed and replicate the analysis of your textbook chapter 3 (visualization, quality evaluation of the model, and residual analysis).
+
+# Response
+
+We'll start by loading in our dataset. Before we move to actual modeling, we'll do some exploratory data analysis, plotting the distribution of each variable, along with a scatterplot examining the variables' relationship.
+
+```{r}
+data(cars)
+
+cars %>%
+  ggplot(aes(dist)) +
+  geom_histogram(bins = 20)
+
+cars %>%
+  ggplot(aes(speed)) +
+  geom_histogram(bins = 20)
+
+cars %>%
+  ggplot(aes(speed, dist)) +
+  geom_point() +
+  geom_smooth(formula = 'y ~ x', method = 'loess')
+```
+
+The two variables appear non-normal. This doesn't necessary prove problematic for building a linear model. What's more important is the presence of a linear relationship between the two. And our scatter plot (and LOESS line) seem to indicate a relatively clear linear relationship.
+
+We can now move ahead with the actual model.
+
+```{r}
+model <- lm(dist ~ speed, data = cars)
+
+summary(model)
+```
+
+I'll highlight some key takeaways from our summary:
+
+1. Speed appears to be a statistically significant predictor of stopping distance. Our p-value for the t-test of variable significance is near-zero.
+
+2. The model overall appears statistically significant, based on the near-zero p-value for our F-test. This comes as no suprise, given that our only predictor variable is significant.
+
+3. Speed is able to explain a significant portion of the variance of stopping distance, as evidenced by the $R^2$ metric of 0.6511.
+
+4. The $\beta$ coefficient indicates that, for each 1 mph increase in speed, the stopping distance would be expected to increase by 3.9324 feet (we can find details on the units by calling `?cars`). 
+
+5. The model should provide us reasonably precise predictions, based on the relatively small standard error of 0.4155 feet. 
+
+Let's examine how our predictions match up with actual values visually.
+
+```{r}
+cars %>%
+  ggplot(aes(speed, dist)) +
+  geom_point() +
+  geom_smooth(formula = 'y ~ x', method = 'lm', se = TRUE)
+```
+
+Our predictions seem to match relatively well to actual values.
+
+Finally, let's examine the residuals for any potential problems.
+
+```{r}
+plot(model)
+```
+
+Looking at fitted versus residuals plots, we see no evidence of heteroskedasticity or non-constant variance. The residuals seem randomly distributed around zero.
+
+Looking at our QQ plot, the residuals seem relatively normally distributed. There are some outliers in the right tail, but overall, the residuals sit along the normal diagonal.
+
+Finally, our leverage plot indicates that, for the most part, single observations do not hold undue influence over parameter estimates. We see some tail values that have higher leverage, but nothing too concerning.
+
+Overall, our model seems to provide a good fit and key regression assumptions hold!
