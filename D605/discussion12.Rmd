@@ -5,8 +5,9 @@ date: "2023-11-16"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
+```{r, message = FALSE, warning = FALSE}
 library(tidyverse)
+library(cowplot)
 library(car)
 ```
 
@@ -15,4 +16,134 @@ library(car)
 Using R, build a multiple regression model for data that interests you.  Include in this model at least one quadratic term, one dichotomous term, and one dichotomous vs. quantitative interaction term.  Interpret all coefficients. Conduct residual analysis.  Was the linear model appropriate? Why or why not?
 
 # Response
+
+Data
+
+https://www.kaggle.com/datasets/mirichoi0218/insurance
+
+```{r}
+data <- read_csv('data/insurance.csv')
+
+glimpse(data)
+```
+
+Cleaning
+
+```{r}
+for (col in colnames(data)) {
+  data[col] %>%
+    filter(is.na(!!sym(col))) %>%
+    nrow() %>% print()
+}
+
+data$sex %>% unique()
+data$smoker %>% unique()
+data$region %>% unique()
+
+data <- data %>%
+  mutate(
+    sex_female = if_else(sex == 'female', 1, 0),
+    smoker = if_else(smoker == 'yes', 1, 0),
+    north = if_else(region == 'northwest' | region == 'northeast', 1, 0),
+    east = if_else(region == 'northeast' | region == 'southeast', 1, 0)
+  ) %>%
+  select(-sex, -region)
+
+head(data)
+summary(data)
+```
+
+Plots
+
+```{r}
+histograms <- function(df) {
+  plots <- list()
+  
+  for (i in 1:ncol(df)) {
+    col <- colnames(df)[i] 
+    p <- df %>%
+      ggplot(aes(!!sym(col))) +
+      geom_histogram(bins = 20)
+    plots[[i]] <- p
+  }
+  
+  return(plot_grid(plotlist = plots, nrow = 3))
+}
+
+histograms(data)
+
+pairs(data)
+```
+
+one by one
+
+```{r}
+for (predictor in colnames(data)) {
+  formula <- as.formula(paste('charges ~',predictor))
+  model <- lm(formula, data = data)
+  print(summary(model))
+  par(mfrow = c(2, 2), mar = c(2,2,2,2))
+  plot(model, main = predictor)
+}
+```
+
+Model
+
+```{r}
+model <- lm(charges ~ ., data = data)
+summary(model)
+par(mfrow = c(2, 2), mar = c(2,2,2,2))
+plot(model)
+```
+
+Power Transform
+
+```{r}
+transformation <- powerTransform(model)
+print(transformation)
+```
+
+Apply
+
+```{r}
+charges_transformed <- bcPower(data$charges, transformation$lambda)
+
+data <- data %>%
+  mutate(charges = charges_transformed)
+
+histograms(data)
+pairs(data)
+
+model <- lm(charges ~ ., data = data)
+summary(model)
+par(mfrow = c(2, 2), mar = c(2,2,2,2))
+plot(model)
+
+for (predictor in colnames(data)) {
+  formula <- as.formula(paste('charges ~',predictor))
+  model <- lm(formula, data = data)
+  print(summary(model))
+  par(mfrow = c(2, 2), mar = c(2,2,2,2))
+  plot(model, main = predictor)
+}
+```
+
+Model 2
+
+```{r}
+data2 <- data %>%
+  mutate(
+    age_binary = if_else(age>60,1,0),
+    bmi = sqrt(bmi),
+    female_children = sex_female*children
+  )
+
+histograms(data2)
+pairs(data2)
+
+model <- lm(charges ~ age_binary + bmi + smoker + female_children + north, data = data2)
+summary(model)
+par(mfrow = c(2, 2), mar = c(2,2,2,2))
+plot(model)
+```
 
