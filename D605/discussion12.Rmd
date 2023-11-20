@@ -22,25 +22,25 @@ Data
 https://www.kaggle.com/datasets/mirichoi0218/insurance
 
 ```{r}
-data <- read_csv('data/insurance.csv')
+df <- read_csv('data/insurance.csv')
 
-glimpse(data)
+glimpse(df)
 ```
 
 Cleaning
 
 ```{r}
-for (col in colnames(data)) {
-  data[col] %>%
+for (col in colnames(df)) {
+  df[col] %>%
     filter(is.na(!!sym(col))) %>%
     nrow() %>% print()
 }
 
-data$sex %>% unique()
-data$smoker %>% unique()
-data$region %>% unique()
+df$sex %>% unique()
+df$smoker %>% unique()
+df$region %>% unique()
 
-data <- data %>%
+df <- df %>%
   mutate(
     sex_female = if_else(sex == 'female', 1, 0),
     smoker = if_else(smoker == 'yes', 1, 0),
@@ -49,8 +49,8 @@ data <- data %>%
   ) %>%
   select(-sex, -region)
 
-head(data)
-summary(data)
+head(df)
+summary(df)
 ```
 
 Plots
@@ -70,17 +70,17 @@ histograms <- function(df) {
   return(plot_grid(plotlist = plots, nrow = 3))
 }
 
-histograms(data)
+histograms(df)
 
-pairs(data)
+pairs(df)
 ```
 
 one by one
 
 ```{r}
-for (predictor in colnames(data)) {
+for (predictor in colnames(df)) {
   formula <- as.formula(paste('charges ~',predictor))
-  model <- lm(formula, data = data)
+  model <- lm(formula, data = df)
   print(summary(model))
   par(mfrow = c(2, 2), mar = c(2,2,2,2))
   plot(model, main = predictor)
@@ -90,7 +90,7 @@ for (predictor in colnames(data)) {
 Model
 
 ```{r}
-model <- lm(charges ~ ., data = data)
+model <- lm(charges ~ ., data = df)
 summary(model)
 par(mfrow = c(2, 2), mar = c(2,2,2,2))
 plot(model)
@@ -106,22 +106,22 @@ print(transformation)
 Apply
 
 ```{r}
-charges_transformed <- bcPower(data$charges, transformation$lambda)
+charges_transformed <- bcPower(df$charges, transformation$lambda)
 
-data <- data %>%
+df <- df %>%
   mutate(charges = charges_transformed)
 
-histograms(data)
-pairs(data)
+histograms(df)
+pairs(df)
 
-model <- lm(charges ~ ., data = data)
+model <- lm(charges ~ ., data = df)
 summary(model)
 par(mfrow = c(2, 2), mar = c(2,2,2,2))
 plot(model)
 
-for (predictor in colnames(data)) {
+for (predictor in colnames(df)) {
   formula <- as.formula(paste('charges ~',predictor))
-  model <- lm(formula, data = data)
+  model <- lm(formula, data = df)
   print(summary(model))
   par(mfrow = c(2, 2), mar = c(2,2,2,2))
   plot(model, main = predictor)
@@ -131,17 +131,17 @@ for (predictor in colnames(data)) {
 Model 2
 
 ```{r}
-data2 <- data %>%
+df2 <- df %>%
   mutate(
     age_binary = if_else(age>60,1,0),
     bmi = sqrt(bmi),
     female_children = sex_female*children
   )
 
-histograms(data2)
-pairs(data2)
+histograms(df2)
+pairs(df2)
 
-model <- lm(charges ~ age_binary + bmi + smoker + female_children + north, data = data2)
+model <- lm(charges ~ age_binary + bmi + smoker + female_children + north, data = df2)
 summary(model)
 par(mfrow = c(2, 2), mar = c(2,2,2,2))
 plot(model)
@@ -150,8 +150,23 @@ plot(model)
 Full Power Transform
 
 ```{r}
-for (col in colnames(data2)) {
-  
+df <- df %>%
+  mutate(children = children + 0.01)
+
+for (predictor in c('age','bmi','children')) {
+  if (predictor == 'charges') next
+  formula <- as.formula(paste(predictor,' ~ 1'))
+  transformation <- powerTransform(formula, data = df)
+  transformed <- bcPower(df[predictor], transformation$lambda)
+  df[predictor] <- transformed
 }
+
+histograms(df)
+pairs(df)
+
+model <- lm(charges ~ ., data = df)
+summary(model)
+par(mfrow = c(2, 2), mar = c(2,2,2,2))
+plot(model)
 ```
 

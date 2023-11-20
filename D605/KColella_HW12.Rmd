@@ -1,6 +1,8 @@
 ---
 title: "DATA605 Homework 12"
-output: html_notebook
+output:
+  html_document:
+    df_print: paged
 ---
 
 ```{r, message = FALSE}
@@ -28,7 +30,7 @@ who %>%
   geom_point()
 ```
 
-This scatter plot does not indicate a clear linear relationship. There does seem to be *some* kind of relationship, however, as the high values of Total Expenditures appear correlate with high values of Life Expectancy.
+This scatter plot does not indicate a clear linear relationship. There does seem to be *some* kind of relationship, however, as the high values of Total Expenditures appear correlated with high values of Life Expectancy.
 
 ### Model
 
@@ -62,12 +64,12 @@ Raise life expectancy to the 4.6 power (i.e., LifeExp^4.6). Raise total expendit
 ```{r}
 who <- who %>%
   mutate(
-    LifeExpPower = LifeExp^4.6,
-    TotExpPower = TotExp^0.06
+    LifeExp_powerT = LifeExp^4.6,
+    TotExp_powerT = TotExp^0.06
   )
 
 who %>%
-  ggplot(aes(LifeExpPower, TotExpPower)) +
+  ggplot(aes(LifeExp_powerT, TotExp_powerT)) +
   geom_point()
 ```
 
@@ -76,7 +78,7 @@ Already, things look better. There is now a clear linear relationship!
 ### Model
 
 ```{r}
-model <- lm(LifeExpPower ~ TotExpPower, data = who)
+model <- lm(LifeExp_powerT ~ TotExp_powerT, data = who)
 summary(model)
 ```
 
@@ -107,8 +109,8 @@ Using the results from 3, forecast life expectancy when TotExp^.06 = 1.5. Then f
 expectancy when TotExp^.06 = 2.5.
 
 ```{r}
-prediction1 <- predict(model, newdata = data.frame(TotExpPower = 1.5))^(1/4.6)
-prediction2 <- predict(model, newdata = data.frame(TotExpPower = 2.5))^(1/4.6)
+prediction1 <- predict(model, newdata = data.frame(TotExp_powerT = 1.5))^(1/4.6)
+prediction2 <- predict(model, newdata = data.frame(TotExp_powerT = 2.5))^(1/4.6)
 
 cat(
   'Prediction with 1.5: ',
@@ -129,14 +131,14 @@ and p-values. How good is the model?
 $$LifeExp =\beta_0 + \beta_1 PropMd + \beta_1 TotExp + \beta_1 PropMD \times TotExp$$
 
 ```{r}
-model <- lm(LifeExp ~ PropMD + TotExp + PropMD*TotExp, data = who)
+model <- lm(LifeExp ~ PropMD + TotExp + PropMD:TotExp, data = who)
 results <- summary(model)
 print(results)
 cat(
   '--Standard Error to Coefficient Ratios--\n',
   'PropMD: ',abs(results$coefficients[2,2] / results$coefficients[2,1]),'\n',
-  'PropMD: ',abs(results$coefficients[3,2] / results$coefficients[3,1]),'\n',
-  'PropMD: ',abs(results$coefficients[4,2] / results$coefficients[4,1]),'\n',
+  'TotExp: ',abs(results$coefficients[3,2] / results$coefficients[3,1]),'\n',
+  'Interaction: ',abs(results$coefficients[4,2] / results$coefficients[4,1]),'\n',
   '--------\n', 
   sep=''
 )
@@ -145,7 +147,7 @@ par(mfrow = c(2,2), mar = c(2,2,2,2))
 plot(model)
 ```
 
-We similar results as we saw in our initial model fit. The F-test and predictor t-test p-values indicate the overall model and all predictors are significant. Our $R^2$ is relatively low, explaining only ~35% of the response variance. Standard errors are relatively higher, all above 10% of the relevant coefficient. And finally, residuals again appear non-normal and heterskedastic.
+We get similar results as we saw in our initial model fit. The F-test and predictor t-test p-values indicate the overall model and all predictors are significant. Our $R^2$ is relatively low, explaining only ~35% of the response variance. Standard errors are relatively higher, all above 10% of the relevant coefficient. And finally, residuals again appear non-normal and heterskedastic.
 
 # Task 5
 
@@ -156,13 +158,64 @@ newdata = data.frame(PropMD = 0.03, TotExp = 14)
 predict(model, newdata = newdata)
 ```
 
-A predicted Life Expectancy of ~107.7 years does not seem reasonable.
+A predicted Life Expectancy of ~107.7 years does not seem reasonable. First, the maximum life expectancy in the whole dataset is 83. Second, a Total Expenditure of 14 is quite low, as seen in the plot below, so a prediction of very high life expectancy defies expectations. A Proportion of MDs of 0.3 is, on the other hand, quite high, but not high enough to warrant a life expectancy of 107 years. The country with the highest PropMD in the dataset (San Marino with ~0.35) only has a Life Expectancy of 82 years.
 
 ```{r}
+max(who$LifeExp)
+
 ggplot(who, aes(PropMD)) +
-  geom_histogram(bins = 20)
+  geom_histogram(bins = 20) +
+  geom_vline(xintercept = mean(who$PropMD), color = 'red')
 
 ggplot(who, aes(TotExp)) +
-  geom_histogram(bins = 20)
+  geom_histogram(bins = 20) +
+  geom_vline(xintercept = mean(who$TotExp), color = 'red')
+
+who %>%
+  filter(PropMD == max(who$PropMD))
 ```
 
+So, it seems this unrealistic prediction is an indication of problems with the model. This point aligns with the residual problems and sizeable standard errors we identified previously. Let's see if we can apply some transformations to improve the fit and produce a better prediction.
+
+```{r}
+y_transformation <- powerTransform(model)
+y_transformed <- bcPower(who$LifeExp, y_transformation$lambda)
+
+x1_transformation <- powerTransform(PropMD ~ 1, data = who)
+x1_transformed <- bcPower(who$PropMD, x1_transformation$lambda)
+
+x2_transformation <- powerTransform(TotExp ~ 1, data = who)
+x2_transformed <- bcPower(who$TotExp, x1_transformation$lambda)
+
+who <- who %>%
+  mutate(
+    LifeExp_powerT = y_transformed,
+    PropMD_powerT = x1_transformed,
+    TotExp_powerT = x2_transformed
+  )
+
+who %>%
+  ggplot(aes(PropMD_powerT, LifeExp_powerT)) +
+  geom_point()
+
+who %>%
+  ggplot(aes(TotExp_powerT, LifeExp_powerT)) +
+  geom_point()
+
+model <- lm(
+  LifeExp_powerT ~ PropMD_powerT + TotExp_powerT + PropMD_powerT:TotExp_powerT, 
+  data = who
+)
+print(summary(model))
+
+par(mfrow = c(2,2), mar = c(2,2,2,2))
+plot(model)
+
+newdata = data.frame(
+  PropMD_powerT = 0.03^x1_transformation$lambda,
+  TotExp_powerT = 14^x2_transformation$lambda
+)
+predict(model, newdata = newdata)^(1/y_transformation$lambda)
+```
+
+After applying transformations, our model fit appears much better. Residuals are roughly normal with reasonable constant variance, and the $R^2$ is much higher. Our prediction is also much more reasonable. It's very low, but not outside what is seen in the dataset (e.g. Sierra Leone has a Life Expectancy of only 40 years). These transformations appear very effective!
