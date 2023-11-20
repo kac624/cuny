@@ -1,0 +1,168 @@
+---
+title: "DATA605 Homework 12"
+output: html_notebook
+---
+
+```{r, message = FALSE}
+library(tidyverse)
+library(cowplot)
+library(car)
+```
+
+# Read in Data
+
+```{r}
+who <- read_csv('data/who.csv')
+glimpse(who)
+```
+
+# Task 1
+
+Provide a scatterplot of LifeExp~TotExp, and run simple linear regression. Do not transform the  variables. Provide and interpret the F statistics, R^2, standard error,and p-values only. Discuss whether the assumptions of simple linear regression met.
+
+### Scatterplot
+
+```{r}
+who %>%
+  ggplot(aes(TotExp, LifeExp)) +
+  geom_point()
+```
+
+This scatter plot does not indicate a clear linear relationship. There does seem to be *some* kind of relationship, however, as the high values of Total Expenditures appear correlate with high values of Life Expectancy.
+
+### Model
+
+```{r}
+model <- lm(LifeExp ~ TotExp, data = who)
+summary(model)
+```
+
+Based on this summary alone, the model appears half-way decent. The F-stat indicates the model is significant, and the sole predictor appears significant as well, given that the p-values of both approach zero. The $R^2$ is quite low, however, indicating that Total Expenditures only explains ~25% of the variance in Life Expectancy. The standard error is relatively low, too, at about 1/10th the value of the $\beta$ coefficient.
+
+```{r}
+results <- summary(model)
+results$coefficients[2,2] / results$coefficients[2,1]
+```
+
+### Residuals and Assumptions
+
+When we look at the residuals, however, the issues resurface. They display non-constant variance and appear non-normally distributed. These indicate the our predictor and response variables do not share a linear relationship. The assumptions of OLS appear violated.
+
+```{r}
+par(mfrow = c(2, 2), mar = c(2,2,2,2))
+plot(model)
+```
+
+# Task 2
+
+Raise life expectancy to the 4.6 power (i.e., LifeExp^4.6). Raise total expenditures to the 0.06 power (nearly a log transform, TotExp^.06). Plot LifeExp^4.6 as a function of TotExp^.06, and re-run the simple regression model using the transformed variables. Provide and interpret the F statistics, R^2, standard error, and p-values. Which model is "better?"
+
+### Plot
+
+```{r}
+who <- who %>%
+  mutate(
+    LifeExpPower = LifeExp^4.6,
+    TotExpPower = TotExp^0.06
+  )
+
+who %>%
+  ggplot(aes(LifeExpPower, TotExpPower)) +
+  geom_point()
+```
+
+Already, things look better. There is now a clear linear relationship!
+
+### Model
+
+```{r}
+model <- lm(LifeExpPower ~ TotExpPower, data = who)
+summary(model)
+```
+
+The overall fit and the TotExp variable appear significant, with very low p-values. This time, however, our $R^2$ is much igher at ~72%, indicating our transformed predictor explains much more of the transformed response's variance. 
+
+```{r}
+results <- summary(model)
+results$coefficients[2,2] / results$coefficients[2,1]
+```
+
+Our standard error is also much smaller.
+
+### Residuals and Assumptions
+
+```{r}
+par(mfrow = c(2, 2), mar = c(2,2,2,2))
+plot(model)
+```
+
+Our residuals are also different. They appear much more uniformly scattered and normally distributed (despite some left tail outliers). This model most certainly provides a better fit.
+
+```{r}
+powerTransform(LifeExp ~ TotExp, data = who)
+```
+# Task 3
+
+Using the results from 3, forecast life expectancy when TotExp^.06 = 1.5. Then forecast life 
+expectancy when TotExp^.06 = 2.5.
+
+```{r}
+prediction1 <- predict(model, newdata = data.frame(TotExpPower = 1.5))^(1/4.6)
+prediction2 <- predict(model, newdata = data.frame(TotExpPower = 2.5))^(1/4.6)
+
+cat(
+  'Prediction with 1.5: ',
+  scales::comma(prediction1),
+  '\nPrediction with 2.5: ',
+  scales::comma(prediction2),
+  sep = ''
+)
+```
+
+We must undo the transformation we applied to the response variable when forming our predictions. With that, we get reasonable predictions.
+
+# Task 4
+
+Build the following multiple regression model and interpret the F Statistics, R^2, standard error, 
+and p-values. How good is the model?
+
+$$LifeExp =\beta_0 + \beta_1 PropMd + \beta_1 TotExp + \beta_1 PropMD \times TotExp$$
+
+```{r}
+model <- lm(LifeExp ~ PropMD + TotExp + PropMD*TotExp, data = who)
+results <- summary(model)
+print(results)
+cat(
+  '--Standard Error to Coefficient Ratios--\n',
+  'PropMD: ',abs(results$coefficients[2,2] / results$coefficients[2,1]),'\n',
+  'PropMD: ',abs(results$coefficients[3,2] / results$coefficients[3,1]),'\n',
+  'PropMD: ',abs(results$coefficients[4,2] / results$coefficients[4,1]),'\n',
+  '--------\n', 
+  sep=''
+)
+
+par(mfrow = c(2,2), mar = c(2,2,2,2))
+plot(model)
+```
+
+We similar results as we saw in our initial model fit. The F-test and predictor t-test p-values indicate the overall model and all predictors are significant. Our $R^2$ is relatively low, explaining only ~35% of the response variance. Standard errors are relatively higher, all above 10% of the relevant coefficient. And finally, residuals again appear non-normal and heterskedastic.
+
+# Task 5
+
+Forecast LifeExp when PropMD = 0.03 and TotExp = 14. Does this forecast seem realistic? Why or why not?
+
+```{r}
+newdata = data.frame(PropMD = 0.03, TotExp = 14)
+predict(model, newdata = newdata)
+```
+
+A predicted Life Expectancy of ~107.7 years does not seem reasonable.
+
+```{r}
+ggplot(who, aes(PropMD)) +
+  geom_histogram(bins = 20)
+
+ggplot(who, aes(TotExp)) +
+  geom_histogram(bins = 20)
+```
+
