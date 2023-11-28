@@ -1,0 +1,107 @@
+---
+title: "discussion13"
+author: "Keith Colella"
+date: "2023-11-25"
+output: html_document
+---
+
+```{r}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Question
+
+A set of plastic spheres are to be made with a diameter of 1cm. If the manufacturing process is accurate to 1mm, what is the propagated error in volume of the spheres? Use differentials to approximate propagated error.
+
+# Response
+
+The volume of a sphere is defined as $$\frac{4}{3} \pi r^3$$. The accuracy of 1mm represents the differential for change in diameter, which we can denote as $$dd$$. Our goal is find the resulting change in volume, which we'll denote $$dv$$. We can do this by finding the derivative $$\frac{dv}{dd}$$.
+
+First, we express $$v$$ in terms of $$d$$.
+
+$$v = \frac{4}{3} \pi \frac{d}{2}^3$$
+
+Then, we differentiate $$v$$ with respect to $$d$$. We set this up as $$\frac{dv}{dd}$$, and substitute $$v$$ with the volume formulation above.
+
+$$\frac{dv}{dd} = \frac{d \frac{4}{3} \pi \frac{d}{2}^3}{dd}$$
+
+We can write this more cleanly as follows.
+
+$$\frac{dv}{dd} = \frac{d}{dd} (\frac{4}{3} \pi \frac{d}{2}^3)$$
+
+We can treat $$\frac{4}{3} \pi$$ as a constant and really focus on differentiating $$\frac{d}{2}^3$$, which we can break into two functions: (1) $$f(x) = x^3$$ and (2) $$g(y) = \frac{y}{2}$$. If we apply the chain rule, we first find $$f'(x) = 3x^2$$, then find $$g'(y) = 1/2$$, and take the product of these two. This simplifies our derivative to the following.
+
+$$\frac{dv}{dd} = \frac{4}{3} \pi \times 3\frac{d}{2}^2 \times \frac{1}{2}$$
+
+Next, we evaluate at $$d = 1$$ (because our diameter is 1cm) and $$dd = 0.1$$ (because the change in diamater is 1mm, or 0.1cm).
+
+$$\frac{dv}{dd} = \frac{4}{3} \pi \times 3\frac{1}{2}^2 \times \frac{1}{2}$$
+
+This simplifies to ~1.571, which indicates that, for a 1cm change in diameter, our volume changes by ~1.571cm. However, we are looking for the change in volume resulting from a 1*mm* change in diamater. So, we convert this change to 0.1cm, then multiply it by ~1.571 to get ~0.1571.
+
+
+
+```{r}
+4 / 3 * pi * 3 * (1/2)^2 * (1/2)
+```
+
+
+```{r}
+# Define the function for the derivative of the volume with respect to diameter
+dv_dd <- function(d) {
+  (4/3) * pi * 3 * (d/2)^2 * (1/2)
+}
+
+# Given values
+d <- 1.0  # diameter in cm
+dd <- 0.1  # change in diameter in cm (accuracy)
+
+# Calculate the propagated error in volume
+propagated_error <- dv_dd(d) * dd
+
+# Print the propagated error
+propagated_error
+```
+
+```{r}
+expr <- expression((4/3)*pi*(d/2)^3)
+derivative <- deriv(expr, 'd')
+derivative
+```
+
+```{r}
+library(Deriv)
+
+# Define the function
+f <- function(d) (4/3)*pi*(d/2)^3
+
+# Compute the derivative
+df <- Deriv(f)
+
+# Print the derivative function
+print(df)
+
+# Evaluate the derivative at a point, e.g., x = 2
+df(1)
+```
+
+```{r}
+# (a) the x-axis
+V = 4.189
+pi * pracma::integral(function(x) { 1 }, 1, 2)
+pi * pracma::integral(function(x) { (-x + 3)^2 }, 1, 2) - pi
+
+# (b) y = 2
+V = 2.094
+pi - pi * pracma::integral(function(x) { (-x + 3 - 2)^2 }, 1, 2)
+
+# (c) the y-axis
+V = 4.189
+# (same as x-axis here, after transformation)
+pi * pracma::integral(function(x) { (-x + 3)^2 }, 1, 2) - pi
+
+# (d) x = 1
+V = 1.047
+pi * pracma::integral(function(x) { (-x + 3 - 1)^2 }, 1, 2)
+```
+

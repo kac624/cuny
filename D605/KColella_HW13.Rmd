@@ -1,0 +1,243 @@
+---
+title: "DATA605 Homework 13"
+author: "Keith Colella"
+date: "2023-11-25"
+output: html_document
+---
+
+```{r, message=FALSE, warning=FALSE}
+library(Ryacas)
+library(tidyverse)
+```
+
+# Question 1
+
+Use integration by substitution to solve the integral below.
+
+$$\int 4e^{-7x} dx$$
+
+### Response
+
+We'll start by assigning $-7x$ as the function we will subtitute and denote as $u$. We then differentiate this function $u$ with respect to $x$. So, if $u = -7x$, then $du = -7dx$. We can rearrange this to form $dx = du / -7$.
+
+We can now substitute these terms in for the $x$ and $dx$ in the original expression.
+
+$$\int 4e^u \times \frac{du}{-7}$$
+
+We can simplify a bit to give the following.
+
+$$-\frac{4}{7} \int e^u du$$
+
+This is a more straightforward integral, which we integrate with respect to $u$. Because this is an indefinite integral, we add a constant of integration.
+
+$$-\frac{4}{7} e^u + C$$
+
+Finally, we subtitute back in the original terms for $u$, giving us our solution.
+
+$$-\frac{4}{7} e^{-7x} + C$$
+
+Let's check this with R, using the `Ryacas` package.
+
+```{r}
+x <- yac_symbol('x')
+fn <- 4 * exp(-7 * x)
+integrate(fn, x)
+```
+
+Our response matches!
+
+# Question 2
+
+Biologists are treating a pond contaminated with bacteria. The level of contamination is changing at a rate of $\frac{dN}{dt} = -\frac{3150}{t^4} -220$ bacteria per cubic centimeter per day, where $t$ is the number of days since treatment began. Find a function $N(t)$ to estimate the level of contamination if the level after 1 day was 6530 bacteria per cubic centimeter.
+
+### Response
+
+We want to find the accumulation of change in contamination over $t$ days. We are given a rate of change, so we can integrate that derivative to essentially "reverse" the derivative and find a function that shows the sum contamination in the pond over a period of time.
+
+$$\int (-\frac{3150}{t^4} - 220) dt$$
+
+An integral of the difference of two functions can be separated this into two integrals, then recombined.
+
+$$\int -\frac{3150}{t^4} dt - \int -220 dt$$
+
+The second simply resolves to $220$, and we can rearrange the first to allow for easy application of the power rule.
+
+$$\int3150t^{-4}dt$$
+Which resolves to the following
+
+$$-1050t^{-3}$$
+
+So our final integral is
+
+$$N(t) = 1050t^{-3} - 220t + C$$
+
+Because we know that $N(1) = 6530$, we can find the specific constant of integration.
+
+$$6530 = 1050(1)^{-3} - 220(1) + C$$
+$$C = 5700$$
+
+So our final function is as follows.
+
+$$N(t) = 1050t^{-3} - 220t + 5700$$
+
+# Question 3
+
+Find the total area of the red rectangles in the figure below, where the equation of the line is $f(x) = 2x - 9$.
+
+### Response
+
+We can find the area directly. Each rectangle has a width of 1 and heights of 1, 3, 5 and 7, giving them rectangles areas of 1, 3, 5 and 7, totaling to 16.
+
+Alternatively, we can approximate this area using integration of $f(x)$ from 4.5 to 8.5. This integral gives us the area under the curve (or line, in our case). 
+
+$$\int_{4.5}^{8.5} (2x - 9) dx$$
+
+Because this is a definite integral, we can use base R's `integrate` function to solve this.
+
+```{r}
+f <- function(x) 2*x - 9
+integrate(f, 4.5, 8.5)
+```
+
+Our approximation matches!
+
+# Question 4
+
+Find the area of the region bounded by the graphs of the given equations.
+
+$$y = x^2 - 2x - 2$$
+$$y = x + 2$$
+
+### Response
+
+We need to find the area between the two curves provided. It is helpful to plot these two curves first.
+
+```{r}
+f_y1 = function(x) x^2 - 2*x - 2
+f_y2 = function(x) x + 2
+
+df = data.frame()
+
+for (x in seq(-10, 10, length.out = 1000)) {
+  result <- list(x = x, y1 = f_y1(x), y2 = f_y2(x))
+  df <- rbind(df, result)
+}
+
+df %>%
+  ggplot() +
+  geom_line(aes(x, y1), color = 'green') +
+  geom_line(aes(x, y2), color = 'blue')
+```
+
+The area between these curves is our goal. We can find the area by integrating the difference of these two functions, specifically the second minus the first (given that the line from the second function sits above the curve from the first in the area of overlap).
+
+To find the bounds of our integral, we need to find the exact points of intersection by setting the two functions equal to one another and solving for x.
+
+$$x^2 - 2x - 2 = x + 2$$
+$$x^2 - 3x - 4 = 0$$
+$$(x - 4)(x + 1) = 0$$
+$$x = 4, x = -1$$
+
+We can now set up our integral.
+
+$$\int_{-1}^4 [(x + 2) - (x^2 - 2x - 2)]dx$$
+$$\int_{-1}^4 [x + 2 - x^2 + 2x + 2]dx$$
+$$\int_{-1}^4 [x^2 + 3x + 4]dx$$
+$$\int_{-1}^4 -x^2 + \int_{-1}^4 3x + \int_{-1}^4 4$$
+$$\frac{-x^3}{3} + \frac{3x^2}{2} + 4x $$
+
+We can now evaluate this expression at $x = 4$ and $x = -1$ and subtract them to find the area.
+
+$$A = [\frac{-4^3}{3} + \frac{3(4)^2}{2} + 4(4)] - [\frac{-(-1)^3}{3} + \frac{3(-1)^2}{2} + 4(-1)]$$
+$$A = ~20.833$$
+
+Let's run a check with R!
+
+```{r}
+f <- function(x) (x+2) - (x^2 - 2*x - 2)
+integrate(f, -1, 4)
+```
+
+We have a match!
+
+# Question 5
+
+A beauty supply store expects to sell 110 flat irons during the next year. It costs \$3.75 to store one flat iron for one year. There is a fixed cost of \$8.25 for each order. Find the lot size and the number of orders per year that will minimize inventory costs.
+
+### Response
+
+One way to find a solution is to define a cost function, then calculate the dervative to find the minimum of the resulting curve.
+
+Let's define our function, with $l$ as the lot size (i.e. irons per order), $s$ as storage costs, $o$ as order costs and $d$ as expected demand. This requires some assumptions. First, we assume that the store will have to store however many irons are in a single lot at any given time. So, the annual storage costs are equal to the stoage cost per iron ($s$) times the lot size ($l$). Second, we assume that demand and orders are evenly spaced throughout the year. So, the number of required orders is simply the total demand ($d$) divided by the lot size ($l$). Moreover, the total ordering cost is the product of the number of orders and cost per order.
+
+$$f(l) = s \times l + \frac{d}{l} \times o$$
+
+We can plug in the known values to simplify this a bit.
+
+$$f(l) =3.75 l + \frac{110 \times 8.25}{l}$$
+$$f(l) = 3.75 l + \frac{907.5}{l}$$
+
+We must now find the derivative of this function with respect to $l$.
+
+$$dl = 3.75 - \frac{907.5}{l^2}$$
+
+We can now set this equal to zero to find the optimal lot order size that minimizes this cost.
+
+$$0 = 3.75 - \frac{907.5}{l^2}$$
+$$\frac{907.5}{l^2} = 3.75 $$
+$$907.5 = 3.75l^2$$
+$$242 = l^2$$
+$$l = ~15.56$$
+
+So, the optimal lot size is ~15.56, which implies roughly 7 orders a year.
+
+# Question 6
+
+Use integration by parts to solve the integral below.
+
+$$\int ln(9x) x^6 dx$$
+
+### Response
+
+Integration by parts uses the following formula.
+
+$$\int u \ dv = uv - \int v \ du$$
+
+So, we need to split the expression into two parts: $u$ and $dv$. We can assign $u = ln(9x)$ and $dv = x^6dx$. We can now compute $du$ and $v$.
+
+$$du = \frac{1}{9x} \ 9 \ dx = \frac{1}{x} dx$$
+$$v = \int x^6 \ dx = \frac{x^7}{7}$$
+
+We can now plug these values into the integration by parts formula.
+
+$$\int u \ dv = uv - \int v \ du = ln(9x) \ \frac{x^7}{7} - \int \frac{x^7}{7} \frac{1}{x} dx$$
+$$ln(9x) \ \frac{x^7}{7} - \frac{1}{7} \int x^6 dx$$
+$$ln(9x) \ \frac{x^7}{7} - \frac{1}{7} \frac{x^7}{7}$$
+$$ln(9x) \ \frac{x^7}{7} - \frac{x^7}{49} + C$$
+
+Let's check our result against 'Ryacas'.
+
+```{r}
+x <- yac_symbol('x')
+fn <- log(9*x)*x^6
+integrate(fn, x)
+```
+
+They match!
+
+# Question 7
+
+Determine whether $f(x)$ is a probability density function on the interval $[1, e^6]$. If not, determine the value of the definite integral.
+$$f ( x ) = \frac{1}{6x}$$
+
+### Response
+
+Probability density functions have two key properties. First, all values must be positive, and second, the area under the curve must sum to 1. The first condition is clearly satisfied based on the defined interval. To test the second condition, we can find the integral of the function and confirm it equals 1.
+
+$$\int_1^{e^6} \frac{1}{6x} \ dx$$
+```{r}
+f <- function(x) 1 / (6*x)
+integrate(f, 1, exp(6))
+```
+
+It appears that $f(x)$ is indeed a PDF!
