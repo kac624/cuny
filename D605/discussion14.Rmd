@@ -1,0 +1,17 @@
+---
+title: "discussion14"
+author: "Keith Colella"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+Approximate the value of the given definite integral by using the first 4 nonzero terms of the integrand’s Taylor series.
+
+$$\int_0^{\sqrt{\pi}} sin (x^2)dx$$
+
+Create the Taylor series of the given function.
+$$f(x) = e^{−x}$$
+$$f(x) = cos (x^2)$$
+
+$$\frac{d}{dx}$$
+$$\frac{df}{dx}$$
