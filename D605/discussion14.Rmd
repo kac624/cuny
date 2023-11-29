@@ -5,11 +5,69 @@ date: "`r Sys.Date()`"
 output: html_document
 ---
 
+Chapter 8.8, Page 496, Q#31
+
+# Question
+
 Approximate the value of the given definite integral by using the first 4 nonzero terms of the integrand’s Taylor series.
 
 $$\int_0^{\sqrt{\pi}} sin (x^2)dx$$
 
+# Response
+
+Key Idea 8.8.1 gives us the first four non-zero terms for $$\sin x$$.
+
+$$x - \frac{x^3}{3!} + \frac{x^5}{5!} - \frac{x^7}{7!}$$
+
+Our integrand is $$\sin x^2$$, so we can replace $$x$$ with $$x^2$$ in the terms above.
+
+$$x^2 - \frac{(x^2)^3}{3!} + \frac{(x^2)^5}{5!} - \frac{(x^2)^7}{7!}$$
+$$x^2 - \frac{x^6}{3!} + \frac{x^{10}}{5!} - \frac{x^{14}}{7!}$$
+
+An integral of the sum (or difference) of multiple terms is equal to the sum (or difference) of the integrals of those terms. So, to evaluate this integral, we can evaluate each term as a separate integral, then sum.
+
+$$\int_0^{\sqrt{\pi}}x^2 - \int_0^{\sqrt{\pi}}\frac{x^6}{3!} + \int_0^{\sqrt{\pi}}\frac{x^{10}}{5!} - \int_0^{\sqrt{\pi}}\frac{x^{14}}{7!}$$
+
+We'll plug these into R.
+
+```{r}
+f1 <- function(x) x^2
+f2 <- function(x) x^6/factorial(3)
+f3 <- function(x) x^10/factorial(5)
+f4 <- function(x) x^14/factorial(7)
+
+results <- c()
+counter <- 1
+
+for (f in c(f1,f2,f3,f4)) {
+  result <- integrate(f, 0, sqrt(pi))
+  if (counter %% 2 == 0) {
+    results <- c(results, -result$value)
+  } else {
+    results <- c(results, result$value)
+  }
+  counter <- counter + 1
+}
+
+print(sum(results))
+```
+
+Alternatively, we could just run the integrate() function on the original full set of terms.
+
+```{r}
+f <- function(x) x^2 - x^6/factorial(3) + x^10/factorial(5) - x^14/factorial(7)
+result <- integrate(f, 0, sqrt(pi))
+
+print(result$value)
+```
+
+They match!
+
+
+
+
 Create the Taylor series of the given function.
+
 $$f(x) = e^{−x}$$
 $$f(x) = cos (x^2)$$
 
