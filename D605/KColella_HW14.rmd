@@ -1,0 +1,185 @@
+---
+title: "DATA605 Homework 13"
+author: "Keith Colella"
+date: "2023-11-25"
+output: html_document
+---
+
+```{r, message=FALSE, warning=FALSE}
+library(calculus)
+library(Deriv)
+```
+
+## Assignment
+
+This week, we’ll work out some Taylor Series expansions of popular functions.
+
+1. $f(x) = (1−x)$
+2. $f(x) = e^x$  
+3. $f(x) = ln(1 + x)$
+4. $f(x) = x^{(1/2)}$
+
+For each function, only consider its valid ranges as indicated in the notes when you are computing the Taylor Series expansion. Please submit your assignment as an R-Markdown document.
+
+## Response
+
+For each function, I'll start work out the expansion using the base formula for Taylor Series.
+
+$$f(x) = \sum_{n=0}^{\infty} \frac{f^{(n)}(c)}{n!} (x-c)^n$$
+I'll work out the first four terms, centered on zero.
+
+$$f(x) = f(c) + f'(c)(x-c) + \frac{f''(c)}{2!}(x-c)^2 + \frac{f'''(c)}{3!}(x-c)^3$$
+
+#### Function 1
+
+$$f(x) = (1−x)$$
+
+This first function is a bit unique, in that the function is already linear. So, a Taylor Series expansion does not serve a functional purpose, in that there is no need to approximate!
+
+Still, we can work through the expansion. The first derivative of $f(x) = (1−x)$ with respect to $x$ is simply -1. That means that all further derivatives are simply zero. So, our Taylor Series looks as follows.
+
+$$f(x) = 1-0 + -1(x-c) + \frac{0}{2!}(x-c)^2 + \frac{0}{3!}(x-c)^3 + ...$$
+
+Beyond the first two terms, all are zero, so we just have the following.
+
+$$f(x) = 1 + -1(x-c)$$
+
+Which we can simplify to $1-x+c$. If we center this on $c=0$, then we are left with $1-x$, which is our original function. It makes sense that the Taylor Series of a linear function $f(x)$ is simply $f(x)$. Taylor Series are a linear approximation of non-linear functions. So if we apply the approach to an already linear function, we get an exact match.
+
+Let's check our result against the `taylor` function from the  `calculus` package.
+
+```{r}
+f1_taylor <- taylor('1-x', var = 'x', order = 4)
+print(f1_taylor$f)
+```
+
+It's the same!
+
+#### Function 2
+
+$$f(x) = e^x$$ 
+
+Figure 8.8.1 in the text gives us the simplified expansion for $e^x$ as follows.
+
+$$ 1 + x + \frac{x^2}{2!} + \frac{x^3}{3!} + ...$$
+
+Let's work to this same spot using the base Taylor Series formula. First, we need to evaluate $f(x)$ at $c=0$ for the first term, and $e^0$ is just 1.
+
+Second, we need the first, second and third derivatives of $e^x$. For this function, however, the answer is simple: it's always $e^x$. In fact, that is the part of what defines $e^x$: it represents the constant that, when used as a base in an exponential function, has a derivative that is proportional to itself by a factor of 1. In other words, $e^x$ is the unique function that equals its own derivative. So, for all terms in our Taylor Series, the function that we will evaluate is just $e^x$.
+
+Let's plug these values in to our Taylor Series formula with $c=0$.
+
+
+$$f(x) = f(c) + f'(c)(x-c) + \frac{f''(c)}{2!}(x-c)^2 + \frac{f'''(c)}{3!}(x-c)^3$$
+$$f(x) = 1 + e^0 (x-0) + \frac{e^0}{2!}(x-0)^2 + \frac{e^0}{3!}(x-0)^3$$
+$$f(x) = 1 + 1 (x) + \frac{1}{2!}(x)^2 + \frac{1}{3!}(x)^3$$
+$$ 1 + x + \frac{x^2}{2!} + \frac{x^3}{3!} $$
+
+With that, we've landed back at what we had in the text. Let's run a final check with `calculus`.
+
+```{r}
+f2_taylor <- taylor('exp(x)', 'x', order = 4)
+print(f2_taylor$f)
+```
+
+It appears to match, but let's check these coefficients. 
+
+```{r}
+print(1/factorial(2))
+print(1/factorial(3))
+print(1/factorial(4))
+```
+
+Looks good!
+
+#### Function 3
+
+$$f(x) = ln(1 + x)$$ 
+
+Figure 8.8.1 gives us the expansion for $ln(x)$ as follows:
+
+$$(x-1) - \frac{(x-1)^2}{2} + \frac{(x-1)^3}{3} - ...$$
+
+I would presume $ln(1+x)$ follows a similar pattern, but let's work it out.
+
+First, we find that $f(0) = ln(1) = 0$, so our first term drops off. Next, we find derivatives.
+
+```{r}
+f <- function(x) log(1+x)
+df <- Deriv(f)
+df2 <- Deriv(df)
+df3 <- Deriv(df2)
+df4 <- Deriv(df3)
+
+print(df)
+print(df2)
+print(df3)
+print(df4)
+
+print(df(0))
+print(df2(0))
+print(df3(0))
+print(df4(0))
+```
+
+So, our coefficients are 1, -1, 2 and -6 for our second, third, fourth and fifth terms. Let's plug these in.
+
+$$f(x) = f(c) + f'(c)(x-c) + \frac{f''(c)}{2!}(x-c)^2 + \frac{f'''(c)}{3!}(x-c)^3 + \frac{f''''(c)}{4!}(x-c)^4$$
+$$f(x) = 0 + 1(x-0) + \frac{-1}{2!}(x-0)^2 + \frac{2}{3!}(x-0)^3 + \frac{-6}{4!}(x-0)^4$$
+$$f(x) = 0 + 1(x) + \frac{-1}{2!}(x)^2 + \frac{2}{3!}(x)^3 + \frac{-6}{4!}(x)^4$$
+$$f(x) = 0 + x - \frac{x^2}{2!} + \frac{2x^3}{3!} - \frac{6x^4}{4!}$$
+
+```{r}
+f3_taylor <- taylor('log(1+x)', 'x', order = 4)
+print(f3_taylor$f)
+```
+
+Looks good. We already confirmed that 1/2! equals 0.5 (duh), but I'll double check that those others.
+
+```{r}
+2/factorial(3)
+6/factorial(4)
+```
+
+We're good :)
+
+Bringing it back to the Series for $ln(x)$, we see a similar positive-negative pattern and overall structure. But it seems that we've gotten rid of the $(x-1)$ format and introduced some other coefficients. Interesting!
+
+#### Function 4
+
+$$f(x) = x^{(1/2)}$$
+
+For this function, we have $x$ alone in the base, so centering on zero will result in the zeroing out of all terms. So, we'll center this Series on $c=1$.
+
+We can evaluate $f(1)$ as $1^{1/2} = 1$. Next, we can find the first three derivatives by applying the power rule.
+
+$$f'(x) = \frac{1}{2}x^{-1/2}$$
+$$f''(x) = -\frac{1}{4}x^{-3/2}$$
+$$f'''(x) = \frac{3}{8}x^{-5/2}$$
+
+We can see we've got some strange exponents to deal with. Luckly, we are centering on 1, and 1 to any power is just 1, which should clean things up.
+
+Let's try and plug these in with $c=1$.
+
+$$f(x) = f(c) + f'(c)(x-c) + \frac{f''(c)}{2!}(x-c)^2 + \frac{f'''(c)}{3!}(x-c)^3$$
+$$f(x) = 1 + \frac{1}{2}1^{-1/2}(x-1) + \frac{-\frac{1}{4}1^{-3/2}}{2!}(x-1)^2 + \frac{\frac{3}{8}1^{-5/2}}{3!}(x-1)^3$$
+$$f(x) = 1 + \frac{1}{2}1(x-1) + \frac{-\frac{1}{4}1}{2!}(x-1)^2 + \frac{\frac{3}{8}1}{3!}(x-1)^3$$
+$$f(x) = 1 + \frac{1}{2}(x-1) - \frac{\frac{1}{4}}{2!}(x-1)^2 + \frac{\frac{3}{8}}{3!}(x-1)^3$$
+
+We can get some rough decimals to try and clean this up a bit.
+
+```{r}
+(1/4)/factorial(2)
+(3/8)/factorial(3)
+```
+
+$$f(x) = 1 + 0.5(x-1) - 0.125(x-1)^2 + 0.0625(x-1)^3$$
+
+Finally, let's check it. I don't believe we can center on any other value except 0 in the `taylor` function in `calculus`. Instead, we'll just check the coefficients using `pracma`.
+
+```{r}
+f <- function(x) x^(1/2)
+pracma::taylor(f, x0 = 1, n = 3)
+```
+
+Hm, they don't quite match. I'm not able to find any issues with my expansion, so I'll need to leave this as a point for further inquiry!
