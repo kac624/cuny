@@ -1,0 +1,87 @@
+---
+title: "Web scraping on job board for data analysts"
+author: "Rstudio"
+date: "2023-03-16"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+##### Web scraping  on the website which Kayleah provided. 
+
+(website)[https://www.dataanalyst.com/]
+
+
+
+```{r}
+library(rvest)
+library(XML)
+library(xml2)
+library(DT)
+library(tidyverse)
+```
+
+
+```{r}
+# read the website
+url <- "https://www.dataanalyst.com"
+webpage <- read_html(url)
+
+# locate the element
+datacontent <- html_nodes(webpage, "div.section.home.wf-section")
+
+# scrape all the "div" elements inside
+div_elements <- html_nodes(datacontent, "div")
+```
+
+
+```{r}
+# get the text attribute
+div_texts <- html_text(div_elements)
+
+```
+
+
+```{r eval=FALSE}
+# print the text
+head(div_texts)
+```
+
+
+
+```{r}
+
+# save it to data frame
+div_texts_df <- data.frame(text = div_texts, stringsAsFactors = FALSE)
+
+head (div_texts_df)
+```
+
+
+```{r}
+div_texts_df <- div_texts_df %>%
+  mutate(job_title = stringr::str_extract(text, "regex_pattern"))
+
+```
+
+
+```{r}
+# extract company names and store them in a new column called company_name
+div_texts_df <- div_texts_df%>%
+  mutate(company_name = stringr::str_extract(text, "regex_pattern"))
+
+# extract job locations and store them in a new column called job_location
+div_texts_df <- div_texts_df%>%
+  mutate(job_location = stringr::str_extract(text, "regex_pattern"))
+
+# extract job descriptions and store them in a new column called job_description
+div_texts_df<- div_texts_df %>%
+  mutate(job_description = stringr::str_extract(text, "regex_pattern"))
+
+```
+
+

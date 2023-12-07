@@ -1,0 +1,313 @@
+---
+title: "Analysis & Visualizations"
+author: "John Cruz"
+date: "3-16-2022"
+output: html_document
+---
+
+```{r setup, include = F}
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+library(tidyverse)
+library(ggplot2)
+library(ggwordcloud)
+```
+
+## Introduction.
+
+This work is the fourth of five stages of an analysis where the main objective was to identify the most valued data science skills. Our approach to this was to collect job postings from various job boards and extract the skills from the postings. The purpose of this specific file's work is to analyze the skills extracted from the job postings.  
+
+## Read in data
+
+Read the data from a CSV file which contains job listings and skills
+
+```{r message=FALSE}
+import_df <- read_csv('output/job_listings_skills_long.csv')
+```
+
+## Job Listings Based on Data Source
+
+```{r website-count}
+distinct_job_website <- 
+  import_df |> 
+  group_by(website) |> 
+  summarise(count = n_distinct(job_id)) |> 
+  arrange(desc(count))
+
+ggplot(distinct_job_website, aes(x = count, y = reorder(website, count))) +
+  geom_bar(stat = 'identity', fill = '#4E79A7') +
+  labs(title = "Job Listings per Website", x = '', y = '') +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(),
+        axis.text = element_text(face = 'bold'))
+
+knitr::kable(distinct_job_website)
+```
+
+## Most Requested Degree
+
+Based on the job postings that had college degree information, having a Master's was first at 498, followed by a Bachelor's at 456. 
+
+```{r college-degree}
+high_degree <- 
+  import_df |> 
+  na.omit(highest_ed) %>%
+  group_by(highest_ed) %>%
+  summarize(count = n_distinct(job_id))
+
+high_degree %>%
+  ggplot(aes(x = highest_ed, y = count)) +
+  geom_bar(stat = 'identity', fill = '#4E79A7') + 
+  labs(title = "Most Degrees Requested", x = '', y = '') +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(),
+        axis.text = element_text(face = 'bold')) +
+  geom_text(aes(label = count), 
+            position = position_stack(vjust = 0.8), 
+            size = 4,
+            fontface = 'bold',
+            color = 'white')
+
+knitr::kable(high_degree)
+```
+
+## Maximum Salary Distribution
+
+The histogram shows the distribution of maximum salary values for all jobs within the dataset, with missing values removed. We can see that there is a bi-modal distribution where it peaks first at \$125,000 and again at \$175,000. 
+
+```{r salary}
+salaries <- 
+  import_df |> 
+  filter(!is.na(salary_max)) |> 
+  distinct(job_id, .keep_all = TRUE)
+  
+
+salaries |> 
+  ggplot(aes(x = salary_max)) +
+  geom_histogram(binwidth = 25000, fill = '#4E79A7') +
+  scale_x_continuous(labels = scales::dollar) +
+  labs(title = "Maximum Salary Distribution", x = '', y = '') +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(),
+        axis.text = element_text(face = 'bold')) +
+  stat_bin(binwidth=25000, geom='text', color='white', size=3,
+           aes(label=after_stat(count)), position=position_stack(vjust=0.8))
+```
+
+## Maximum Salary Distribution vs. Education
+
+Separating our bi-modal distribution based on education, we can still see the same type of distribution and peaks as before.
+
+```{r salary-edu}
+salaries_edu <- 
+  import_df |> 
+  filter(!is.na(salary_max), !is.na(highest_ed)) |> 
+  distinct(job_id, .keep_all = TRUE)
+  
+
+salaries_edu |> 
+  ggplot(aes(x = salary_max)) +
+  geom_histogram(binwidth = 25000, fill = '#4E79A7') +
+  scale_x_continuous(labels = scales::dollar) +
+  labs(title = "Maximum Salary Distribution vs. Education", x = '', y = '') +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(),
+        axis.text = element_text(face = 'bold')) +
+  stat_bin(binwidth=25000, geom='text', color='white', size=3,
+           aes(label=after_stat(count)), position=position_stack(vjust=0.8)) +
+  facet_grid(rows = vars(highest_ed))
+```
+
+## Maximum Salary Distribution vs. Years of Experience
+
+Separating our bi-modal distribution based on years of experience, we again can still see the same type of distribution and peaks as before.
+
+```{r salary-experience}
+salaries_exp <- 
+  import_df |> 
+  filter(!is.na(salary_max), !is.na(years_exp)) |> 
+  distinct(job_id, .keep_all = TRUE) |> 
+  mutate(exp_bins = case_when(years_exp <= 2 ~ "0-2",
+                              years_exp > 2 & years_exp <= 5 ~ "3-5",
+                              years_exp > 5 & years_exp <= 8 ~ "6-8",
+                              years_exp > 8  ~ "9+")) |> 
+  mutate(across(c(exp_bins), factor))
+
+
+salaries_exp |> 
+  ggplot(aes(x = salary_max)) +
+  geom_histogram(binwidth = 25000, fill = '#4E79A7') +
+  scale_x_continuous(labels = scales::dollar) +
+  labs(title = "Maximum Salary Distribution vs. Years of Experience", x = '', y = '') +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(),
+        axis.text = element_text(face = 'bold')) +
+  stat_bin(binwidth=25000, geom='text', color='white', size=3,
+           aes(label=after_stat(count)), position=position_stack(vjust=0.8)) +
+  facet_grid(rows = vars(exp_bins))
+```
+
+## Education and Years of Experience
+
+Based on the chart, we can identify that most jobs primarily look for candidates with 3-5 years of experience. However, the plot also suggests that there are differences in the distribution of years of experience within each educational level. For example, among individuals with a Bachelor's degree, the distribution of years of experience appears to be skewed towards the lower end, suggesting that many individuals in these positions have relatively little experience. On the other hand, among individuals with a PhD, the distribution of years of experience appears to be more evenly spread out, suggesting that individuals with a PhD may have more varied levels of experience.
+
+```{r education-exp}
+edu_exp <- 
+  import_df |> 
+  filter(!is.na(highest_ed), !is.na(years_exp)) |> 
+  distinct(job_id, .keep_all = TRUE) |> 
+  mutate(exp_bins = case_when(years_exp <= 2 ~ "0-2",
+                              years_exp > 2 & years_exp <= 5 ~ "3-5",
+                              years_exp > 5 & years_exp <= 8 ~ "6-8",
+                              years_exp > 8  ~ "9+")) |> 
+  mutate(across(c(exp_bins), factor))
+
+edu_exp |> ggplot(aes(exp_bins)) +
+  geom_bar(aes(fill = exp_bins)) +
+  facet_grid(~highest_ed,
+             labeller = label_wrap_gen(width=2, multi_line=TRUE)) +
+  labs(title = "Education vs. Years of Experience", 
+       x = '', y = '',
+       fill = "Years of Experience") +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(),
+        axis.text = element_text(face = 'bold'),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        legend.position="top") +
+  scale_fill_brewer(palette = 'Set1')
+```
+
+## Top 20 Most Frequently Cited Skills
+
+```{r top20-all}
+skill_counts <- import_df %>%
+  group_by(skill) %>%
+  summarize(count = n(), .groups = 'keep') |> 
+  filter(!skill %in% c('engineering', 'data science', 'research', 'programming')) |> 
+  arrange(desc(count))
+
+skill_counts |> 
+  head(20) |> 
+  ggplot(aes(x = count, y = reorder(skill, count))) +
+  geom_bar(stat = 'identity', fill = '#4E79A7') +
+    labs(title = "Top 20 Most Frequently Cited Skills", x = '', y = '') +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(),
+        axis.text = element_text(face = 'bold')) +
+  geom_text(aes(label = count), 
+            position = position_stack(vjust = 0.9), 
+            size = 3,
+            fontface = 'bold',
+            color = 'white')
+
+knitr::kable(skill_counts |> head(20))
+```
+
+## What are the top 10 most important skills for data science?
+
+```{r top10-ds}
+top_10 <- import_df %>%
+  count(skill) %>%
+  arrange(desc(n)) %>%
+  head(n = 10)
+
+knitr::kable(top_10, col.names = c("Skills", "Count"), format.args = list(big.mark = ","))
+
+top_10 %>%
+  ggplot(aes(y = reorder(skill, n), x = n, fill = skill)) +
+    geom_bar(stat = "identity") +
+    labs(title = "Top 10 Skills for Data Science", x = "Count", y = "Skill") +
+    theme(legend.position = "none")
+```
+
+## What are the top skills for Data Scientists vs. Data Analysts?
+
+The highlighted bars shows the overlap in skills between both job titles. 
+
+```{r top-ds-da, fig.show='hold', out.width='50%', warning=FALSE, message=FALSE}
+# filter for just data scientists and analysts
+data_scientist <- import_df %>% 
+  filter(str_detect(job_title, "data scientist")) %>%
+  mutate(job = "Data Scientist")
+  
+data_analyst <- import_df %>% 
+  filter(str_detect(job_title, "data analyst")) %>%
+  mutate(job = "Data Analyst")
+
+# top 10 for each
+data_scientist_top10 <- data_scientist %>%
+  count(skill) %>%
+  arrange(desc(n)) %>%
+  head(n = 10)
+
+data_analyst_top10 <- data_analyst %>%
+  count(skill) %>%
+  arrange(desc(n)) %>%
+  head(n = 10)
+
+common_skills <- data_analyst_top10 |> 
+  inner_join(data_scientist_top10, by = 'skill') |> 
+  select(skill)
+
+vec_common_skills <- common_skills[['skill']]
+
+data_scientist_top10 <-
+  data_scientist_top10 |> mutate(f_color = ifelse(skill %in% vec_common_skills, "Yes", "No"))
+
+data_analyst_top10 <-
+  data_analyst_top10 |> mutate(f_color = ifelse(skill %in% vec_common_skills, "Yes", "No"))
+
+# plot top 10
+data_scientist_top10 %>%
+  ggplot(aes(y = reorder(skill, n), x = n, fill = f_color)) +
+    geom_bar(stat = "identity") +
+    labs(title = "Top 10 Skills for Data Scientists", x = "Count", y='') +
+    theme_bw() +
+    theme(legend.position = "none") +
+    scale_fill_manual(values = c("Yes" = "#F28E2B", "No" = "gray")) +
+    geom_text(aes(label = n), 
+            position = position_stack(vjust = 0.9), 
+            size = 3,
+            fontface = 'bold',
+            color = 'black')
+
+data_analyst_top10 %>%
+  ggplot(aes(y = reorder(skill, n), x = n, fill = f_color)) +
+    geom_bar(stat = "identity") +
+    labs(title = "Top 10 Skills for Data Analysts", x = "Count", y = '') +
+    theme_bw() +
+    theme(legend.position = "none") +
+    scale_fill_manual(values = c("Yes" = "#F28E2B", "No" = "gray")) +
+    geom_text(aes(label = n), 
+            position = position_stack(vjust = 0.9), 
+            size = 3,
+            fontface = 'bold',
+            color = 'black')
+```
+
+## Wordclouds
+
+Sort the data by the number of citations in descending order and select the top 20 most cited skills. Create the plot using ggplot2 and ggwordcloud packages
+
+```{r rename6}
+skill_counts <- skill_counts %>%
+  arrange(desc(count)) %>%
+  head(20)
+
+ggplot(skill_counts, aes(label = skill, size = count, color = factor(sample.int(8, nrow(skill_counts), replace = TRUE)))) +
+  geom_text_wordcloud() +
+  scale_size_area(max_size = 10) +
+  theme_minimal()
+```
+
+This code generates a word cloud plot of the most frequently cited skills in the jobs_long dataset. It first creates a new dataframe called skills_freq that counts the frequency of each skill in the skills column of jobs_long, arranges them in descending order, and selects the top 20 It then uses ggplot and geom_text_wordcloud to plot the skill names as words, with the size of the word indicating the frequency of the skill. The plot is given a title "Most frequently cited skills".
+
+## Conclusion 
+
+The "Master" education level is the most prevalent among different job types, followed by "PhD" and "Bachelor".
+The majority of jobs have a maximum salary value between 100,000 and 200,000 USD. There are relatively fewer jobs with a maximum salary value between 0 and 100,000 USD, and even fewer with a maximum salary value between 200,000 and 300,000 USD. There are only a few jobs with a maximum salary value above 300,000 USD.
+There are differences in the distribution of years of experience across different job positions and education levels. For example, among individuals with a Bachelor's degree, the distribution of years of experience appears to be skewed towards the lower end, suggesting that many individuals in these positions have relatively little experience. On the other hand, among individuals with a PhD, the distribution of years of experience appears to be more evenly spread out, suggesting that individuals with a PhD may have more varied levels of experience.
+The most frequently cited skills in the job listings are "Python", "SQL", and "Machine Learning". The top skills cited in the job listings vary depending on the highest education level required and the job location.
+
+------------------
