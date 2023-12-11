@@ -1,0 +1,175 @@
+---
+title: "DATA605 Homework 15"
+author: "Keith Colella"
+date: "2023-12-11"
+output: html_document
+---
+
+```{r, message = FALSE, warning = FALSE}
+library(Ryacas)
+library(Deriv)
+```
+
+## Question 1
+
+Find the equation of the regression line for the given points. Round any final values to the nearest hundredth, if necessary.
+
+$$( 5.6, 8.8 ), ( 6.3, 12.4 ), ( 7, 14.8 ), ( 7.7, 18.2 ), ( 8.4, 20.8 )$$
+
+#### Response
+
+The regression line is the best fit line, or the line that minimizes the sum of squared errors (SSE). Like any line, we can express it as a function $y = mx + b$, where $m$ is our slope and $b$ is our intercept. If we're using regression notation, we would express it as $y = \alpha + \beta x$. The SSE can be formulated as $SSE = \Sigma [y_i - \alpha + \beta x_{i})]^2$.
+
+So, we can find the parameters $\alpha$ and $\beta$ that minimize the SSE by taking the partial derivatives of the SSE function with respect to $\alpha$ and $\beta$. We can then set the resulting partial derivatives equal to zero (representing the minimums of our SSE curves) and solve the system of equations.
+
+Let's start with the partial derivatives of $SSE = f(\alpha,\beta) = \Sigma [y_i - \alpha + \beta x_{i})]^2$.
+
+$f_{\alpha} = \frac{\partial f}{\partial \alpha} = -2 \sigma [y_i - \alpha + \beta x_{i})]$
+
+$f_{\beta} = \frac{\partial f}{\partial \beta} = 2 \sigma [y_i - \alpha + \beta x_{i})]x_i$
+
+We can then set both equal to zero and solve the system. After quite a bit of rearranging, we get the following.
+
+$\alpha = \bar{y} + \beta \bar{x}$
+
+$\beta = \frac{\bar{y} \Sigma x_i - \Sigma y_ix_i}{\Sigma x^2_i - \bar{x} \Sigma x_i}$
+
+```{r}
+beta_calc <- function(x, y) {
+  n <- length(x)
+  x_bar <- mean(x)
+  y_bar <- mean(y)
+  
+  sum_xi <- sum(x)
+  sum_yi_xi <- sum(y * x)
+  sum_xi_squared <- sum(x^2)
+  
+  beta <- (y_bar * sum_xi - sum_yi_xi) / (sum_xi_squared - x_bar * sum_xi)
+  return(beta)
+}
+
+x <- c(5.6, 6.3, 7, 7.7, 8.4)
+y <- c(8.8, 12.4, 14.8, 18.2, 20.8)
+
+beta <- beta_calc(x,y)
+
+alpha_calc <- function(x, y, beta) {
+  return(mean(y) + beta * mean(x))
+}
+
+alpha <- alpha_calc(x, y, beta)
+
+cat(
+  'Final regression line: y = ', 
+  round(alpha,2), ' + ', 
+  round(beta,2), 'x', 
+  sep = ''
+)
+```
+
+Now, let's check this against R's lm function, which calculates the same thing!
+
+```{r}
+lm <- lm(y~x)
+
+lm_alpha <- lm$coefficients[1]
+lm_beta <- lm$coefficients[2]
+
+cat(
+  'LM function regression line: y = ',
+  round(lm_alpha,2), ' + ',
+  round(lm_beta,2), 'x', 
+  sep = ''
+)
+```
+
+It's the same!
+
+## Question 2
+
+Find all local maxima, local minima, and saddle points for the function given below. Write your answer(s) in the form 
+$(x, y, z)$. Separate multiple points with a comma.
+
+$$f(x, y) = 24x - 6xy^2 - 8y^3$$
+
+#### Response
+
+Finding local minima/maxima requires the second derivative test, which involves (i) finding critical points, (ii) calculating the second partial derivatives and (iii) evaluating the discriminant. 
+
+First we need the critical points, which are the first partial derivatives evaluated at 0. The first partial derivatives are:
+
+$$f_X = \frac{\partial f}{\partial x} = 24 - 6y^2$$
+
+$$f_y = \frac{\partial f}{\partial y} = -12xy - 6y^2$$
+
+When evaluated at zero, they give us $y \pm -2$ and $x = -4$. So, our critical points are $(-4,2)$ and $(-4,-2)$.
+
+Next, we need the second partial derivatives for this function, solved as follows:
+
+$$f_{xx} = \frac{\partial ^2 f}{\partial x^2} = 0$$
+
+$$f_{yy} = \frac{\partial ^2 f}{\partial y^2} = -12x - 48y$$
+
+$$f_{xy} = \frac{\partial ^2 f}{\partial x \partial y} = -12y$$
+
+The discriminant $D$ is defined as follows.
+
+$$D = f_{xx}f_{yy} - (f_{xy})^2 = 0 \times (-12x-48y) - (12y)^2$$
+
+Finally, let's evaluate at our critical points, $(-4,2)$ and $(-4,-2)$.
+
+$$D_{(-4,2)} = 0 \times (-12(-4)-48(2)) - (12(2))^2 = -576$$
+$$D_{(-4,-2)} = 0 \times (-12(-4)-48(2)) - (12(-2))^2 = -576$$
+
+In both cases, the discriminant is < 0. Per the second derivative test definition, this indicates that both points are saddles, and the function has no local minima or maxima.
+
+## Question 3
+
+A grocery store sells two brands of a product, the "house" brand and a "name" brand. The manager estimates that if she sells the "house" brand for x dollars and the "name" brand for y dollars, she will be able to sell $81 - 21x + 17y$ units of the "house" brand and $40 + 11x - 23y$ units of the "name" brand.
+
+**Step 1:** Find the revenue function $R (x, y)$.
+
+**Step 2:** What is the revenue if she sells the "house" brand for \$2.30 and the "name" brand for \$4.10?
+
+#### Response
+
+Revenue for each product would be determined by the number of units sold multiplied by the price. We are given all of these values in terms of $x$ and $y$, so we can write this as a function.
+
+$$R(x,y) = x(81 - 21x + 17y) + y(40 + 11x - 23y)$$
+
+To evaluate this function with the provided values for $x$ and $y$, I'll write a quick functions.
+
+```{r}
+revenue <- function(x,y) {
+  revenue <- x * (81 - 21*x + 17*y) + y * (40 + 11*x - 23*y)
+  return(revenue)
+}
+
+rev <- revenue(x = 2.30, y = 4.10)
+
+cat('Projected revenue: $', round(rev,2), sep = '')
+```
+
+## Question 4
+
+A company has a plant in Los Angeles and a plant in Denver. The firm is committed to produce a total of 96 units of a product each week. The total weekly cost is given by 
+
+$$C(x, y) = \frac{1}{6}x^2 + \frac{1}{6}y^2 + 7x + 25y + 700$$
+
+where $x$ is the number of units produced in Los Angeles and $y$ is the number of units produced in Denver. How many units should be produced in each plant to minimize the total weekly cost?
+
+#### Response
+
+We can use a similar approach as we did when finding the SSE. First, we will find  
+
+## Question 5
+
+Evaluate the double integral on the given region.
+
+$\iint (e^{8x + 3y}) dA$; $R:2 \leq x \leq 4$ and $2 \leq y \leq 4$
+ 
+Write your answer in exact form without decimals.
+
+#### Response
+
+TBD
