@@ -9,3 +9,5 @@ D607/rsconnect/documents/Week5_TidyingTransformingData.Rmd/rpubs.com/rpubs/Docum
 *.dcf
 *.pyc
 *.ipynb_checkpoints
+*.joblib
+*.pth
