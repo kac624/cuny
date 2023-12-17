@@ -1,0 +1,271 @@
+---
+title: "D605 Final"
+author: "Keith Colella"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r message = FALSE, warning = FALSE}
+library(tidyverse)
+```
+
+# Problem 1 
+
+*Using R, set a random seed equal to 1234 (i.e., set.seed(1234)). Generate a random variable X that has 10,000 continuous random uniform values between 5 and 15.Then generate a random variable Y that has 10,000 random normal values with a mean of 10 and a standard deviation of 2.89.*
+
+```{r}
+set.seed(1234)
+
+X <- runif(n = 10^4, min = 5, max = 15)
+
+Y <- rnorm(n = 10^4, mean = 10, sd = 2.89)
+
+data.frame(X = X, Y = Y) %>%
+  ggplot() +
+  geom_histogram(aes(X), bins = 30, fill = 'red', alpha = 0.7) +
+  geom_histogram(aes(Y), bins = 30, fill = 'blue', alpha = 0.7)
+```
+
+### Part 1
+
+*Calculate as a minimum the below probabilities a through c. Assume the small letter "x" is estimated as the median of the X variable, and the small letter "y" is estimated as the median of the Y variable. Interpret the meaning of all probabilities.*
+
+*a. P(X>x | X>y)*
+
+We can approach this question both conceptually and empirically, given the distributions we generated above. First, let's set $x$ and $y$.
+
+```{r}
+x <- median(X)
+y <- median(Y)
+
+cat(
+  'Median of X: ',x,'\n',
+  'Median of Y: ',y,
+  sep = ''
+)
+```
+
+These values, both close to 10, conform to expectations. The median of both uniform and normal distributions are very close to the means, and we know the mean of both distributions will be ~10. For $X$, it's the halfway point between the min and max (5 and 15), and for $Y$, it's given.
+
+Let's reframe our question with this in mind. We are looking for the probability that our random variable is greater than $x$, and we already know that our random variable is greater than $y$. Since both of those values are ~10, our probability should be very close to 1.
+
+We can confirm this by creating a subset of cases where $X>y$, then calculating the proportion of those cases where $X$ is also less than $x$.
+
+```{r}
+B <- X[X>y]
+A <- B[B>x]
+
+proportion <- length(A) / length(B)
+
+cat('P(A|B):', proportion)
+```
+
+Within our random sample, 100% of the values of $X$ within the subset $X>y$ are greater than $x$. In other words, $P(X>x | X>y) = 1.$
+
+*b. P(X>x & Y>y)*
+
+Whereas part (a) asked for a conditional probability, we're now looking at a joint probability. In other words, we're given nothing, and we have to find the probability that both of these conditions are met simultaneously.
+
+Individually, the probability that a random variable is greater than the median of its respective distribution is 50%, since the median is, by definition, the 50th percentile. To be a bit more explicit, with a sample of 10,000, the probability would be
+
+$$P(X > x) = \frac{(10,000/2)}{10,000} = \frac{5000}{10,000} = 0.5$$
+
+And the same would apply to $P(Y > y)$. Moreover, we can estimate a joint probability $(PA \cap B)$ as the product of each individual probability: $P(A) \times P(B)$. So in this case, we would expect the probability to be 
+
+$$P(X>x \cap Y>y) = P(X>x) \times P(Y>y) = 0.4999 * 0.4999 = 0.2499$$
+
+Let's check this empirically. We can calculate the proportion of cases where $X>x$ compared to the total length of $X$, and the same for $Y>y$, then multiply the two.
+
+```{r}
+P_A <- length(X[X>x]) / length(X)
+P_B <- length(Y[Y>y]) / length(Y)
+
+P_AandB <- P_A * P_B
+
+print(P_AandB)
+```
+
+It matches! Another way to check this empirically is to randomly sample from both distributions, then calculate the proportion of cases where both samples are greater than their respective medians.
+
+```{r}
+results <- data.frame()
+
+for (n in 1:1000) {
+  x_sample <- sample(X, 1)
+  y_sample <- sample(Y, 1)
+  result <- list(X = x_sample, Y = y_sample)
+  results <- rbind(results, result)
+}
+
+proportion <- nrow(filter(results, X > x, Y > y)) / nrow(results)
+
+print(proportion)
+```
+
+Our estimate of 0.2499 holds true!
+
+*c. P(X<x | X>y)*
+
+We again have a condition probability, so we can employ a similar approach as our first problem. Moreover, given what we know about the first problem (i.e. that it's one), we can expect this probability to approach 0. Specifically, we know that $x$ and $y$ are both very close to 10. So if $X$ is greater than 10 (the given condition), then the chances of it also being less than 10 should be zero.
+
+Let's check it from our distributions.
+
+```{r}
+B <- X[X>y]
+A <- B[B<x]
+
+proportion <- length(A) / length(B)
+
+cat('P(A|B):', proportion)
+```
+
+Indeed, we find no cases where $X$ is both greater than $y$ and less than $x$, because both $x$ and $y$ are ~10.
+
+### Part 2
+
+*Investigate whether P(X>x & Y>y)=P(X>x)P(Y>y) by building a table and evaluating the marginal and joint probabilities.*
+
+We used this definition of joint probability above. Let's now build a contigency table to substantiate the definition. We'll use conditional subsets to count the number of cases the meet the conditions of interest ($X>x$ and $Y>y$, as well as their complements ($X \leq x$ and $Y \leq y$). From there, we can divide by $n = 10,000$ to convert the table to show the proportion that each subset represents of the total sample, which gives us their probabilities.
+
+```{r}
+contingency <- table(
+  factor(levels = c('X>x','X≤x','margin')), 
+  factor(levels = c('Y>y','Y≤y','margin'))
+)
+
+contingency['X>x', 'margin'] <- length(X[X>x])
+contingency['margin', 'Y>y'] <- length(Y[Y>y])
+
+contingency['X≤x', 'margin'] <- length(X[X<=x])
+contingency['margin', 'Y≤y'] <- length(Y[Y<=y])
+
+contingency['X>x', 'Y>y'] <- length(X[(X>x) & (Y>y)])
+contingency['X>x', 'Y≤y'] <- length(X[(X>x) & (Y<=y)])
+
+contingency['X≤x', 'Y>y'] <- length(X[(X<=x) & (Y>y)])
+contingency['X≤x', 'Y≤y'] <- length(X[(X<=x) & (Y<=y)])
+
+print(contingency)
+
+contingency_prop <- contingency/10^4
+
+print(contingency_prop)
+```
+
+We can now see that the marginal probabilities $P(X>x)$ and $P(Y>y)$ both equal 0.5. This conforms to expectations, given that (as noted above), $x$ and $y$ represent the medians (or 50th percentiles) of their respective distributions. Moreover, we see that the joint probability $P(X>x \cap Y>y)$ is ~0.2507. Let's see if the product of $P(X>x)$ and $P(Y>y)$ comes out to the same.
+
+```{r}
+contingency_prop['X>x','margin'] * contingency_prop['margin', 'Y>y']
+```
+
+Indeed, it matches. Our estimated probability in the contigency table doesn't *exactly* equal 0.25 because our random sampling is, well, random!
+
+### Part 3
+
+*Check to see if independence holds by using Fisher’s Exact Test and the Chi Square Test. What is the difference between the two? Which is most appropriate? Are you surprised at the results? Why or why not?*
+
+Both of these tests examine whether there are nonrandom associations between two variables. In the absence of such associations, we can conclude that the variables are independent. Both tests take as the null hypothesis ($H_0$) that the variables are independent, and the alternative hypothesis ($H_1$) is that they are not. Both produce a p-value that, as it approaches 0, gives us more confidence in rejecting alternative hypothesis. Finally, both require a contigency table as an input.
+
+In terms of differences, one key difference is related to sample size. Whereas the Chi-Squared test assumes that samples are random and representative, and that there are at least ~5 observations in each square of the contigency table, the Fisher Exact Test is typically used for smaller sample sizes (although it technically still applies to larger samples, too). Moreover, the Chi-Squared test relies upon the chi-squared distribution (which becomes more accurate as sample size increases), whereas the Fisher Test relies upon no parametric distribution. Finally, the Fisher test is a bit more computationally intensive (especially with large sample sizes).
+
+So, in terms of applicability, the Chi-Squared test is typically more appropriate for large sample sizes, while Fisher Test is often used with smaller samples. For situation, we have a very large sample of 10,000, so the Chi-Squared test seems most appropriate. Lucky for us, R has implementations for both of these tests, so let's check both!
+
+```{r}
+p_chi <- chisq.test(contingency[1:2, 1:2])$p.value
+
+p_fish <- fisher.test(contingency[1:2, 1:2])$p.value
+
+cat(
+  'Chi-Squared Test Result:', p_chi, '\n',
+  'Fisher Exact Test Result:', p_fish,
+  sep = ''
+)
+```
+
+In both cases, our p-value is well above zero. So, with just about any reasonable significance level / $\alpha$, we do not reject the null that the two variables are independent. Thus, we can conclude they *are* independent.
+
+Given that we generated these variables with entirely independent processes (`rnorm` and `runif`), it is unsurprising that these tests helped us conclude that they are independent. Moreover, they come from very different different distributions, so again, one would expect independence.
+
+# Problem 2
+
+*You are to register for Kaggle.com (free) and compete in the Regression with a Crab Age Dataset competition: https://www.kaggle.com/competitions/playground-series-s3e16.*
+
+```{r}
+train <- read.csv('data/crab_train.csv')
+test <- read.csv('data/crab_test.csv')
+```
+
+I noticed that the test dataset has no target variable (which makes sense, given competition). However, I'd like to test the generalizability of my modeling, so I'll perform another split to create a validation dataset. I'll use this validation data during model development to assess performance out-of-sample. I prefer to perform this step at before any analysis (including EDA) to minimize data leakage.
+
+```{r}
+train_idx <- caret::createDataPartition(train$Age, p = 0.8, list = FALSE)
+valid <- train[-train_idx, ]
+train <- train[train_idx, ]
+```
+
+### Descriptive and Inferential Statistics
+
+*Provide univariate descriptive statistics and appropriate plots for the training data set.*
+
+```{r}
+for (col in colnames(train)){
+  if(col == 'id' | col == 'Sex') next
+  cat('-----',col,'-----\n')
+  print(summary(train[[col]]))
+  hist(train[[col]], main = col, xlab = col)
+}
+```
+
+```{r}
+barplot(table(train$Sex), main = "Sex", xlab = "Sex", ylab = "Frequency")
+```
+
+Across nearly all of our variables, we see quite a bit of skew. Specifically, Length and Diameter exhibit left skew, whereas Height, Age and the various Weight measures exhibit right skew. When modeling, these variables may benefit from transformation. Sex, on the other hand, is relatively well balanced across the three classes.
+
+*Provide a scatterplot matrix for at least two of the independent variables and the dependent variable.* 
+
+```{r}
+pairs(~ Height + Weight + Length + Age, data = train)
+```
+
+We see some evidence of linear relationships between these three primary predictors and Age. The relationships don't appear perfectly linear, but they seem sufficient for modeling. Moreover, some transformation may reinforce the linearity of the relationships.
+
+*Derive a correlation matrix for any three quantitative variables in the dataset.*
+
+```{r}
+cor(train[, c('Height', 'Weight', 'Length')])
+```
+
+We see high correlation across these primary independent variables. This conforms to expectations, as all three relate to size. We'll need to consider whether this multicollinearity could impact our modeling.
+
+*Test the hypotheses that the correlations between each pairwise set of variables is 0 and provide an 80% confidence interval. Discuss the meaning of your analysis. Would you be worried about familywise error? Why or why not?*
+
+```{r}
+combos <- combn(colnames(train)[-c(1,2,10)], 2, simplify = FALSE)
+
+results <- data.frame()
+for (combo in combos) {
+  test <- cor.test(train[[combo[1]]], train[[combo[2]]], conf.level = 0.80)
+  result <- list(Var1 = combo[1], Var2 = combo[2], p = test$p.value)
+  results <- rbind(results, result)
+}
+
+results
+
+test
+```
+
+
+
+### Linear Algebra and Correlation
+
+*Invert your correlation matrix from above. (This is known as the precision matrix and contains variance inflation factors on the diagonal.) Multiply the correlation matrix by the precision matrix, and then multiply the precision matrix by the correlation matrix. Conduct LDU decomposition on the matrix.*
+
+### Calculus-Based Probability & Statistics
+
+*Many times, it makes sense to fit a closed form distribution to data. Select a variable in the Kaggle.com training dataset that is skewed to the right, shift it so that the minimum value is absolutely above zero if necessary. Then load the MASS package and run fitdistr to fit an exponential probability density function. (See https://stat.ethz.ch/R-manual/R-devel/library/MASS/html/fitdistr.html). Find the optimal value of $\lambda$ for this distribution, and then take 1000 samples from this exponential distribution using this value (e.g., rexp(1000, $\lambda$)). Plot a histogram and compare it with a histogram of your original variable.  Using the exponential pdf, find the 5th and 95th percentiles using the cumulative distribution function (CDF).  Also generate a 95% confidence interval from the empirical data, assuming normality. Finally, provide the empirical 5th percentile and 95th percentile of the data. Discuss.*
+
+### Modeling
+
+*Build some type of multiple regression model and submit your model to the competition board. Provide your complete model summary and results with analysis. Report your Kaggle.com user name and score.*
+
