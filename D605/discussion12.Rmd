@@ -150,21 +150,38 @@ plot(model)
 Full Power Transform
 
 ```{r}
-df <- df %>%
-  mutate(children = children + 0.01)
+train_transform <- train
+train_transform[['Height']] <- train_transform[['Height']] + 1
 
-for (predictor in c('age','bmi','children')) {
-  if (predictor == 'charges') next
+for (predictor in colnames(select(train_transform, -id, -Sex, -Age))) {
   formula <- as.formula(paste(predictor,' ~ 1'))
-  transformation <- powerTransform(formula, data = df)
-  transformed <- bcPower(df[predictor], transformation$lambda)
-  df[predictor] <- transformed
+  transformation <- car::powerTransform(formula, data = train_transform)
+  transformed <- car::bcPower(train_transform[predictor], transformation$lambda)
+  train_transform[predictor] <- transformed
+}
+```
+
+Let's re-examine these variables now that they're transformed.
+
+```{r}
+histograms <- function(df) {
+ plots <- list()
+ 
+ for (i in 1:ncol(df)) {
+ col <- colnames(df)[i] 
+ p <- df %>%
+ ggplot(aes(!!sym(col))) +
+ geom_histogram(bins = 20)
+ plots[[i]] <- p
+ }
+ 
+ return(plot_grid(plotlist = plots, nrow = 3))
 }
 
-histograms(df)
-pairs(df)
+histograms(train_transform)
+pairs(train_transform)
 
-model <- lm(charges ~ ., data = df)
+model <- lm(charges ~ ., data = train_transform)
 summary(model)
 par(mfrow = c(2, 2), mar = c(2,2,2,2))
 plot(model)

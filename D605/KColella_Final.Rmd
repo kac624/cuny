@@ -1,5 +1,5 @@
 ---
-title: "D605 Final"
+title: "CUNY SPS MSDS - DATA605 - Final"
 author: "Keith Colella"
 date: "`r Sys.Date()`"
 output: html_document
@@ -72,7 +72,7 @@ $$P(X > x) = \frac{(10,000/2)}{10,000} = \frac{5000}{10,000} = 0.5$$
 
 And the same would apply to $P(Y > y)$. Moreover, we can estimate a joint probability $(PA \cap B)$ as the product of each individual probability: $P(A) \times P(B)$. So in this case, we would expect the probability to be 
 
-$$P(X>x \cap Y>y) = P(X>x) \times P(Y>y) = 0.4999 * 0.4999 = 0.2499$$
+$$P(X>x \cap Y>y) = P(X>x) \times P(Y>y) = 0.5 * 0.5 = 0.2499$$
 
 Let's check this empirically. We can calculate the proportion of cases where $X>x$ compared to the total length of $X$, and the same for $Y>y$, then multiply the two.
 
@@ -102,7 +102,7 @@ proportion <- nrow(filter(results, X > x, Y > y)) / nrow(results)
 print(proportion)
 ```
 
-Our estimate of 0.2499 holds true!
+Our estimate of 0.25 holds true!
 
 *c. P(X<x | X>y)*
 
@@ -195,14 +195,6 @@ train <- read.csv('data/crab_train.csv')
 test <- read.csv('data/crab_test.csv')
 ```
 
-I noticed that the test dataset has no target variable (which makes sense, given competition). However, I'd like to test the generalizability of my modeling, so I'll perform another split to create a validation dataset. I'll use this validation data during model development to assess performance out-of-sample. I prefer to perform this step at before any analysis (including EDA) to minimize data leakage.
-
-```{r}
-train_idx <- caret::createDataPartition(train$Age, p = 0.8, list = FALSE)
-valid <- train[-train_idx, ]
-train <- train[train_idx, ]
-```
-
 ### Descriptive and Inferential Statistics
 
 *Provide univariate descriptive statistics and appropriate plots for the training data set.*
@@ -228,7 +220,7 @@ Across nearly all of our variables, we see quite a bit of skew. Specifically, Le
 pairs(~ Height + Weight + Length + Age, data = train)
 ```
 
-We see some evidence of linear relationships between these three primary predictors and Age. The relationships don't appear perfectly linear, but they seem sufficient for modeling. Moreover, some transformation may reinforce the linearity of the relationships.
+We see some evidence of linear relationships between these three primary predictors and Age. The relationships don't appear perfectly linear, but they seem sufficient for explore in modeling. Moreover, some transformation may reinforce the linearity of the relationships.
 
 *Derive a correlation matrix for any three quantitative variables in the dataset.*
 
@@ -241,31 +233,320 @@ We see high correlation across these primary independent variables. This conform
 *Test the hypotheses that the correlations between each pairwise set of variables is 0 and provide an 80% confidence interval. Discuss the meaning of your analysis. Would you be worried about familywise error? Why or why not?*
 
 ```{r}
-combos <- combn(colnames(train)[-c(1,2,10)], 2, simplify = FALSE)
+variables <- colnames(train)[-c(1,2)]
+variables <- c(variables[length(variables)], variables[-length(variables)])
+combos <- combn(variables, 2, simplify = FALSE)
 
 results <- data.frame()
 for (combo in combos) {
-  test <- cor.test(train[[combo[1]]], train[[combo[2]]], conf.level = 0.80)
-  result <- list(Var1 = combo[1], Var2 = combo[2], p = test$p.value)
+  cor_test <- cor.test(train[[combo[1]]], train[[combo[2]]], conf.level = 0.80)
+  result <- list(
+    Var1 = combo[1], Var2 = combo[2], p = cor_test$p.value,
+    ci_lower = cor_test$conf.int[1], ci_lower = cor_test$conf.int[2]
+  )
   results <- rbind(results, result)
 }
 
 results
-
-test
 ```
 
+Our testing indicates that **all** pairs of variables have correlations greater than 0. I'll note that the p-values from these tests are not actually zero. Instead, they are exceedingly small and approach zero; the `cor.test` function simply rounds it to zero because it's so small. Still, they all indicate that we should reject the null that correlations are zero, instead concluding they are non-zero.
 
+While this is a "good" thing for variables' relationship with Age (since it indicates they are likely good predictors), it also indicates that we'll need to account for multicollinearity in modeling.
+
+Because we are conducting a series of statistically tests concurrently, we should consider familywise error rate, which is the probability of false positives in our findings. With such a large series of tests (28 in total), the methods for adjusting our testing (e.g. Bonferonni correction) may drive overly conservative alphas. However, our p-values are already near zero, so we can apply a correction anyway and see if it impacts any conclusions.
+
+The Bonferonni correction requires us to adjust our $\alpha$ by dividing by on the number of tests conducted (28). We can then subtract this adjusted $\alpha$ from 1 to get our new confidence level.
+
+```{r}
+results <- data.frame()
+for (combo in combos) {
+  cor_test <- cor.test(train[[combo[1]]], train[[combo[2]]], conf.level = 1 - (0.20 / 28))
+  result <- list(
+    Var1 = combo[1], Var2 = combo[2], p = cor_test$p.value,
+    ci_lower = cor_test$conf.int[1], ci_lower = cor_test$conf.int[2]
+  )
+  results <- rbind(results, result)
+}
+
+results
+```
+
+Even with the correction, our conclusion remains the same — all pairs of variables have non-zero correlation. Our confidence intervals are slightly wider, but in all cases, the correlation appears quite strong (>0.9) for pairs of predictor variables. When paired with our target variable (Age), predictor variables have slightly lower levels of correlation (~0.5 to ~0.7), but still enough to indicate that they may be good predictors.
 
 ### Linear Algebra and Correlation
 
 *Invert your correlation matrix from above. (This is known as the precision matrix and contains variance inflation factors on the diagonal.) Multiply the correlation matrix by the precision matrix, and then multiply the precision matrix by the correlation matrix. Conduct LDU decomposition on the matrix.*
 
+I didn't have an explicit correlation matrix with all variables, so I'll first generate that. Note that I'll remove the ID column (since it's not actually a numerical value, just a unique key), and the Sex column (since its not numerical).
+
+```{r}
+cor_matrix <- cor(select(train, -id, -Sex))
+cor_matrix
+```
+
+Next, we can compute the precision matrix by inverting this correlation matrix. We'll use the `inv` function from `pracma`.
+
+```{r}
+precision_matrix <- pracma::inv(cor_matrix)
+precision_matrix
+```
+
+Finally, we can multiply these two and perform our LDU decomposition. We'll start by calculating the L and U components with `lu.decomposition` function from `matrixcalc`. We can then pull out the diagonals from the U component to form our D component. With that, we need to then adjust our U component and scale its diagonal down to 1 by dividing by the diagonal of D.
+
+```{r}
+product_matrix <- cor_matrix %*% precision_matrix
+
+lu_decomp <- matrixcalc::lu.decomposition(product_matrix)
+
+L <- lu_decomp$L
+U <- lu_decomp$U
+D <- diag(diag(U))
+U <- U / diag(D)
+
+cat('L component:\n')
+print(L)
+cat('D component:\n')
+print(D)
+cat('U component:\n')
+print(U)
+```
+
+We can check our decomposition by multiplying these three component matrixes and confirming that their product matches the original `product_matrix`. 
+
+```{r}
+reformed_matrix <- L %*% D %*% U
+
+cat('Original Product Matrix:\n')
+print(matrix(scales::scientific(product_matrix), nrow = 8))
+cat('Reformed Matrix from LDU:\n')
+print(matrix(scales::scientific(reformed_matrix), nrow = 8))
+cat('Match Check:',all.equal(round(matrix(product_matrix,nrow = 8),20),round(reformed_matrix,20)))
+```
+
+Our reconstruction was successful! Note that the value in `[7,8]` is actually zero in both matrices, but appears as -3.50e-46 in the reconstruction due to floating point precision.
+
+One thing to note here is that our initial `product_matrix` is symmetrical and has unit diagonals (i.e. 1s along the diagonal). As a result, the U component is simply the transpose of L. Moreover, the D component is simply an identity matrix. We can demonstrate this with an alternative deconstruction.
+
+```{r}
+lu_decomp <- matrixcalc::lu.decomposition(product_matrix)
+
+L_alt <- lu_decomp$L
+U_alt <- t(L_alt)
+D_alt <- diag(8)
+
+cat('L component:\n')
+print(L_alt)
+cat('D component:\n')
+print(U_alt)
+cat('U component:\n')
+print(D_alt)
+
+reformed_matrix_alt <- L %*% D %*% U
+
+cat('Original Product Matrix:\n')
+print(matrix(scales::scientific(product_matrix), nrow = 8))
+cat('Reformed Matrix from LDU:\n')
+print(matrix(scales::scientific(reformed_matrix_alt), nrow = 8))
+cat('Match Check:',all.equal(round(matrix(product_matrix,nrow = 8),20),round(reformed_matrix_alt,20)))
+```
+
+
+
 ### Calculus-Based Probability & Statistics
 
-*Many times, it makes sense to fit a closed form distribution to data. Select a variable in the Kaggle.com training dataset that is skewed to the right, shift it so that the minimum value is absolutely above zero if necessary. Then load the MASS package and run fitdistr to fit an exponential probability density function. (See https://stat.ethz.ch/R-manual/R-devel/library/MASS/html/fitdistr.html). Find the optimal value of $\lambda$ for this distribution, and then take 1000 samples from this exponential distribution using this value (e.g., rexp(1000, $\lambda$)). Plot a histogram and compare it with a histogram of your original variable.  Using the exponential pdf, find the 5th and 95th percentiles using the cumulative distribution function (CDF).  Also generate a 95% confidence interval from the empirical data, assuming normality. Finally, provide the empirical 5th percentile and 95th percentile of the data. Discuss.*
+*Many times, it makes sense to fit a closed form distribution to data. Select a variable in the Kaggle.com training dataset that is skewed to the right, shift it so that the minimum value is absolutely above zero if necessary. Then load the MASS package and run fitdistr to fit an exponential probability density function. Find the optimal value of $\lambda$ for this distribution, and then take 1000 samples from this exponential distribution using this value (e.g., rexp(1000, $\lambda$)). Plot a histogram and compare it with a histogram of your original variable.  Using the exponential pdf, find the 5th and 95th percentiles using the cumulative distribution function (CDF).  Also generate a 95% confidence interval from the empirical data, assuming normality. Finally, provide the empirical 5th percentile and 95th percentile of the data. Discuss.*
+
+We'll use the `Weight` variable for this exercise, as it demonstrates right skew.
+
+```{r}
+hist(train$Weight, main = 'Weight', xlab = 'Weight')
+```
+
+A shift is not needed here, as the minimum value for Weight is already greater than 0.
+
+```{r}
+min(train$Weight)
+```
+
+Now, we can use the `fitdistr` function from `MASS` to fit an exponential distribution. This function provides an estimate for the optimal parameter of whichever distribution you choose, which this case is $\lambda$ for an exponential. 
+
+```{r}
+weight_exp <- MASS::fitdistr(train$Weight, "exponential")
+cat('Estimated Optimal Lambda:', weight_exp$estimate)
+```
+
+Let's sample from this distribution and compare the resulting plot to the original variable.
+
+```{r}
+weight_exp_sample <- rexp(1000, weight_exp$estimate)
+
+hist(weight_exp_sample, main = 'Simulated Distribution of Weight from Exponential', xlab = 'Weight')
+hist(train$Weight, main = 'Original Distribution of Weight', xlab = 'Weight')
+```
+
+Our simulated distribution appears to be very rough approximation of the actual `Weight` variable. It exhibits the same right skew, as expected, but it also produced much greater tail values. The max in our distribution is greater than 150, but the true max weight is closer to 80.
+
+Let's compare the 5th and 95th quantiles from each distribution, along with a 95% confidence interval. For the confidence  interval, we'll use the following formula:
+
+$$\bar{x} \pm (\frac{s}{\sqrt{n}} \times zscore)$$
+
+The mean and standard deviation of our sample will serve as $\bar{x}$ and $s$, respectively; our sample size will serve as $n$; and we can generate a z-score with the `qnorm` function (which comes out to ~1.96 for a 95% CI).
+
+```{r}
+exp_5th <- qexp(0.05, rate = weight_exp$estimate)
+exp_95th <- qexp(0.95, rate = weight_exp$estimate)
+
+emp_5th <- quantile(train$Weight, 0.05)
+emp_95th <- quantile(train$Weight, 0.95)
+
+ci <- mean(train$Weight) + c(-1, 1) * sd(train$Weight) / sqrt(length(train$Weight)) * qnorm(0.975)
+
+cat(
+  'Exponential 5th percentile:', exp_5th,
+  '\nExponential 95th percentile:', exp_95th,
+  '\nEmpirical 5th percentile:', emp_5th,
+  '\nEmpirical 95th percentile:', emp_95th,
+  '\n95% CI:', ci,
+  '\nSimulated distribution mean:',mean(weight_exp_sample)
+)
+```
+
+As with the plots above, we see significant differences between our empirical and parametric distributions. The 5th and 95th percentiles of the parametric distribution are lower and higher than the observed 5th and 95th percentiles. The mean of our simulated distribution also sits outside of the 95% confidence interval for the true population mean of `Weight` (although it is quite close).
 
 ### Modeling
 
 *Build some type of multiple regression model and submit your model to the competition board. Provide your complete model summary and results with analysis. Report your Kaggle.com user name and score.*
 
+##### Baseline
+
+Let's start with an initial linear fit to serve as a baseline.
+
+```{r}
+lm_base <- lm(Age ~ ., data = select(train, -id))
+summary(lm_base)
+plot(lm_base)
+```
+
+These plots highlight some potential issues. The first and third plots indicate heteroskedasticity. We noted before significant skew in most of our variables, which is likely driving inconsistent variance in residuals. We'll consider some transformations in our next iteration of the model.
+
+The fourth indicates two very influential points at indexes 55880 and 19024. If we take a look at these points, nothing appears especially significant. All predictor variables are roughly around the first quartile in terms of their respective distributions. The exceptions are Shucked and Viscera Weight, which are relatively high compared to overall Weight. So, if anything, this observation seems for be for a crab that has relatively high Shucked and Viscera Weight. I don't think this warrants removal at these points, but we'll keep an eye out as we adjust the model.
+
+```{r}
+train[c('55880','19024'), ]
+```
+
+Previously, we had also identified high correlation among predictors. Let's check the Variance Infaltion Factor to see if the model exhibits high multicollinearity.
+
+```{r}
+car::vif(lm_base)
+```
+
+Looking at the adjusted VIF (the third column). It seems there is some significant multicollinearity with Length, Diameter and Weight. If this condition persists after transformation, I'll consider feature selection techniques to remove correlated pairs.
+
+##### Power Transformation
+
+I'll use the `powerTransform` function from `car` to address the skew in our variables.
+
+```{r}
+train_transform <- train
+
+train_transform[['Height']] <- train_transform[['Height']] + 1
+
+for (predictor in colnames(select(train_transform, -id, -Sex, -Age))) {
+  formula <- as.formula(paste(predictor,' ~ 1'))
+  transformation <- car::powerTransform(formula, data = train_transform)
+  transformed <- car::bcPower(train_transform[predictor], transformation$lambda)
+  train_transform[predictor] <- transformed
+}
+
+transformation <- car::powerTransform(Age ~ ., data = train_transform)
+transformed <- car::bcPower(train_transform['Age'], transformation$lambda)
+train_transform['Age'] <- transformed
+```
+
+Let's re-examine these variables now that they're transformed.
+
+```{r}
+histograms <- function(df) {
+ plots <- list()
+ 
+ for (i in 1:ncol(df)) {
+ col <- colnames(df)[i] 
+ p <- df %>%
+ ggplot(aes(!!sym(col))) +
+ geom_histogram(bins = 20)
+ plots[[i]] <- p
+ }
+ 
+ return(cowplot::plot_grid(plotlist = plots, nrow = 3))
+}
+
+histograms(select(train_transform, -id, -Sex))
+pairs(select(train_transform, -id, -Sex))
+```
+
+Our distributions appear much more normal, and the linear relationships are much clearer. Multicollinearity persists, but we'll address that shortly.
+ 
+For now, let's refit the model.
+
+```{r}
+lm_pt <- lm(Age ~ ., data = select(train_transform, -id))
+summary(lm_pt)
+plot(lm_pt)
+```
+
+We see some of the original issues persist. Given the persistence of these issues, along with multicollinearity, I believe Principal Component Analysis (PCA) may be a viable option. Let's give it a go!
+
+##### PCA
+
+```{r}
+pca_inputs <- scale(select(train, -id, -Age, -Sex))
+pca_fit <- prcomp(pca_inputs, center = TRUE, scale. = TRUE)
+
+summary(pca_fit)
+plot(pca_fit)
+```
+
+We end up with 7 principal components, although the first drives explains the vast majority of the variance. This is somewhat expected, given the high degree of multicollieanrity and redundancy across predictors. I'll therefore only take the first three components to use in modeling.
+
+We'll add back the categorical Sex variable, along with our target variable, then fit another model.
+
+```{r}
+train_pca <- data.frame(pca_fit$x[, 1:3]) %>%
+  mutate(Sex = train$Sex, Age = train$Age)
+
+lm_pca <- lm(Age ~ ., data = train_pca)
+summary(lm_pca)
+plot(lm_pca)
+```
+
+Our residual plots look  much better. However, our R-squared is relatively low at ~50%, and the two influential points remains. Let's fit this model without that point and see how things change.
+
+```{r}
+train_pca2 <- train_pca[-which(rownames(train_pca) == '55880'),]
+train_pca2 <- train_pca2[-which(rownames(train_pca2) == '19024'),]
+
+lm_pca <- lm(Age ~ ., data = train_pca2)
+summary(lm_pca)
+plot(lm_pca)
+```
+
+I don't actually see a big difference in coefficients, so it appears we are fine to leave out these points.
+
+Ultimately, it seems there is some non-linearity in the model. So, modeling approaches that handle non-linearity may provide better fits. Regarding the linear models we've considered, however, this appears to provide the best while observing the key assumptions of regression.
+
+With this final model, we can generate our predictions for submission on Kaggle!
+
+```{r}
+test_scaled <- scale(select(test, -id, -Sex))
+test_pca <- predict(pca_fit, newdata = test_scaled)
+test_pca<- data.frame(test_pca[, 1:3]) %>%
+  mutate(Sex = test$Sex)
+predictions <- predict(lm_pca, newdata = test_pca)
+predictions <- data.frame(id = test$id, Age = predictions)
+
+write.csv(predictions, 'data/crab_kaggle_submission_kac624.csv', row.names = FALSE)
+```
+
+My submission had a score (the MAE) of 1.57413. Not bad! Curious to see how this stacks up to other submissions.
