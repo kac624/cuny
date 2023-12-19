@@ -72,7 +72,7 @@ $$P(X > x) = \frac{(10,000/2)}{10,000} = \frac{5000}{10,000} = 0.5$$
 
 And the same would apply to $P(Y > y)$. Moreover, we can estimate a joint probability $(PA \cap B)$ as the product of each individual probability: $P(A) \times P(B)$. So in this case, we would expect the probability to be 
 
-$$P(X>x \cap Y>y) = P(X>x) \times P(Y>y) = 0.5 * 0.5 = 0.2499$$
+$$P(X>x \cap Y>y) = P(X>x) \times P(Y>y) = 0.5 * 0.5 = 0.25$$
 
 Let's check this empirically. We can calculate the proportion of cases where $X>x$ compared to the total length of $X$, and the same for $Y>y$, then multiply the two.
 

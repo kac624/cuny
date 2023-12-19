@@ -3,7 +3,7 @@
 <html lang="en">
 <head><meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>d602_project_KeithC_part1</title><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+<title>01_initialModelTraining</title><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
 <style type="text/css">
     pre { line-height: 125%; }
 td.linenos .normal { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
@@ -7501,11 +7501,10 @@ a.anchor-link {
 <span class="kn">from</span> <span class="nn">sklearn.linear_model</span> <span class="kn">import</span> <span class="n">LogisticRegression</span>
 <span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">RandomForestClassifier</span>
 <span class="kn">from</span> <span class="nn">sklearn.svm</span> <span class="kn">import</span> <span class="n">SVC</span>
-<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">accuracy_score</span><span class="p">,</span> <span class="n">classification_report</span>
+<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">accuracy_score</span><span class="p">,</span> <span class="n">classification_report</span><span class="p">,</span> <span class="n">precision_score</span><span class="p">,</span> <span class="n">recall_score</span><span class="p">,</span> <span class="n">f1_score</span>
 
 <span class="kn">import</span> <span class="nn">torch</span>
 <span class="kn">import</span> <span class="nn">torch.nn</span> <span class="k">as</span> <span class="nn">nn</span>
-<span class="kn">import</span> <span class="nn">torch.nn.functional</span> <span class="k">as</span> <span class="nn">F</span>
 <span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">DataLoader</span>
 
 <span class="c1"># functional</span>
@@ -8075,31 +8074,31 @@ a.anchor-link {
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Finished with RNN-tfidf - Time elapsed: 0.72
+<pre>Finished with RNN-tfidf - Time elapsed: 0.56
 
-Finished with LR-tfidf - Time elapsed: 0.74
+Finished with LR-tfidf - Time elapsed: 0.57
 
-Finished with RF-tfidf - Time elapsed: 0.90
+Finished with RF-tfidf - Time elapsed: 0.73
 
-Finished with SVM-tfidf - Time elapsed: 1.79
+Finished with SVM-tfidf - Time elapsed: 1.62
 
-Finished with RNN-w2v - Time elapsed: 2.51
+Finished with RNN-w2v - Time elapsed: 2.18
 
-Finished with LR-w2v - Time elapsed: 2.57
+Finished with LR-w2v - Time elapsed: 2.22
 
-Finished with RF-w2v - Time elapsed: 3.06
+Finished with RF-w2v - Time elapsed: 2.70
 
-Finished with SVM-w2v - Time elapsed: 3.93
+Finished with SVM-w2v - Time elapsed: 3.58
 
-Finished with RNN-bert - Time elapsed: 4.61
+Finished with RNN-bert - Time elapsed: 4.11
 
-Finished with LR-bert - Time elapsed: 4.72
+Finished with LR-bert - Time elapsed: 4.20
 
-Finished with RF-bert - Time elapsed: 5.11
+Finished with RF-bert - Time elapsed: 4.57
 
-Finished with SVM-bert - Time elapsed: 5.65
+Finished with SVM-bert - Time elapsed: 5.17
 
-Finished with RNN-gpt - Time elapsed: 6.35
+Finished with RNN-gpt - Time elapsed: 5.71
 
 </pre>
 </div>
@@ -8121,11 +8120,11 @@ Please also refer to the documentation for alternative solver options:
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Finished with LR-gpt - Time elapsed: 6.73
+<pre>Finished with LR-gpt - Time elapsed: 6.00
 
-Finished with RF-gpt - Time elapsed: 7.12
+Finished with RF-gpt - Time elapsed: 6.37
 
-Finished with SVM-gpt - Time elapsed: 7.65
+Finished with SVM-gpt - Time elapsed: 7.00
 
 </pre>
 </div>
@@ -8209,7 +8208,11 @@ Finished with SVM-gpt - Time elapsed: 7.65
 <div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">model</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">data_name</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">models</span><span class="p">,</span> <span class="n">data_sets</span><span class="o">*</span><span class="mi">4</span><span class="p">,</span> <span class="n">data_names</span><span class="o">*</span><span class="mi">4</span><span class="p">):</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'model'</span><span class="p">,</span> <span class="s1">'data'</span><span class="p">,</span> <span class="s1">'accuracy_is'</span><span class="p">,</span> <span class="s1">'accuracy_oos'</span><span class="p">,</span> <span class="s1">'precision_oos'</span><span class="p">,</span> <span class="s1">'recall_oos'</span><span class="p">,</span> <span class="s1">'f1_oos'</span><span class="p">]</span>
+
+<span class="n">results</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">columns</span> <span class="o">=</span> <span class="n">columns</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">model</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">data_name</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">models</span><span class="p">,</span> <span class="n">data_sets</span><span class="o">*</span><span class="mi">4</span><span class="p">,</span> <span class="n">data_names</span><span class="o">*</span><span class="mi">4</span><span class="p">):</span>
     <span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span> <span class="o">=</span> <span class="n">data</span>
     <span class="k">if</span> <span class="s1">'Rnn'</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
         <span class="n">y_pred_train</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">X_train</span><span class="p">)</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
@@ -8219,12 +8222,26 @@ Finished with SVM-gpt - Time elapsed: 7.65
     <span class="k">else</span><span class="p">:</span>
         <span class="n">y_pred_train</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_train</span><span class="p">)</span>
         <span class="n">y_pred_test</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+    
+    <span class="n">accuracy_train</span> <span class="o">=</span> <span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_train</span><span class="p">,</span> <span class="n">y_pred_train</span><span class="p">)</span>
+    <span class="n">accuracy_test</span> <span class="o">=</span> <span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_pred_test</span><span class="p">)</span>
+    <span class="n">precision_oos</span> <span class="o">=</span> <span class="n">precision_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_pred_test</span><span class="p">,</span> <span class="n">average</span><span class="o">=</span><span class="s1">'weighted'</span><span class="p">)</span>
+    <span class="n">recall_oos</span> <span class="o">=</span> <span class="n">recall_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_pred_test</span><span class="p">,</span> <span class="n">average</span><span class="o">=</span><span class="s1">'weighted'</span><span class="p">)</span>
+    <span class="n">f1_oos</span> <span class="o">=</span> <span class="n">f1_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_pred_test</span><span class="p">,</span> <span class="n">average</span><span class="o">=</span><span class="s1">'weighted'</span><span class="p">)</span>
+    <span class="n">class_report_oos</span> <span class="o">=</span> <span class="n">classification_report</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_pred_test</span><span class="p">)</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">columns</span><span class="p">,</span> <span class="p">[</span>
+        <span class="nb">str</span><span class="p">(</span><span class="n">model</span><span class="p">),</span> <span class="n">data_name</span><span class="p">,</span> <span class="n">accuracy_train</span><span class="p">,</span> <span class="n">accuracy_test</span><span class="p">,</span> 
+        <span class="n">precision_oos</span><span class="p">,</span> <span class="n">recall_oos</span><span class="p">,</span> <span class="n">f1_oos</span>
+    <span class="p">]))</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">results</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">])],</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    
     <span class="nb">print</span><span class="p">(</span>
         <span class="sa">f</span><span class="s1">'Model: </span><span class="si">{</span><span class="n">model</span><span class="si">}</span><span class="se">\n</span><span class="s1">'</span>
         <span class="sa">f</span><span class="s1">'Data: </span><span class="si">{</span><span class="n">data_name</span><span class="si">}</span><span class="se">\n</span><span class="s1">'</span>
-        <span class="sa">f</span><span class="s1">'In-sample accuracy: </span><span class="si">{</span><span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_train</span><span class="p">,</span><span class="w"> </span><span class="n">y_pred_train</span><span class="p">)</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="se">\n</span><span class="s1">'</span>
-        <span class="sa">f</span><span class="s1">'Out-of-sample accuracy: </span><span class="si">{</span><span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span><span class="w"> </span><span class="n">y_pred_test</span><span class="p">)</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="se">\n</span><span class="s1">'</span>
-        <span class="sa">f</span><span class="s1">'Classification report (OOS):</span><span class="se">\n</span><span class="si">{</span><span class="n">classification_report</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span><span class="w"> </span><span class="n">y_pred_test</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s1">'</span>
+        <span class="sa">f</span><span class="s1">'In-sample accuracy: </span><span class="si">{</span><span class="n">accuracy_train</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="se">\n</span><span class="s1">'</span>
+        <span class="sa">f</span><span class="s1">'Out-of-sample accuracy: </span><span class="si">{</span><span class="n">accuracy_test</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="se">\n</span><span class="s1">'</span>
+        <span class="sa">f</span><span class="s1">'Classification report (OOS):</span><span class="se">\n</span><span class="si">{</span><span class="n">class_report_oos</span><span class="si">}</span><span class="se">\n</span><span class="s1">'</span>
         <span class="sa">f</span><span class="s1">'</span><span class="se">\n</span><span class="s1">----------</span><span class="se">\n</span><span class="s1">'</span>
     <span class="p">)</span>
 </pre></div>
@@ -8245,21 +8262,21 @@ Finished with SVM-gpt - Time elapsed: 7.65
   (fc): Linear(in_features=256, out_features=6, bias=True)
 )
 Data: tfidf
-In-sample accuracy: 0.988
-Out-of-sample accuracy: 0.204
+In-sample accuracy: 0.986
+Out-of-sample accuracy: 0.194
 Classification report (OOS):
               precision    recall  f1-score   support
 
- barely-true       0.22      0.18      0.20       212
-       false       0.24      0.25      0.25       249
-   half-true       0.22      0.21      0.21       265
- mostly-true       0.21      0.20      0.20       241
-  pants-fire       0.10      0.14      0.12        92
-        true       0.18      0.20      0.19       208
+ barely-true       0.26      0.23      0.24       212
+       false       0.19      0.18      0.19       249
+   half-true       0.21      0.21      0.21       265
+ mostly-true       0.17      0.16      0.16       241
+  pants-fire       0.11      0.12      0.11        92
+        true       0.20      0.23      0.21       208
 
-    accuracy                           0.20      1267
-   macro avg       0.20      0.20      0.19      1267
-weighted avg       0.21      0.20      0.20      1267
+    accuracy                           0.19      1267
+   macro avg       0.19      0.19      0.19      1267
+weighted avg       0.20      0.19      0.19      1267
 
 
 ----------
@@ -8270,21 +8287,21 @@ Model: RnnTextClassifier(
   (fc): Linear(in_features=256, out_features=6, bias=True)
 )
 Data: w2v
-In-sample accuracy: 0.241
-Out-of-sample accuracy: 0.218
+In-sample accuracy: 0.237
+Out-of-sample accuracy: 0.239
 Classification report (OOS):
               precision    recall  f1-score   support
 
- barely-true       0.24      0.12      0.16       212
-       false       0.21      0.26      0.23       249
-   half-true       0.20      0.47      0.28       265
- mostly-true       0.30      0.20      0.23       241
-  pants-fire       0.20      0.01      0.02        92
-        true       0.19      0.07      0.10       208
+ barely-true       0.22      0.19      0.20       212
+       false       0.24      0.31      0.27       249
+   half-true       0.27      0.03      0.06       265
+ mostly-true       0.25      0.72      0.37       241
+  pants-fire       0.10      0.03      0.05        92
+        true       0.00      0.00      0.00       208
 
-    accuracy                           0.22      1267
-   macro avg       0.22      0.19      0.17      1267
-weighted avg       0.23      0.22      0.19      1267
+    accuracy                           0.24      1267
+   macro avg       0.18      0.21      0.16      1267
+weighted avg       0.20      0.24      0.17      1267
 
 
 ----------
@@ -8296,20 +8313,20 @@ Model: RnnTextClassifier(
 )
 Data: bert
 In-sample accuracy: 0.999
-Out-of-sample accuracy: 0.232
+Out-of-sample accuracy: 0.230
 Classification report (OOS):
               precision    recall  f1-score   support
 
- barely-true       0.22      0.21      0.21       212
-       false       0.29      0.20      0.24       249
-   half-true       0.26      0.27      0.27       265
- mostly-true       0.21      0.27      0.23       241
-  pants-fire       0.24      0.25      0.25        92
-        true       0.19      0.19      0.19       208
+ barely-true       0.21      0.17      0.18       212
+       false       0.25      0.22      0.23       249
+   half-true       0.27      0.28      0.27       265
+ mostly-true       0.22      0.28      0.25       241
+  pants-fire       0.17      0.21      0.19        92
+        true       0.22      0.21      0.21       208
 
     accuracy                           0.23      1267
-   macro avg       0.23      0.23      0.23      1267
-weighted avg       0.24      0.23      0.23      1267
+   macro avg       0.22      0.22      0.22      1267
+weighted avg       0.23      0.23      0.23      1267
 
 
 ----------
@@ -8320,26 +8337,46 @@ Model: RnnTextClassifier(
   (fc): Linear(in_features=256, out_features=6, bias=True)
 )
 Data: gpt
-In-sample accuracy: 0.853
-Out-of-sample accuracy: 0.197
+In-sample accuracy: 0.857
+Out-of-sample accuracy: 0.210
 Classification report (OOS):
               precision    recall  f1-score   support
 
- barely-true       0.18      0.14      0.16       212
-       false       0.19      0.16      0.17       249
-   half-true       0.21      0.25      0.23       265
- mostly-true       0.19      0.25      0.22       241
-  pants-fire       0.34      0.12      0.18        92
-        true       0.18      0.21      0.20       208
+ barely-true       0.16      0.06      0.08       212
+       false       0.22      0.28      0.24       249
+   half-true       0.20      0.34      0.25       265
+ mostly-true       0.24      0.13      0.17       241
+  pants-fire       0.08      0.03      0.05        92
+        true       0.23      0.29      0.26       208
 
-    accuracy                           0.20      1267
-   macro avg       0.22      0.19      0.19      1267
-weighted avg       0.20      0.20      0.19      1267
+    accuracy                           0.21      1267
+   macro avg       0.19      0.19      0.18      1267
+weighted avg       0.20      0.21      0.19      1267
 
 
 ----------
 
-Model: LogisticRegression(max_iter=4000)
+</pre>
+</div>
+</div>
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
+<pre>c:\Users\Keith\miniconda3\envs\cuny\Lib\site-packages\sklearn\metrics\_classification.py:1344: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, msg_start, len(result))
+c:\Users\Keith\miniconda3\envs\cuny\Lib\site-packages\sklearn\metrics\_classification.py:1344: UndefinedMetricWarning: Precision and F-score are ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, msg_start, len(result))
+c:\Users\Keith\miniconda3\envs\cuny\Lib\site-packages\sklearn\metrics\_classification.py:1344: UndefinedMetricWarning: Precision and F-score are ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, msg_start, len(result))
+c:\Users\Keith\miniconda3\envs\cuny\Lib\site-packages\sklearn\metrics\_classification.py:1344: UndefinedMetricWarning: Precision and F-score are ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, msg_start, len(result))
+</pre>
+</div>
+</div>
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>Model: LogisticRegression(max_iter=4000)
 Data: tfidf
 In-sample accuracy: 0.400
 Out-of-sample accuracy: 0.239
@@ -8362,21 +8399,21 @@ weighted avg       0.23      0.24      0.23      1267
 
 Model: LogisticRegression(max_iter=4000)
 Data: w2v
-In-sample accuracy: 0.238
-Out-of-sample accuracy: 0.223
+In-sample accuracy: 0.239
+Out-of-sample accuracy: 0.220
 Classification report (OOS):
               precision    recall  f1-score   support
 
- barely-true       0.15      0.05      0.07       212
-       false       0.21      0.44      0.29       249
-   half-true       0.22      0.29      0.25       265
- mostly-true       0.26      0.33      0.29       241
-  pants-fire       0.12      0.01      0.02        92
-        true       0.18      0.03      0.05       208
+ barely-true       0.15      0.05      0.08       212
+       false       0.22      0.43      0.29       249
+   half-true       0.21      0.29      0.24       265
+ mostly-true       0.27      0.33      0.30       241
+  pants-fire       0.11      0.01      0.02        92
+        true       0.14      0.02      0.04       208
 
     accuracy                           0.22      1267
-   macro avg       0.19      0.19      0.16      1267
-weighted avg       0.20      0.22      0.19      1267
+   macro avg       0.18      0.19      0.16      1267
+weighted avg       0.19      0.22      0.18      1267
 
 
 ----------
@@ -8426,20 +8463,20 @@ weighted avg       0.23      0.23      0.22      1267
 Model: RandomForestClassifier()
 Data: tfidf
 In-sample accuracy: 0.991
-Out-of-sample accuracy: 0.223
+Out-of-sample accuracy: 0.222
 Classification report (OOS):
               precision    recall  f1-score   support
 
- barely-true       0.17      0.10      0.13       212
-       false       0.25      0.35      0.29       249
-   half-true       0.22      0.21      0.21       265
- mostly-true       0.25      0.31      0.27       241
-  pants-fire       0.15      0.07      0.09        92
+ barely-true       0.24      0.13      0.17       212
+       false       0.23      0.33      0.27       249
+   half-true       0.25      0.23      0.24       265
+ mostly-true       0.21      0.26      0.23       241
+  pants-fire       0.12      0.08      0.09        92
         true       0.20      0.18      0.19       208
 
     accuracy                           0.22      1267
    macro avg       0.21      0.20      0.20      1267
-weighted avg       0.21      0.22      0.21      1267
+weighted avg       0.22      0.22      0.22      1267
 
 
 ----------
@@ -8447,20 +8484,20 @@ weighted avg       0.21      0.22      0.21      1267
 Model: RandomForestClassifier()
 Data: w2v
 In-sample accuracy: 0.999
-Out-of-sample accuracy: 0.225
+Out-of-sample accuracy: 0.235
 Classification report (OOS):
               precision    recall  f1-score   support
 
- barely-true       0.18      0.15      0.16       212
-       false       0.25      0.33      0.29       249
-   half-true       0.23      0.29      0.26       265
- mostly-true       0.23      0.23      0.23       241
-  pants-fire       0.11      0.03      0.05        92
-        true       0.21      0.17      0.19       208
+ barely-true       0.20      0.17      0.19       212
+       false       0.25      0.36      0.30       249
+   half-true       0.24      0.27      0.25       265
+ mostly-true       0.26      0.26      0.26       241
+  pants-fire       0.11      0.04      0.06        92
+        true       0.22      0.17      0.19       208
 
-    accuracy                           0.22      1267
-   macro avg       0.20      0.20      0.20      1267
-weighted avg       0.22      0.22      0.22      1267
+    accuracy                           0.24      1267
+   macro avg       0.21      0.21      0.21      1267
+weighted avg       0.23      0.24      0.23      1267
 
 
 ----------
@@ -8468,41 +8505,61 @@ weighted avg       0.22      0.22      0.22      1267
 Model: RandomForestClassifier()
 Data: bert
 In-sample accuracy: 0.999
-Out-of-sample accuracy: 0.233
+Out-of-sample accuracy: 0.210
 Classification report (OOS):
               precision    recall  f1-score   support
 
- barely-true       0.21      0.11      0.15       212
-       false       0.24      0.31      0.27       249
-   half-true       0.26      0.38      0.31       265
- mostly-true       0.22      0.29      0.25       241
+ barely-true       0.20      0.11      0.14       212
+       false       0.21      0.29      0.25       249
+   half-true       0.20      0.28      0.23       265
+ mostly-true       0.23      0.31      0.26       241
   pants-fire       0.00      0.00      0.00        92
-        true       0.19      0.10      0.13       208
+        true       0.20      0.10      0.13       208
 
-    accuracy                           0.23      1267
-   macro avg       0.19      0.20      0.18      1267
-weighted avg       0.21      0.23      0.21      1267
+    accuracy                           0.21      1267
+   macro avg       0.17      0.18      0.17      1267
+weighted avg       0.19      0.21      0.19      1267
 
 
 ----------
 
-Model: RandomForestClassifier()
+</pre>
+</div>
+</div>
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
+<pre>c:\Users\Keith\miniconda3\envs\cuny\Lib\site-packages\sklearn\metrics\_classification.py:1344: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, msg_start, len(result))
+c:\Users\Keith\miniconda3\envs\cuny\Lib\site-packages\sklearn\metrics\_classification.py:1344: UndefinedMetricWarning: Precision and F-score are ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, msg_start, len(result))
+c:\Users\Keith\miniconda3\envs\cuny\Lib\site-packages\sklearn\metrics\_classification.py:1344: UndefinedMetricWarning: Precision and F-score are ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, msg_start, len(result))
+c:\Users\Keith\miniconda3\envs\cuny\Lib\site-packages\sklearn\metrics\_classification.py:1344: UndefinedMetricWarning: Precision and F-score are ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, msg_start, len(result))
+</pre>
+</div>
+</div>
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>Model: RandomForestClassifier()
 Data: gpt
 In-sample accuracy: 0.999
-Out-of-sample accuracy: 0.230
+Out-of-sample accuracy: 0.242
 Classification report (OOS):
               precision    recall  f1-score   support
 
- barely-true       0.25      0.08      0.12       212
-       false       0.25      0.37      0.30       249
-   half-true       0.20      0.30      0.24       265
- mostly-true       0.26      0.33      0.29       241
+ barely-true       0.18      0.06      0.09       212
+       false       0.22      0.34      0.27       249
+   half-true       0.26      0.36      0.30       265
+ mostly-true       0.27      0.34      0.30       241
   pants-fire       0.00      0.00      0.00        92
-        true       0.17      0.11      0.13       208
+        true       0.22      0.16      0.18       208
 
-    accuracy                           0.23      1267
-   macro avg       0.19      0.20      0.18      1267
-weighted avg       0.21      0.23      0.21      1267
+    accuracy                           0.24      1267
+   macro avg       0.19      0.21      0.19      1267
+weighted avg       0.22      0.24      0.22      1267
 
 
 ----------
@@ -8534,7 +8591,9 @@ weighted avg       0.24      0.23      0.21      1267
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
-<pre>c:\Users\Keith\miniconda3\envs\cuny\Lib\site-packages\sklearn\metrics\_classification.py:1344: UndefinedMetricWarning: Precision and F-score are ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
+<pre>c:\Users\Keith\miniconda3\envs\cuny\Lib\site-packages\sklearn\metrics\_classification.py:1344: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, msg_start, len(result))
+c:\Users\Keith\miniconda3\envs\cuny\Lib\site-packages\sklearn\metrics\_classification.py:1344: UndefinedMetricWarning: Precision and F-score are ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
   _warn_prf(average, modifier, msg_start, len(result))
 c:\Users\Keith\miniconda3\envs\cuny\Lib\site-packages\sklearn\metrics\_classification.py:1344: UndefinedMetricWarning: Precision and F-score are ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
   _warn_prf(average, modifier, msg_start, len(result))
@@ -8549,20 +8608,20 @@ c:\Users\Keith\miniconda3\envs\cuny\Lib\site-packages\sklearn\metrics\_classific
 <pre>Model: SVC()
 Data: w2v
 In-sample accuracy: 0.236
-Out-of-sample accuracy: 0.243
+Out-of-sample accuracy: 0.250
 Classification report (OOS):
               precision    recall  f1-score   support
 
  barely-true       0.00      0.00      0.00       212
-       false       0.22      0.48      0.30       249
+       false       0.23      0.50      0.32       249
    half-true       0.23      0.40      0.29       265
- mostly-true       0.31      0.35      0.33       241
+ mostly-true       0.33      0.36      0.34       241
   pants-fire       0.00      0.00      0.00        92
         true       0.00      0.00      0.00       208
 
-    accuracy                           0.24      1267
-   macro avg       0.13      0.20      0.15      1267
-weighted avg       0.15      0.24      0.18      1267
+    accuracy                           0.25      1267
+   macro avg       0.13      0.21      0.16      1267
+weighted avg       0.16      0.25      0.19      1267
 
 
 ----------
@@ -8573,7 +8632,9 @@ weighted avg       0.15      0.24      0.18      1267
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
-<pre>c:\Users\Keith\miniconda3\envs\cuny\Lib\site-packages\sklearn\metrics\_classification.py:1344: UndefinedMetricWarning: Precision and F-score are ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
+<pre>c:\Users\Keith\miniconda3\envs\cuny\Lib\site-packages\sklearn\metrics\_classification.py:1344: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, msg_start, len(result))
+c:\Users\Keith\miniconda3\envs\cuny\Lib\site-packages\sklearn\metrics\_classification.py:1344: UndefinedMetricWarning: Precision and F-score are ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
   _warn_prf(average, modifier, msg_start, len(result))
 c:\Users\Keith\miniconda3\envs\cuny\Lib\site-packages\sklearn\metrics\_classification.py:1344: UndefinedMetricWarning: Precision and F-score are ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
   _warn_prf(average, modifier, msg_start, len(result))
@@ -8633,13 +8694,231 @@ weighted avg       0.09      0.21      0.11      1267
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
-<pre>c:\Users\Keith\miniconda3\envs\cuny\Lib\site-packages\sklearn\metrics\_classification.py:1344: UndefinedMetricWarning: Precision and F-score are ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
+<pre>c:\Users\Keith\miniconda3\envs\cuny\Lib\site-packages\sklearn\metrics\_classification.py:1344: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, msg_start, len(result))
+c:\Users\Keith\miniconda3\envs\cuny\Lib\site-packages\sklearn\metrics\_classification.py:1344: UndefinedMetricWarning: Precision and F-score are ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
   _warn_prf(average, modifier, msg_start, len(result))
 c:\Users\Keith\miniconda3\envs\cuny\Lib\site-packages\sklearn\metrics\_classification.py:1344: UndefinedMetricWarning: Precision and F-score are ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
   _warn_prf(average, modifier, msg_start, len(result))
 c:\Users\Keith\miniconda3\envs\cuny\Lib\site-packages\sklearn\metrics\_classification.py:1344: UndefinedMetricWarning: Precision and F-score are ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
   _warn_prf(average, modifier, msg_start, len(result))
 </pre>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">results</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child jp-OutputArea-executeResult">
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[ ]:</div>
+<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+<thead>
+<tr style="text-align: right;">
+<th></th>
+<th>model</th>
+<th>data</th>
+<th>accuracy_is</th>
+<th>accuracy_oos</th>
+<th>precision_oos</th>
+<th>recall_oos</th>
+<th>f1_oos</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th>0</th>
+<td>RnnTextClassifier(\n  (rnn): RNN(1000, 256, nu...</td>
+<td>tfidf</td>
+<td>0.985938</td>
+<td>0.194159</td>
+<td>0.196119</td>
+<td>0.194159</td>
+<td>0.194749</td>
+</tr>
+<tr>
+<th>1</th>
+<td>RnnTextClassifier(\n  (rnn): RNN(1000, 256, nu...</td>
+<td>w2v</td>
+<td>0.237012</td>
+<td>0.239148</td>
+<td>0.195117</td>
+<td>0.239148</td>
+<td>0.173715</td>
+</tr>
+<tr>
+<th>2</th>
+<td>RnnTextClassifier(\n  (rnn): RNN(768, 256, num...</td>
+<td>bert</td>
+<td>0.999414</td>
+<td>0.229676</td>
+<td>0.230131</td>
+<td>0.229676</td>
+<td>0.228597</td>
+</tr>
+<tr>
+<th>3</th>
+<td>RnnTextClassifier(\n  (rnn): RNN(768, 256, num...</td>
+<td>gpt</td>
+<td>0.856934</td>
+<td>0.209945</td>
+<td>0.201538</td>
+<td>0.209945</td>
+<td>0.192728</td>
+</tr>
+<tr>
+<th>4</th>
+<td>LogisticRegression(max_iter=4000)</td>
+<td>tfidf</td>
+<td>0.399902</td>
+<td>0.239148</td>
+<td>0.232249</td>
+<td>0.239148</td>
+<td>0.231159</td>
+</tr>
+<tr>
+<th>5</th>
+<td>LogisticRegression(max_iter=4000)</td>
+<td>w2v</td>
+<td>0.239258</td>
+<td>0.220205</td>
+<td>0.193823</td>
+<td>0.220205</td>
+<td>0.184905</td>
+</tr>
+<tr>
+<th>6</th>
+<td>LogisticRegression(max_iter=4000)</td>
+<td>bert</td>
+<td>0.405957</td>
+<td>0.260458</td>
+<td>0.261260</td>
+<td>0.260458</td>
+<td>0.258416</td>
+</tr>
+<tr>
+<th>7</th>
+<td>LogisticRegression(max_iter=4000)</td>
+<td>gpt</td>
+<td>0.400098</td>
+<td>0.228098</td>
+<td>0.225181</td>
+<td>0.228098</td>
+<td>0.219562</td>
+</tr>
+<tr>
+<th>8</th>
+<td>RandomForestClassifier()</td>
+<td>tfidf</td>
+<td>0.991211</td>
+<td>0.221784</td>
+<td>0.220277</td>
+<td>0.221784</td>
+<td>0.215404</td>
+</tr>
+<tr>
+<th>9</th>
+<td>RandomForestClassifier()</td>
+<td>w2v</td>
+<td>0.999414</td>
+<td>0.235201</td>
+<td>0.226790</td>
+<td>0.235201</td>
+<td>0.227268</td>
+</tr>
+<tr>
+<th>10</th>
+<td>RandomForestClassifier()</td>
+<td>bert</td>
+<td>0.999414</td>
+<td>0.209945</td>
+<td>0.193252</td>
+<td>0.209945</td>
+<td>0.192529</td>
+</tr>
+<tr>
+<th>11</th>
+<td>RandomForestClassifier()</td>
+<td>gpt</td>
+<td>0.999414</td>
+<td>0.242305</td>
+<td>0.216128</td>
+<td>0.242305</td>
+<td>0.218852</td>
+</tr>
+<tr>
+<th>12</th>
+<td>SVC()</td>
+<td>tfidf</td>
+<td>0.766699</td>
+<td>0.232044</td>
+<td>0.237683</td>
+<td>0.232044</td>
+<td>0.214954</td>
+</tr>
+<tr>
+<th>13</th>
+<td>SVC()</td>
+<td>w2v</td>
+<td>0.236328</td>
+<td>0.250197</td>
+<td>0.155866</td>
+<td>0.250197</td>
+<td>0.188198</td>
+</tr>
+<tr>
+<th>14</th>
+<td>SVC()</td>
+<td>bert</td>
+<td>0.401855</td>
+<td>0.259669</td>
+<td>0.248805</td>
+<td>0.259669</td>
+<td>0.238580</td>
+</tr>
+<tr>
+<th>15</th>
+<td>SVC()</td>
+<td>gpt</td>
+<td>0.220801</td>
+<td>0.213102</td>
+<td>0.090863</td>
+<td>0.213102</td>
+<td>0.113994</td>
+</tr>
+</tbody>
+</table>
+</div>
 </div>
 </div>
 </div>
