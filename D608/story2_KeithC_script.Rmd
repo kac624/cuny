@@ -1,0 +1,127 @@
+---
+title: "Story 2 - The Fed's Dual Mandate"
+author: "Keith Colella"
+date: "2024-02-08"
+output: html_document
+---
+
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+library(fredr)
+library(blsAPI)
+library(jsonlite)
+```
+
+Read in API keys
+
+```{r}
+keys <- fromJSON('data/api_keys.json')
+```
+
+## Data
+
+BLS API: https://www.bls.gov/developers/home.htm
+
+```{r}
+# https://www.bls.gov/cpi/overview.htm
+
+year_ranges <- list(c('2011','2024'), c('1990','2010'))
+
+cpi <- data.frame()
+ue <- data.frame()
+
+for (year_range in year_ranges){
+  request <- list(
+    'seriesid' = c('CUUR0000SA0L1E', 'LAUCN281070000000003'), 
+    'startyear' = year_range[1], 'endyear' = year_range[2],
+    'registrationkey' = keys$bls
+  )
+  
+  response <- blsAPI(request) 
+  json <- fromJSON(response)
+  
+  df1 <- json$Results$series$data[[1]]
+  cpi <- rbind(cpi, df1[c('year', 'period', 'value')])
+  
+  df2 <- json$Results$series$data[[2]]
+  ue <- rbind(ue, df2[c('year', 'period', 'value')])
+}
+
+cpi <- cpi %>%
+  mutate(
+    month = as.numeric(str_remove(period, 'M')),
+    year = as.numeric(year),
+    value = as.numeric(value)
+  )
+
+ue <- ue %>%
+  mutate(
+    month = as.numeric(str_remove(period, 'M')),
+    year = as.numeric(year),
+    value = as.numeric(value)
+  )
+```
+
+FRED API: https://www.rdocumentation.org/packages/fredr/versions/2.1.0
+
+```{r}
+fredr_set_key(keys$fred)
+
+fed_funds <- fredr(
+  series_id = "FEDFUNDS",
+  observation_start = as.Date("1990-01-01"),
+  observation_end = as.Date("2024-02-01")
+)
+
+fed_funds <- fed_funds %>%
+  mutate(
+    year = year(date),
+    month = month(date)
+  )
+```
+
+MERGE
+
+```{r}
+df <- left_join(cpi, ue, by = c('year', 'month')) %>%
+  left_join(fed_funds, by = c('year', 'month')) %>%
+  rename(cpi = value.x, ue = value.y, fed_funds = value) %>%
+  select(date, cpi, ue, fed_funds)
+
+df
+```
+
+## Visualizations
+
+```{r}
+df %>%
+  arrange(date) %>%
+  mutate(cpi_growth = (cpi/lag(cpi, n = 12) - 1) * 100) %>%
+  pivot_longer(cols = c(cpi_growth, ue, fed_funds)) %>%
+  ggplot(aes(date, value, color = name)) +
+  geom_line()
+```
+
+```{r}
+cpi_mean = mean(df$cpi)
+cpi_sd = sd(df$cpi)
+
+ue_mean = mean(df$ue)
+ue_sd = sd(df$ue)
+
+ff_mean = mean(df$fed_funds)
+ff_sd = sd(df$fed_funds)
+
+df %>%
+  arrange(date) %>%
+  mutate(
+    cpi = (cpi - cpi_mean) / cpi_sd,
+    ue = (ue - ue_mean) / ue_sd,
+    fed_funds = (fed_funds - ff_mean) / ff_sd,
+    cpi_growth = (cpi/lag(cpi, n = 12) - 1) * 100
+  ) %>%
+  pivot_longer(cols = c(cpi, ue, fed_funds)) %>%
+  ggplot(aes(date, value, color = name)) +
+  geom_line()
+```
+

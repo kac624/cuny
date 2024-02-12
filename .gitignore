@@ -6,6 +6,8 @@ D607/.DS_Store
 D606/.DS_Store
 .DS_Store
 D607/rsconnect/documents/Week5_TidyingTransformingData.Rmd/rpubs.com/rpubs/Document.dcf
+D605/data/fred_api.txt
+D608/data/api_keys.json
 *.dcf
 *.pyc
 *.ipynb_checkpoints
