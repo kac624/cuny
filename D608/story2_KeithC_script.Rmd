@@ -10,6 +10,7 @@ library(tidyverse)
 library(fredr)
 library(blsAPI)
 library(jsonlite)
+library(zoo)
 ```
 
 Read in API keys
@@ -25,14 +26,14 @@ BLS API: https://www.bls.gov/developers/home.htm
 ```{r}
 # https://www.bls.gov/cpi/overview.htm
 
-year_ranges <- list(c('2011','2024'), c('1990','2010'))
+year_ranges <- list(c('2011','2024'), c('1985','2010'))
 
 cpi <- data.frame()
 ue <- data.frame()
 
 for (year_range in year_ranges){
   request <- list(
-    'seriesid' = c('CUUR0000SA0L1E', 'LAUCN281070000000003'), 
+    'seriesid' = c('CUUR0000SA0L1E', 'LNS14000000'), 
     'startyear' = year_range[1], 'endyear' = year_range[2],
     'registrationkey' = keys$bls
   )
@@ -68,9 +69,9 @@ FRED API: https://www.rdocumentation.org/packages/fredr/versions/2.1.0
 fredr_set_key(keys$fred)
 
 fed_funds <- fredr(
-  series_id = "FEDFUNDS",
-  observation_start = as.Date("1990-01-01"),
-  observation_end = as.Date("2024-02-01")
+  series_id = 'FEDFUNDS',
+  observation_start = as.Date('1985-01-01'),
+  observation_end = as.Date('2024-02-01')
 )
 
 fed_funds <- fed_funds %>%
@@ -78,6 +79,28 @@ fed_funds <- fed_funds %>%
     year = year(date),
     month = month(date)
   )
+
+recession <- fredr(
+  series_id = 'JHDUSRGDPBR',
+  observation_start = as.Date('1985-01-01'),
+  observation_end = as.Date('2024-02-01')
+)
+
+recession <- recession %>%
+  mutate(
+    year = year(date),
+    month = month(date)
+  )
+
+recession_dates <- recession %>%
+  mutate(recession_start = value == 1 & lag(value) == 0,
+         recession_end = value == 1 & lead(value) == 0) %>%
+  replace_na(list(recession_start = TRUE)) %>%
+  filter(recession_start | recession_end) %>%
+  mutate(period_id = cumsum(recession_start)) %>%
+  group_by(period_id) %>%
+  summarise(start = min(date), end = max(date)) %>%
+  ungroup()
 ```
 
 MERGE
@@ -93,24 +116,128 @@ df
 
 ## Visualizations
 
-```{r}
-df %>%
-  arrange(date) %>%
-  mutate(cpi_growth = (cpi/lag(cpi, n = 12) - 1) * 100) %>%
-  pivot_longer(cols = c(cpi_growth, ue, fed_funds)) %>%
-  ggplot(aes(date, value, color = name)) +
-  geom_line()
-```
+Prep df
 
 ```{r}
+df <- df %>%
+  arrange(date) %>%
+  mutate(cpi_growth = (cpi/lag(cpi, n = 12) - 1) * 100)
+
 cpi_mean = mean(df$cpi)
 cpi_sd = sd(df$cpi)
+
+cpi_g_mean = mean(df$cpi_growth, na.rm = TRUE)
+cpi_g_sd = sd(df$cpi_growth, na.rm = TRUE)
 
 ue_mean = mean(df$ue)
 ue_sd = sd(df$ue)
 
 ff_mean = mean(df$fed_funds)
 ff_sd = sd(df$fed_funds)
+```
+
+Levels
+
+```{r}
+df %>%
+  pivot_longer(cols = c(cpi_growth, ue, fed_funds)) %>%
+  ggplot(aes(date, value, color = name)) +
+  geom_line() + 
+  geom_rect(
+    data = recession_dates, 
+    aes(xmin = start, xmax = end, ymin = 0, ymax = 15),
+    fill = 'blue', alpha = 0.3, inherit.aes = FALSE
+  ) + 
+  theme(
+    panel.background = element_blank(),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank()
+  )
+```
+
+Normalized
+
+```{r}
+df %>%
+  arrange(date) %>%
+  mutate(
+    cpi = (cpi - cpi_mean) / cpi_sd,
+    ue = (ue - ue_mean) / ue_sd,
+    fed_funds = (fed_funds - ff_mean) / ff_sd,
+    cpi_growth = (cpi_growth - cpi_g_mean) / cpi_g_sd
+  ) %>%
+  pivot_longer(cols = c(cpi_growth, ue, fed_funds)) %>%
+  ggplot(aes(date, value, color = name)) +
+  geom_line() +
+  geom_rect(
+    data = recession_dates, 
+    aes(xmin = start, xmax = end, ymin = -2, ymax = 4),
+    fill = 'blue', alpha = 0.3, inherit.aes = FALSE
+  ) + 
+  scale_y_continuous(limits = c(-2,4)) +
+  scale_x_date(limits = as.Date(c("1990-01-01", "2024-01-01"))) + 
+  theme(
+    panel.background = element_blank(),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank()
+  )
+```
+
+Normalized separate plots
+
+```{r fig.height=5, fig.width=4}
+df %>%
+  arrange(date) %>%
+  mutate(
+    cpi = (cpi - cpi_mean) / cpi_sd,
+    ue = (ue - ue_mean) / ue_sd,
+    fed_funds = (fed_funds - ff_mean) / ff_sd,
+    cpi_growth = (cpi_growth - cpi_g_mean) / cpi_g_sd
+  ) %>%
+  pivot_longer(cols = c(cpi_growth, ue, fed_funds)) %>%
+  ggplot(aes(date, value)) + # color = name
+  geom_line() +
+  geom_rect(
+    data = recession_dates, 
+    aes(xmin = start, xmax = end, ymin = -2, ymax = 4),
+    fill = 'blue', alpha = 0.3, inherit.aes = FALSE
+  ) +
+  facet_wrap(~name, ncol = 1) + 
+  scale_y_continuous(limits = c(-4,4)) +
+  scale_x_date(limits = as.Date(c("1990-01-01", "2024-01-01"))) + 
+  theme(
+    panel.background = element_blank(),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank()
+  )
+```
+
+Separate CPI and UE
+
+```{r}
+df %>%
+  arrange(date) %>%
+  mutate(
+    cpi = (cpi - cpi_mean) / cpi_sd,
+    ue = (ue - ue_mean) / ue_sd,
+    fed_funds = (fed_funds - ff_mean) / ff_sd,
+    cpi_growth = (cpi_growth - cpi_g_mean) / cpi_g_sd
+  ) %>%
+  pivot_longer(cols = c(cpi_growth, fed_funds)) %>%
+  ggplot(aes(date, value, color = name)) +
+  geom_line() +
+  geom_rect(
+    data = recession_dates, 
+    aes(xmin = start, xmax = end, ymin = -2, ymax = 4),
+    fill = 'blue', alpha = 0.3, inherit.aes = FALSE
+  ) +
+  scale_y_continuous(limits = c(-2,4)) +
+  scale_x_date(limits = as.Date(c("1990-01-01", "2024-01-01"))) + 
+  theme(
+    panel.background = element_blank(),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank()
+  )
 
 df %>%
   arrange(date) %>%
@@ -118,10 +245,133 @@ df %>%
     cpi = (cpi - cpi_mean) / cpi_sd,
     ue = (ue - ue_mean) / ue_sd,
     fed_funds = (fed_funds - ff_mean) / ff_sd,
-    cpi_growth = (cpi/lag(cpi, n = 12) - 1) * 100
+    cpi_growth = (cpi_growth - cpi_g_mean) / cpi_g_sd
   ) %>%
-  pivot_longer(cols = c(cpi, ue, fed_funds)) %>%
+  pivot_longer(cols = c(ue, fed_funds)) %>%
   ggplot(aes(date, value, color = name)) +
-  geom_line()
+  geom_line() +
+  geom_rect(
+    data = recession_dates, 
+    aes(xmin = start, xmax = end, ymin = -2, ymax = 4),
+    fill = 'blue', alpha = 0.3, inherit.aes = FALSE
+  ) + 
+  scale_y_continuous(limits = c(-2,4)) +
+  scale_x_date(limits = as.Date(c("1990-01-01", "2024-01-01"))) + 
+  theme(
+    panel.background = element_blank(),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank()
+  )
+```
+
+```{r}
+df %>%
+  pivot_longer(cols = c(cpi_growth, fed_funds)) %>%
+  ggplot(aes(date, value, color = name)) +
+  geom_line() +
+  geom_rect(
+    data = recession_dates, 
+    aes(xmin = start, xmax = end, ymin = 0, ymax = 15),
+    fill = 'blue', alpha = 0.3, inherit.aes = FALSE
+  ) +
+  scale_x_date(limits = as.Date(c("1990-01-01", "2024-01-01"))) + 
+  theme(
+    panel.background = element_blank(),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank()
+  )
+
+df %>%
+  pivot_longer(cols = c(ue, fed_funds)) %>%
+  ggplot(aes(date, value, color = name)) +
+  geom_line() +
+  geom_rect(
+    data = recession_dates, 
+    aes(xmin = start, xmax = end, ymin = 0, ymax = 15),
+    fill = 'blue', alpha = 0.3, inherit.aes = FALSE
+  ) + 
+  scale_x_date(limits = as.Date(c("1990-01-01", "2024-01-01"))) + 
+  theme(
+    panel.background = element_blank(),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank()
+  )
+```
+
+Optimal Lag
+
+```{r}
+cpi_ccf <- ccf(
+  as.ts(df$fed_funds), as.ts(df$cpi_growth), 
+  na.action = na.pass, plot = FALSE
+)
+max_corr_index <- which.max(abs(cpi_ccf$acf))
+cpi_lag <- cpi_ccf$lag[max_corr_index]
+
+df %>%
+  mutate(cpi_growth = lag(cpi_growth, n = cpi_lag)) %>%
+  pivot_longer(cols = c(cpi_growth, fed_funds)) %>%
+  ggplot(aes(date, value, color = name)) +
+  geom_line() +
+  geom_rect(
+    data = recession_dates, 
+    aes(xmin = start, xmax = end, ymin = 0, ymax = 15),
+    fill = 'blue', alpha = 0.3, inherit.aes = FALSE
+  ) +
+  scale_x_date(limits = as.Date(c("1990-01-01", "2024-01-01"))) + 
+  theme(
+    panel.background = element_blank(),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank()
+  )
+```
+
+```{r}
+ue_ccf <- ccf(
+  as.ts(df$fed_funds), as.ts(df$ue), 
+  na.action = na.pass, plot = FALSE
+)
+max_corr_index <- which.max(abs(ue_ccf$acf))
+ue_lag <- ue_ccf$lag[max_corr_index]
+
+df %>%
+  mutate(ue = lag(ue, n = ue_lag)) %>%
+  pivot_longer(cols = c(ue, fed_funds)) %>%
+  ggplot(aes(date, value, color = name)) +
+  geom_line() +
+  geom_rect(
+    data = recession_dates, 
+    aes(xmin = start, xmax = end, ymin = 0, ymax = 15),
+    fill = 'blue', alpha = 0.3, inherit.aes = FALSE
+  ) +
+  scale_x_date(limits = as.Date(c("1990-01-01", "2024-01-01"))) + 
+  theme(
+    panel.background = element_blank(),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank()
+  )
+```
+
+Bar Charts
+
+```{r}
+# df <- 
+  
+  
+df %>%
+  mutate(
+    fed_diff = fed_funds - lag(fed_funds, n = 1),
+    fed_diff_rollsum1 = rollapply(fed_diff, width = 12, FUN = sum, align = "right", fill = NA),
+    fed_diff_rollsum2 = rollapply(fed_diff_rollsum1, width = 12, FUN = sum, align = "right", fill = NA),
+    fed_status = case_when(
+      (fed_diff_rollsum2 > 0 & lag(fed_diff_rollsum2 < 0)) ~ 'start_hike_cycle',
+      (fed_diff_rollsum2 < 0 & lag(fed_diff_rollsum2 > 0)) ~ 'start_cut_cycle',
+      fed_diff_rollsum2 > 0 ~ 'hike_cycle',
+      fed_diff_rollsum2 < 0 ~ 'cut_cycle',
+      .default = NA
+    ))%>%
+  ggplot() +
+  geom_line(aes(date, fed_funds)) +
+  geom_point(aes(date, fed_diff_rollsum2, color = fed_status))
 ```
 
