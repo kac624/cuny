@@ -10,6 +10,7 @@ library(tidyverse)
 library(fredr)
 library(blsAPI)
 library(jsonlite)
+library(lubridate)
 library(zoo)
 ```
 
@@ -26,7 +27,7 @@ BLS API: https://www.bls.gov/developers/home.htm
 ```{r}
 # https://www.bls.gov/cpi/overview.htm
 
-year_ranges <- list(c('2011','2024'), c('1985','2010'))
+year_ranges <- list(c('2005','2024'), c('1985','2005'))
 
 cpi <- data.frame()
 ue <- data.frame()
@@ -80,6 +81,18 @@ fed_funds <- fed_funds %>%
     month = month(date)
   )
 
+fed_target <- fredr(
+  series_id = 'DFEDTARU',
+  observation_start = as.Date('1985-01-01'),
+  observation_end = as.Date('2024-02-01')
+)
+
+fed_target <- fed_target %>%
+  mutate(
+    year = year(date),
+    month = month(date)
+  )
+
 recession <- fredr(
   series_id = 'JHDUSRGDPBR',
   observation_start = as.Date('1985-01-01'),
@@ -108,8 +121,15 @@ MERGE
 ```{r}
 df <- left_join(cpi, ue, by = c('year', 'month')) %>%
   left_join(fed_funds, by = c('year', 'month')) %>%
-  rename(cpi = value.x, ue = value.y, fed_funds = value) %>%
-  select(date, cpi, ue, fed_funds)
+  left_join(fed_target, by = 'date') %>%
+  rename(
+    cpi = value.x, ue = value.y, 
+    fed_funds = value.x.x, fed_target = value.y.y
+  ) %>%
+  select(date, cpi, ue, fed_funds, fed_target) %>%
+  mutate(fed_target = 
+           if_else(is.na(fed_target), ceiling(fed_funds * 4) / 4, fed_target)
+  )
 
 df
 ```
@@ -355,23 +375,212 @@ df %>%
 Bar Charts
 
 ```{r}
-# df <- 
-  
-  
-df %>%
+df <- df %>%
   mutate(
-    fed_diff = fed_funds - lag(fed_funds, n = 1),
-    fed_diff_rollsum1 = rollapply(fed_diff, width = 12, FUN = sum, align = "right", fill = NA),
-    fed_diff_rollsum2 = rollapply(fed_diff_rollsum1, width = 12, FUN = sum, align = "right", fill = NA),
+    fed_roll_peak = rollapply(
+      fed_target, width = 52, FUN = max, 
+      align = "center", fill = c(NA, NA, 'extend')
+    ),
+    fed_roll_valley = rollapply(
+      fed_target, width = 52, FUN = min, 
+      align = "center", fill = c(NA, NA, 'extend')
+    ),
     fed_status = case_when(
-      (fed_diff_rollsum2 > 0 & lag(fed_diff_rollsum2 < 0)) ~ 'start_hike_cycle',
-      (fed_diff_rollsum2 < 0 & lag(fed_diff_rollsum2 > 0)) ~ 'start_cut_cycle',
-      fed_diff_rollsum2 > 0 ~ 'hike_cycle',
-      fed_diff_rollsum2 < 0 ~ 'cut_cycle',
-      .default = NA
-    ))%>%
-  ggplot() +
-  geom_line(aes(date, fed_funds)) +
-  geom_point(aes(date, fed_diff_rollsum2, color = fed_status))
+      fed_target == fed_roll_peak & fed_target > lead(fed_target) ~ 'peak',
+      fed_target == fed_roll_valley & fed_target < lead(fed_target)~ 'valley',
+      .default = 'between'
+    )) %>%
+  select(-fed_roll_peak, -fed_roll_valley)
+
+previous_cycle <- 'hike'
+current_cycle <- 'hike'
+
+for (row in 1:nrow(df)) {
+  if (df[row, 'fed_status'] == 'peak') {current_cycle <- 'cut'}
+  if (df[row, 'fed_status'] == 'valley') {current_cycle <- 'hike'}
+  
+  lags <- c(df[row, 'fed_target'])
+  
+  for (lag in 1:12) {
+    lags <- c(lags, df[row-lag, 'fed_target'])
+  }
+  
+  if (all(diff(lags) == 0)) {
+    df[row, 'fed_status'] <- 'maintain'
+  } else if (current_cycle == 'cut' & previous_cycle != 'cut') {
+    df[row, 'fed_status'] <- 'start_cut'
+  } else if (current_cycle == 'hike' & previous_cycle != 'hike') {
+    df[row, 'fed_status'] <- 'start_hike'
+  } else if (current_cycle == 'cut' & previous_cycle == 'cut') {
+    df[row, 'fed_status'] <- 'cut'
+  } else if (current_cycle == 'hike' & previous_cycle == 'hike') {
+    df[row, 'fed_status'] <- 'hike'
+  }
+  
+  previous_cycle <- current_cycle
+}
+
+df[nrow(df), 'fed_status'] <- 'cut'
+# df[df$date > '2019-07-01' & df$date < '2020-04-01', 'fed_status'] <- 'hike'
+# df[df$date == '2020-04-01', 'fed_status'] <- 'start_cut'
+
+ggplot() + 
+  geom_rect(data = df, aes(
+    xmin = date, xmax = lead(date, order_by = date), 
+    ymin = -Inf, ymax = Inf, fill = fed_status
+  ), alpha = 0.4) +
+  geom_line(data = df, aes(x = date, y = fed_target), color = "black") +
+  geom_line(data = df, aes(x = date, y = fed_funds), color = "green") +
+  # geom_line(data = df, aes(x = date, y = ue), color = "red") +
+  # geom_line(data = df, aes(x = date, y = cpi_growth), color = "blue") +
+  scale_fill_manual(values = c("cut" = "red", "hike" = "green"))
+
+df %>%
+  filter(str_detect(fed_status, 'start'))
+
+df
+```
+
+```{r}
+cut_cycles <- data.frame(
+  start = as.Date(c('1989-05-01','1995-05-01','2000-07-01','2007-03-01','2019-07-01')),
+  end = as.Date(c('1992-12-01','1999-01-01','2004-01-01','2010-01-01','2020-04-01'))
+)
+
+cut_cycles
+
+hike_cycles <- data.frame(
+  start = as.Date(c('1992-12-01','1999-01-01','2004-01-01','2016-01-01','2022-04-01')),
+  end = as.Date(c('1995-05-01','2000-07-01','2007-03-01','2019-07-01','2024-01-01'))
+)
+
+hike_cycles
+
+ggplot() + 
+  # geom_line(data = df, aes(x = date, y = fed_target), color = "black") +
+  # geom_line(data = df, aes(x = date, y = fed_funds), color = "green") +
+  geom_line(data = df, aes(x = date, y = ue), color = "red") +
+  geom_line(data = df, aes(x = date, y = cpi_growth), color = "blue") +
+  geom_rect(
+    data = cut_cycles, aes(xmin = start, xmax = end, ymin = -Inf, ymax = Inf), 
+    alpha = 0.3, fill = 'red', inherit.aes = FALSE
+  ) +
+  geom_rect(
+    data = hike_cycles, aes(xmin = start, xmax = end, ymin = -Inf, ymax = Inf), 
+    alpha = 0.3, fill = 'blue', inherit.aes = FALSE
+  )
+```
+
+```{r}
+for (row in 1:nrow(cut_cycles)) {
+  
+  time_to_change <- as.period(hike_cycles[row, 2] - cut_cycles[row, 2])
+  obs_period <- if_else(time_to_change < months(60), time_to_change, months(60))
+  
+  cut_cycles[row, 'obs_period_end'] <- cut_cycles[row, 2] + obs_period
+  
+  cut_cycles[row, 'ff_change'] <- 
+    df[df$date == cut_cycles[row, 2], 'fed_funds'] - 
+    df[df$date == cut_cycles[row, 1], 'fed_funds']
+  
+  cut_cycles[row, 'infl_change'] <- 
+    df[df$date == cut_cycles[row, 2] + obs_period, 'cpi_growth'] -
+    df[df$date == cut_cycles[row, 2], 'cpi_growth']
+    # NA
+  
+  cut_cycles[row, 'ue_change'] <- 
+    df[df$date == cut_cycles[row, 2] + obs_period, 'ue'] - 
+    df[df$date == cut_cycles[row, 2], 'ue']
+}
+
+cut_cycles
+
+for (row in 1:nrow(hike_cycles)) {
+  
+  if (row == nrow(hike_cycles)) {
+    obs_period <- 0
+    adjustment <- 1
+  } else {
+    time_to_change <- as.period(cut_cycles[row+1, 2] - hike_cycles[row, 2])
+    obs_period <- if_else(time_to_change < months(60), time_to_change, months(60))
+    adjustment <- 0
+  }
+  
+  hike_cycles[row, 'obs_period_end'] <- hike_cycles[row, 2] + obs_period
+  
+  hike_cycles[row, 'ff_change'] <- 
+    df[df$date == hike_cycles[row, 2], 'fed_funds'] - 
+    df[df$date == hike_cycles[row, 1], 'fed_funds']
+  
+  hike_cycles[row, 'infl_change'] <- 
+    df[df$date == hike_cycles[row, 2] + obs_period, 'cpi_growth'] - 
+    df[df$date == hike_cycles[row, 2 - adjustment], 'cpi_growth']
+  
+  hike_cycles[row, 'ue_change'] <- 
+    df[df$date == hike_cycles[row, 2] + obs_period, 'ue'] -
+    df[df$date == hike_cycles[row, 2 - adjustment], 'ue']
+    # NA
+}
+
+hike_cycles
+```
+
+
+```{r}
+cut_cycles %>%
+  pivot_longer(cols = c(ff_change, ue_change)) %>% 
+  mutate(
+    end = as.character(end),
+    value = (value)
+  ) %>%
+  ggplot(aes(end, value, fill = name)) +
+  geom_col(position = position_dodge()) +
+  theme_minimal()
+
+hike_cycles %>%
+  mutate(
+    end = as.character(end),
+    infl_change = -(infl_change)
+  ) %>%
+  pivot_longer(cols = c(ff_change, infl_change)) %>% 
+  ggplot(aes(end, value, fill = name)) +
+  geom_col(position = position_dodge()) +
+  theme_minimal()
+```
+
+
+```{r}
+rbind(cut_cycles, hike_cycles) %>%
+  mutate(
+    end = as.character(end),
+    infl_change = (infl_change),
+    effect = coalesce(infl_change, ue_change)
+  ) %>%
+  # pivot_longer(cols = c(ff_change, effect)) %>%
+  pivot_longer(cols = c(ff_change, infl_change, ue_change), values_drop_na = TRUE) %>% 
+  ggplot(aes(end, value, fill = name)) +
+  geom_col(position = position_dodge()) +
+  # geom_line(data = df, aes(x = date, y = ue), color = "red", inherit.aes = FALSE)
+  theme_minimal()
+```
+
+```{r}
+# Sample data
+df1 <- data.frame(
+  category = c("A", "B", "C"),
+  start = as.Date(c("2021-01-01", "2021-02-01", "2021-03-01")),
+  end = as.Date(c("2021-01-15", "2021-02-20", "2021-04-01"))
+)
+
+# Calculate duration and mid-point for plotting
+df1$duration <- as.numeric(df1$end - df1$start)
+df1$mid_point <- df1$start + (df1$duration / 2)
+
+ggplot(df1, aes(x = mid_point, y = category, height = 0.9, width = duration)) +
+  geom_tile(fill = "steelblue") +
+  scale_x_date(name = "Date", date_breaks = "1 month", date_labels = "%b %Y") +
+  labs(y = "Category", title = "Duration of Events by Category") +
+  theme_minimal()
+
 ```
 
