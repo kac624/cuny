@@ -1,7 +1,7 @@
 ---
-title: "Story 2 - The Fed's Dual Mandate"
-author: "Keith Colella"
-date: "2024-02-08"
+title: 'Story 2 - The Feds Dual Mandate'
+author: 'Keith Colella'
+date: '2024-02-18'
 output: html_document
 ---
 
@@ -116,7 +116,7 @@ recession_dates <- recession %>%
   ungroup()
 ```
 
-MERGE
+Merge and create new columns
 
 ```{r}
 df <- left_join(cpi, ue, by = c('year', 'month')) %>%
@@ -127,34 +127,16 @@ df <- left_join(cpi, ue, by = c('year', 'month')) %>%
     fed_funds = value.x.x, fed_target = value.y.y
   ) %>%
   select(date, cpi, ue, fed_funds, fed_target) %>%
-  mutate(fed_target = 
-           if_else(is.na(fed_target), ceiling(fed_funds * 4) / 4, fed_target)
-  )
+  arrange(date) %>%
+  mutate(
+    fed_target = if_else(is.na(fed_target), ceiling(fed_funds * 4) / 4, fed_target),
+    cpi_growth = (cpi/lag(cpi, n = 12) - 1) * 100
+  ) 
 
-df
+head(df)
 ```
 
 ## Visualizations
-
-Prep df
-
-```{r}
-df <- df %>%
-  arrange(date) %>%
-  mutate(cpi_growth = (cpi/lag(cpi, n = 12) - 1) * 100)
-
-cpi_mean = mean(df$cpi)
-cpi_sd = sd(df$cpi)
-
-cpi_g_mean = mean(df$cpi_growth, na.rm = TRUE)
-cpi_g_sd = sd(df$cpi_growth, na.rm = TRUE)
-
-ue_mean = mean(df$ue)
-ue_sd = sd(df$ue)
-
-ff_mean = mean(df$fed_funds)
-ff_sd = sd(df$fed_funds)
-```
 
 Levels
 
@@ -162,228 +144,39 @@ Levels
 df %>%
   pivot_longer(cols = c(cpi_growth, ue, fed_funds)) %>%
   ggplot(aes(date, value, color = name)) +
-  geom_line() + 
+  geom_line(size = 0.8) + 
   geom_rect(
     data = recession_dates, 
     aes(xmin = start, xmax = end, ymin = 0, ymax = 15),
     fill = 'blue', alpha = 0.3, inherit.aes = FALSE
   ) + 
-  theme(
-    panel.background = element_blank(),
-    panel.grid.major = element_blank(),
-    panel.grid.minor = element_blank()
-  )
-```
-
-Normalized
-
-```{r}
-df %>%
-  arrange(date) %>%
-  mutate(
-    cpi = (cpi - cpi_mean) / cpi_sd,
-    ue = (ue - ue_mean) / ue_sd,
-    fed_funds = (fed_funds - ff_mean) / ff_sd,
-    cpi_growth = (cpi_growth - cpi_g_mean) / cpi_g_sd
-  ) %>%
-  pivot_longer(cols = c(cpi_growth, ue, fed_funds)) %>%
-  ggplot(aes(date, value, color = name)) +
-  geom_line() +
-  geom_rect(
-    data = recession_dates, 
-    aes(xmin = start, xmax = end, ymin = -2, ymax = 4),
-    fill = 'blue', alpha = 0.3, inherit.aes = FALSE
-  ) + 
-  scale_y_continuous(limits = c(-2,4)) +
-  scale_x_date(limits = as.Date(c("1990-01-01", "2024-01-01"))) + 
-  theme(
-    panel.background = element_blank(),
-    panel.grid.major = element_blank(),
-    panel.grid.minor = element_blank()
-  )
-```
-
-Normalized separate plots
-
-```{r fig.height=5, fig.width=4}
-df %>%
-  arrange(date) %>%
-  mutate(
-    cpi = (cpi - cpi_mean) / cpi_sd,
-    ue = (ue - ue_mean) / ue_sd,
-    fed_funds = (fed_funds - ff_mean) / ff_sd,
-    cpi_growth = (cpi_growth - cpi_g_mean) / cpi_g_sd
-  ) %>%
-  pivot_longer(cols = c(cpi_growth, ue, fed_funds)) %>%
-  ggplot(aes(date, value)) + # color = name
-  geom_line() +
-  geom_rect(
-    data = recession_dates, 
-    aes(xmin = start, xmax = end, ymin = -2, ymax = 4),
-    fill = 'blue', alpha = 0.3, inherit.aes = FALSE
+  ggtitle('Fed Funds Rate, Unemployment and Inflation Over Time') +
+  xlab('Date') +
+  ylab('Percent (%)') + 
+  scale_color_manual(
+    values = c('cpi_growth' = 'chartreuse4', 'fed_funds' = 'dodgerblue2', 'ue' = 'coral3'), 
+    name = '', 
+    labels = c('cpi_growth' = 'Inflation', 'fed_funds' = 'Fed Funds Rate', 'ue' = 'Unemployment')
   ) +
-  facet_wrap(~name, ncol = 1) + 
-  scale_y_continuous(limits = c(-4,4)) +
-  scale_x_date(limits = as.Date(c("1990-01-01", "2024-01-01"))) + 
   theme(
-    panel.background = element_blank(),
-    panel.grid.major = element_blank(),
-    panel.grid.minor = element_blank()
+    plot.title = element_text(hjust = 0.5),
+    legend.position = 'bottom',
+    panel.background = element_blank()
   )
 ```
 
-Separate CPI and UE
-
-```{r}
-df %>%
-  arrange(date) %>%
-  mutate(
-    cpi = (cpi - cpi_mean) / cpi_sd,
-    ue = (ue - ue_mean) / ue_sd,
-    fed_funds = (fed_funds - ff_mean) / ff_sd,
-    cpi_growth = (cpi_growth - cpi_g_mean) / cpi_g_sd
-  ) %>%
-  pivot_longer(cols = c(cpi_growth, fed_funds)) %>%
-  ggplot(aes(date, value, color = name)) +
-  geom_line() +
-  geom_rect(
-    data = recession_dates, 
-    aes(xmin = start, xmax = end, ymin = -2, ymax = 4),
-    fill = 'blue', alpha = 0.3, inherit.aes = FALSE
-  ) +
-  scale_y_continuous(limits = c(-2,4)) +
-  scale_x_date(limits = as.Date(c("1990-01-01", "2024-01-01"))) + 
-  theme(
-    panel.background = element_blank(),
-    panel.grid.major = element_blank(),
-    panel.grid.minor = element_blank()
-  )
-
-df %>%
-  arrange(date) %>%
-  mutate(
-    cpi = (cpi - cpi_mean) / cpi_sd,
-    ue = (ue - ue_mean) / ue_sd,
-    fed_funds = (fed_funds - ff_mean) / ff_sd,
-    cpi_growth = (cpi_growth - cpi_g_mean) / cpi_g_sd
-  ) %>%
-  pivot_longer(cols = c(ue, fed_funds)) %>%
-  ggplot(aes(date, value, color = name)) +
-  geom_line() +
-  geom_rect(
-    data = recession_dates, 
-    aes(xmin = start, xmax = end, ymin = -2, ymax = 4),
-    fill = 'blue', alpha = 0.3, inherit.aes = FALSE
-  ) + 
-  scale_y_continuous(limits = c(-2,4)) +
-  scale_x_date(limits = as.Date(c("1990-01-01", "2024-01-01"))) + 
-  theme(
-    panel.background = element_blank(),
-    panel.grid.major = element_blank(),
-    panel.grid.minor = element_blank()
-  )
-```
-
-```{r}
-df %>%
-  pivot_longer(cols = c(cpi_growth, fed_funds)) %>%
-  ggplot(aes(date, value, color = name)) +
-  geom_line() +
-  geom_rect(
-    data = recession_dates, 
-    aes(xmin = start, xmax = end, ymin = 0, ymax = 15),
-    fill = 'blue', alpha = 0.3, inherit.aes = FALSE
-  ) +
-  scale_x_date(limits = as.Date(c("1990-01-01", "2024-01-01"))) + 
-  theme(
-    panel.background = element_blank(),
-    panel.grid.major = element_blank(),
-    panel.grid.minor = element_blank()
-  )
-
-df %>%
-  pivot_longer(cols = c(ue, fed_funds)) %>%
-  ggplot(aes(date, value, color = name)) +
-  geom_line() +
-  geom_rect(
-    data = recession_dates, 
-    aes(xmin = start, xmax = end, ymin = 0, ymax = 15),
-    fill = 'blue', alpha = 0.3, inherit.aes = FALSE
-  ) + 
-  scale_x_date(limits = as.Date(c("1990-01-01", "2024-01-01"))) + 
-  theme(
-    panel.background = element_blank(),
-    panel.grid.major = element_blank(),
-    panel.grid.minor = element_blank()
-  )
-```
-
-Optimal Lag
-
-```{r}
-cpi_ccf <- ccf(
-  as.ts(df$fed_funds), as.ts(df$cpi_growth), 
-  na.action = na.pass, plot = FALSE
-)
-max_corr_index <- which.max(abs(cpi_ccf$acf))
-cpi_lag <- cpi_ccf$lag[max_corr_index]
-
-df %>%
-  mutate(cpi_growth = lag(cpi_growth, n = cpi_lag)) %>%
-  pivot_longer(cols = c(cpi_growth, fed_funds)) %>%
-  ggplot(aes(date, value, color = name)) +
-  geom_line() +
-  geom_rect(
-    data = recession_dates, 
-    aes(xmin = start, xmax = end, ymin = 0, ymax = 15),
-    fill = 'blue', alpha = 0.3, inherit.aes = FALSE
-  ) +
-  scale_x_date(limits = as.Date(c("1990-01-01", "2024-01-01"))) + 
-  theme(
-    panel.background = element_blank(),
-    panel.grid.major = element_blank(),
-    panel.grid.minor = element_blank()
-  )
-```
-
-```{r}
-ue_ccf <- ccf(
-  as.ts(df$fed_funds), as.ts(df$ue), 
-  na.action = na.pass, plot = FALSE
-)
-max_corr_index <- which.max(abs(ue_ccf$acf))
-ue_lag <- ue_ccf$lag[max_corr_index]
-
-df %>%
-  mutate(ue = lag(ue, n = ue_lag)) %>%
-  pivot_longer(cols = c(ue, fed_funds)) %>%
-  ggplot(aes(date, value, color = name)) +
-  geom_line() +
-  geom_rect(
-    data = recession_dates, 
-    aes(xmin = start, xmax = end, ymin = 0, ymax = 15),
-    fill = 'blue', alpha = 0.3, inherit.aes = FALSE
-  ) +
-  scale_x_date(limits = as.Date(c("1990-01-01", "2024-01-01"))) + 
-  theme(
-    panel.background = element_blank(),
-    panel.grid.major = element_blank(),
-    panel.grid.minor = element_blank()
-  )
-```
-
-Bar Charts
+Identify Rate & Hike Cycles
 
 ```{r}
 df <- df %>%
   mutate(
     fed_roll_peak = rollapply(
       fed_target, width = 52, FUN = max, 
-      align = "center", fill = c(NA, NA, 'extend')
+      align = 'center', fill = c(NA, NA, 'extend')
     ),
     fed_roll_valley = rollapply(
       fed_target, width = 52, FUN = min, 
-      align = "center", fill = c(NA, NA, 'extend')
+      align = 'center', fill = c(NA, NA, 'extend')
     ),
     fed_status = case_when(
       fed_target == fed_roll_peak & fed_target > lead(fed_target) ~ 'peak',
@@ -421,25 +214,35 @@ for (row in 1:nrow(df)) {
 }
 
 df[nrow(df), 'fed_status'] <- 'cut'
-# df[df$date > '2019-07-01' & df$date < '2020-04-01', 'fed_status'] <- 'hike'
-# df[df$date == '2020-04-01', 'fed_status'] <- 'start_cut'
 
 ggplot() + 
   geom_rect(data = df, aes(
     xmin = date, xmax = lead(date, order_by = date), 
     ymin = -Inf, ymax = Inf, fill = fed_status
   ), alpha = 0.4) +
-  geom_line(data = df, aes(x = date, y = fed_target), color = "black") +
-  geom_line(data = df, aes(x = date, y = fed_funds), color = "green") +
-  # geom_line(data = df, aes(x = date, y = ue), color = "red") +
-  # geom_line(data = df, aes(x = date, y = cpi_growth), color = "blue") +
-  scale_fill_manual(values = c("cut" = "red", "hike" = "green"))
-
-df %>%
-  filter(str_detect(fed_status, 'start'))
-
-df
+  geom_line(data = df, aes(x = date, y = fed_target, color = 'Target Rate')) +
+  geom_line(data = df, aes(x = date, y = fed_funds, color = 'Actual Rate')) +
+  ggtitle('Rate Cut Versus Hike Cycles with the Fed Funds Rate') +
+  xlab('Date') +
+  ylab('Fed Funds Rate (%)') + 
+  scale_fill_manual(
+    values = c('cut' = 'coral3', 'hike' = 'dodgerblue2'), 
+    name = '', 
+    labels = c('cut' = 'Rate Cut Cycle', 'hike' = 'Rate Hike Cycle')
+  ) +
+  scale_color_manual(
+    values = c('Target Rate' = 'black', 'Actual Rate' = 'dodgerblue2'),
+    name = '',
+    labels = c('Target Rate', 'Actual Rate')
+  ) +
+  theme(
+    plot.title = element_text(hjust = 0.5),
+    legend.position = 'bottom', legend.box = 'vertical',
+    panel.background = element_blank()
+  )
 ```
+
+Fine Tune Dates and Set up Cycle DFs
 
 ```{r}
 cut_cycles <- data.frame(
@@ -447,29 +250,45 @@ cut_cycles <- data.frame(
   end = as.Date(c('1992-12-01','1999-01-01','2004-01-01','2010-01-01','2020-04-01'))
 )
 
-cut_cycles
-
 hike_cycles <- data.frame(
-  start = as.Date(c('1992-12-01','1999-01-01','2004-01-01','2016-01-01','2022-04-01')),
+  start = as.Date(c('1992-12-01','1999-01-01','2004-01-01','2016-01-01','2022-02-01')),
   end = as.Date(c('1995-05-01','2000-07-01','2007-03-01','2019-07-01','2024-01-01'))
 )
 
-hike_cycles
-
 ggplot() + 
-  # geom_line(data = df, aes(x = date, y = fed_target), color = "black") +
-  # geom_line(data = df, aes(x = date, y = fed_funds), color = "green") +
-  geom_line(data = df, aes(x = date, y = ue), color = "red") +
-  geom_line(data = df, aes(x = date, y = cpi_growth), color = "blue") +
+  geom_line(data = df, aes(x = date, y = ue, color = 'Unemployment')) +
+  geom_line(data = df, aes(x = date, y = cpi_growth, color = 'Inflation')) +
   geom_rect(
-    data = cut_cycles, aes(xmin = start, xmax = end, ymin = -Inf, ymax = Inf), 
-    alpha = 0.3, fill = 'red', inherit.aes = FALSE
+    data = cut_cycles, aes(
+      xmin = start, xmax = end, ymin = -Inf, ymax = Inf, fill = 'Rate Cut Cycle'
+      ), alpha = 0.3, inherit.aes = FALSE
   ) +
   geom_rect(
-    data = hike_cycles, aes(xmin = start, xmax = end, ymin = -Inf, ymax = Inf), 
-    alpha = 0.3, fill = 'blue', inherit.aes = FALSE
+    data = hike_cycles, aes(
+      xmin = start, xmax = end, ymin = -Inf, ymax = Inf, fill = 'Rate Hike Cycle'
+    ), alpha = 0.3, inherit.aes = FALSE
+  ) +
+  ggtitle('Rate Cut Versus Hike Cycles with the Inflation and Unemployment') +
+  xlab('Date') +
+  ylab('Percent (%)') + 
+  scale_fill_manual(
+    values = c('Rate Cut Cycle' = 'coral3', 'Rate Hike Cycle' = 'dodgerblue2'), 
+    name = '', 
+    labels = c('Rate Cut Cycle', 'Rate Hike Cycle')
+  ) +
+  scale_color_manual(
+    values = c('Unemployment' = 'chartreuse4', 'Inflation' = 'firebrick2'),
+    name = '',
+    labels = c('Unemployment', 'Inflation')
+  ) +
+  theme(
+    plot.title = element_text(hjust = 0.5),
+    legend.position = 'bottom', legend.box = 'vertical',
+    panel.background = element_blank()
   )
 ```
+
+Calculate changes in UE and CPI after each cycle
 
 ```{r}
 for (row in 1:nrow(cut_cycles)) {
@@ -486,14 +305,11 @@ for (row in 1:nrow(cut_cycles)) {
   cut_cycles[row, 'infl_change'] <- 
     df[df$date == cut_cycles[row, 2] + obs_period, 'cpi_growth'] -
     df[df$date == cut_cycles[row, 2], 'cpi_growth']
-    # NA
   
   cut_cycles[row, 'ue_change'] <- 
     df[df$date == cut_cycles[row, 2] + obs_period, 'ue'] - 
     df[df$date == cut_cycles[row, 2], 'ue']
 }
-
-cut_cycles
 
 for (row in 1:nrow(hike_cycles)) {
   
@@ -519,68 +335,149 @@ for (row in 1:nrow(hike_cycles)) {
   hike_cycles[row, 'ue_change'] <- 
     df[df$date == hike_cycles[row, 2] + obs_period, 'ue'] -
     df[df$date == hike_cycles[row, 2 - adjustment], 'ue']
-    # NA
 }
 
+cut_cycles <- cut_cycles %>%
+  mutate(label = str_c(
+    'Cut Cycle: ', format(start, "%b-%y"),
+    ' – ', format(end, "%b-%y"),
+    ' / Observation Period: ', format(end, "%b-%y"), 
+    ' – ', format(obs_period_end, "%b-%y")
+  ))
+
+hike_cycles <- hike_cycles %>%
+  mutate(label = str_c(
+    'Hike Cycle: ', format(start, "%b-%y"),
+    ' – ', format(end, "%b-%y"),
+    ' / Observation Period: ', format(end, "%b-%y"), 
+    ' – ', format(obs_period_end, "%b-%y")
+  ))
+
+hike_cycles[5,7] <- 'Hike Cycle: Feb-22 – Jan-24 / Observation Period: Feb-22 – Jan-24'
+
+cut_cycles
 hike_cycles
 ```
 
+Plot separate Bar Charts
 
 ```{r}
-cut_cycles %>%
+cut_plot <- cut_cycles %>%
   pivot_longer(cols = c(ff_change, ue_change)) %>% 
   mutate(
-    end = as.character(end),
+    end = as.character(year(end)),
     value = (value)
   ) %>%
   ggplot(aes(end, value, fill = name)) +
   geom_col(position = position_dodge()) +
-  theme_minimal()
+  ggtitle('Fed Funds Rate Hikes and Resulting Changes in Unemployment') +
+  xlab(NULL) +
+  ylab('Change (%)') + 
+  scale_fill_manual(
+    values = c('ff_change' = 'dodgerblue2', 'ue_change' = 'firebrick2'), 
+    name = NULL, 
+    labels = c('ff_change' = 'Change in Fed Funds Rate', 'ue_change' = 'Change in Unemployment')
+  ) +
+  theme(
+    plot.title = element_text(hjust = 0.5),
+    panel.background = element_blank(),
+    legend.position = 'bottom', legend.box = 'vertical',
+    axis.ticks.x = element_blank()
+  )
 
-hike_cycles %>%
+hike_plot <- hike_cycles %>%
   mutate(
-    end = as.character(end),
-    infl_change = -(infl_change)
+    end = as.character(year(end)),
+    infl_change = (infl_change)
   ) %>%
   pivot_longer(cols = c(ff_change, infl_change)) %>% 
   ggplot(aes(end, value, fill = name)) +
   geom_col(position = position_dodge()) +
-  theme_minimal()
+  ggtitle('Fed Funds Rate Hikes and Resulting Changes in Inflation') +
+  xlab(NULL) +
+  ylab('Change (%)') + 
+  scale_fill_manual(
+    values = c('ff_change' = 'dodgerblue2', 'infl_change' = 'chartreuse4'), 
+    name = NULL, 
+    labels = c('ff_change' = 'Change in Fed Funds Rate', 'infl_change' = 'Change in Inflation')
+  ) +
+  theme(
+    plot.title = element_text(hjust = 0.5),
+    panel.background = element_blank(),
+    legend.position = 'bottom', legend.box = 'vertical',
+    axis.ticks.x = element_blank()
+  )
+
+cut_plot
+hike_plot
 ```
 
+# Final Plot
 
-```{r}
-rbind(cut_cycles, hike_cycles) %>%
-  mutate(
-    end = as.character(end),
-    infl_change = (infl_change),
-    effect = coalesce(infl_change, ue_change)
-  ) %>%
-  # pivot_longer(cols = c(ff_change, effect)) %>%
-  pivot_longer(cols = c(ff_change, infl_change, ue_change), values_drop_na = TRUE) %>% 
-  ggplot(aes(end, value, fill = name)) +
-  geom_col(position = position_dodge()) +
-  # geom_line(data = df, aes(x = date, y = ue), color = "red", inherit.aes = FALSE)
-  theme_minimal()
-```
+This final plots shows that the Fed typically succeeds in its dual mandate. After each cut cycle, we typically see unemployment decrease. After each hike cycle, we typically see inflation decrease. This plot, however, also shows that contradictory nature of the dual mandate. After many cut cycles, we see some increase in inflation, and after many hike cycles, we see some increase in unemployment. Historical context is important here, as sometimes the Fed may intend to drive up some unemployment to "cool" the economy. Similarly, it may sometimes intend to increase inflation during periods of high disinflation. Regardless, this plot helps us determine that cuts typically drive higher employment and hikes typically drive lower inflation.
 
-```{r}
-# Sample data
-df1 <- data.frame(
-  category = c("A", "B", "C"),
-  start = as.Date(c("2021-01-01", "2021-02-01", "2021-03-01")),
-  end = as.Date(c("2021-01-15", "2021-02-20", "2021-04-01"))
+```{r fig.width=7, fig.height=8}
+caption <- str_c(
+  'NOTE:',
+  '\n Each year corresponds to a period of rate cuts / hikes and a period of observation for unemployment and inflation.',
+  '\n The details of each cycle are provided below.'
 )
+  
+for (row in 1:nrow(cut_cycles)) {
+  cut_caption <- str_c(year(cut_cycles[row, 'end']), ' – ', cut_cycles[row, 'label'])
+  caption <- str_c(caption, '\n     ', cut_caption)
+  
+  hike_caption <- str_c(year(hike_cycles[row, 'end']), ' – ', hike_cycles[row, 'label'])
+  caption <- str_c(caption, '\n     ', hike_caption)
+}
 
-# Calculate duration and mid-point for plotting
-df1$duration <- as.numeric(df1$end - df1$start)
-df1$mid_point <- df1$start + (df1$duration / 2)
+caption <- str_c(caption, '\n Sources: Fed Funds Rates data are from FRED. Inflation and Unemployment data are from BLS.')
 
-ggplot(df1, aes(x = mid_point, y = category, height = 0.9, width = duration)) +
-  geom_tile(fill = "steelblue") +
-  scale_x_date(name = "Date", date_breaks = "1 month", date_labels = "%b %Y") +
-  labs(y = "Category", title = "Duration of Events by Category") +
-  theme_minimal()
+final_plot <- rbind(cut_cycles, hike_cycles) %>%
+  pivot_longer(cols = c(ff_change, ue_change, infl_change)) %>%
+  filter(!is.na(value)) %>%
+  mutate(label = fct_reorder(label, end), end = as.character(year(end))) %>%
+  arrange(end) %>%
+  ggplot(aes(x = end, y = value, fill = name)) +
+  geom_col(position = position_dodge(), width = 0.75) +
+  labs(
+    x = 'End of Rate Cycle (Year)', y = 'Change (%)', 
+    title = 'Fed Funds Rate Cuts / Hikes and Resulting Changes in Unemployment / Inflation',
+    caption = caption
+  ) +
+  scale_fill_manual(
+    values = c(
+      'ff_change' = 'azure2',
+      'ue_change' = 'wheat2',
+      'infl_change' = 'sienna1'
+    ),
+    labels = c(
+      'ff_change' = 'Change in Fed Funds Rate',
+      'ue_change' = 'Change in Unemployment',
+      'infl_change' = 'Change in Inflation'
+    ), 
+    name = NULL,
+  ) +
+  scale_x_discrete(position = 'bottom') +
+  geom_text(
+    aes(label = round(value,1), y = ifelse(value > 0, value + 1, value - 1)),
+    position = position_dodge(0.8),
+    color = "black", size = 3.2
+  ) +
+  theme(
+    plot.title.position = 'plot',
+    plot.title = element_text(hjust = 0.5),
+    plot.caption = element_text(hjust = 0),
+    panel.background = element_blank(),
+    legend.position = 'bottom', legend.box = 'vertical',
+    axis.ticks.x = element_blank(),
+    axis.title.x = element_text(margin = margin(t = 15, b = 10))
+  )
 
+final_plot
+```
+
+```{r}
+ggsave('story2_KeithC_finalPlot.png', plot = final_plot, width = 7, height = 8, dpi = 500)
 ```
 
