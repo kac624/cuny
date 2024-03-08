@@ -13,3 +13,8 @@ D608/data/api_keys.json
 *.ipynb_checkpoints
 *.joblib
 *.pth
+*.pt
+__pycache__/
+logs/
+processed/
+models/
