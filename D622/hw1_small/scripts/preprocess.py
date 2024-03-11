@@ -9,7 +9,7 @@ from sklearn.model_selection import train_test_split
 
 from haversine import haversine
 
-from config import config
+from utils import config
 
 import time
 start = time.time()
@@ -17,9 +17,13 @@ start = time.time()
 
 """CONFIG"""
 
+TRAIN_SPLIT_PROP = config['TRAIN_SPLIT_PROP']
+FEATURES_TO_DROP = config['FEATURES_TO_DROP']
+FEATURES_TO_SCALE = config['FEATURES_TO_SCALE']
+FEATURES_TO_ONEHOT = config['FEATURES_TO_ONEHOT']
 SCALE_TARGET = config['SCALE_TARGET']
 SCALE_FUNCTION = config['SCALE_FUNCTION']
-TRAIN_SPLIT_PROP = config['TRAIN_SPLIT_PROP']
+
 
 
 """LOAD DATA"""
@@ -38,40 +42,28 @@ housing['DISTANCE'] = housing.apply(
     lambda x: haversine(empire_state, (x.LATITUDE, x.LONGITUDE)), axis=1
 )
 
+# Zipcode
+housing['ZIPCODE'] = housing.STATE.apply(lambda x: x[-5:])
+zip_counts = housing.ZIPCODE.value_counts()
+housing.ZIPCODE = housing.ZIPCODE.apply(lambda x: x if x in zip_counts[zip_counts > 30].index else 'Other')
+
 
 
 """SET UP PIPELINE"""
 
-# Lists to handle columns for dropping, one-hot encoding, scaling
-features_to_drop = [
-    'ADDRESS', 'FORMATTED_ADDRESS', 'MAIN_ADDRESS',
-    'LONG_NAME', 'LATITUDE', 'LONGITUDE', 'BROKERTITLE'
-]
-
 # Categorical features
-features_to_onehot = [
-    'TYPE', 'STATE', 'ADMINISTRATIVE_AREA_LEVEL_2',
-    'STREET_NAME', 'LOCALITY', 'SUBLOCALITY', 
-]
 onehot_transformer = Pipeline(steps=[
     ('encoder', OneHotEncoder(handle_unknown='ignore'))
 ])
 
-# Numerical features
-features_to_scale = [
-    x for x in housing.columns
-    if x not in features_to_drop 
-    and x not in features_to_onehot 
-    and x != 'PRICE'
-]
 scale_transfomer = Pipeline(steps=[
     ('scaler', SCALE_FUNCTION())
 ])
 
 # Combine in preprocess pipeline
 preprocessor = ColumnTransformer(transformers=[
-    ('scale', scale_transfomer, features_to_scale),
-    ('onehot', onehot_transformer, features_to_onehot)
+    ('scale', scale_transfomer, FEATURES_TO_SCALE),
+    ('onehot', onehot_transformer, FEATURES_TO_ONEHOT),
 ])
 
 
@@ -79,12 +71,12 @@ preprocessor = ColumnTransformer(transformers=[
 """TRAIN TEST SPLIT"""
 
 # Separate features and target
-X = housing.drop(features_to_drop + ['PRICE'], axis=1)
+X = housing.drop(FEATURES_TO_DROP + ['PRICE'], axis=1)
 y = housing.PRICE
 
 # Train, valid, test split
-X_train, X_valid, y_train, y_valid = train_test_split(X, y, test_size=1-TRAIN_SPLIT_PROP)
-X_valid, X_test, y_valid, y_test = train_test_split(X_valid, y_valid, test_size=0.5)
+X_train, X_valid, y_train, y_valid = train_test_split(X, y, test_size=1-TRAIN_SPLIT_PROP, random_state=42)
+X_valid, X_test, y_valid, y_test = train_test_split(X_valid, y_valid, test_size=0.5, random_state=42)
 
 print(
     f'\n-------- Train, Valid, Test Split --------\n'

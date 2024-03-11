@@ -9,7 +9,7 @@ from sklearn.linear_model import LogisticRegression
 from xgboost import XGBClassifier
 
 # evaluation
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import accuracy_score, f1_score
 
 # timing
 start = time.time()
@@ -36,8 +36,10 @@ for key, value in config.items():
 
 tfidf_train = torch.load('data/processed/tfidf_train.pt').numpy()
 tfidf_valid = torch.load('data/processed/tfidf_valid.pt').numpy()
+tfidf_test = torch.load('data/processed/tfidf_test.pt').numpy()
 y_train = torch.load('data/processed/y_train.pt').numpy()
 y_valid = torch.load('data/processed/y_valid.pt').numpy()
+y_test = torch.load('data/processed/y_test.pt').numpy()
 
 
 """LOGISTIC REGRESSION"""
@@ -47,11 +49,20 @@ lr_model.fit(tfidf_train, y_train)
 
 y_pred_train = lr_model.predict(tfidf_train)
 y_pred_valid = lr_model.predict(tfidf_valid)
+y_pred_test = lr_model.predict(tfidf_test)
 
 print(
     f'--Logistic Regression Results--'
+
     f'\nTrain Accuracy: {100 * accuracy_score(y_train, y_pred_train):.2f}%'
+    f'\nTrain F-1 Score: {100 * f1_score(y_train, y_pred_train, average="weighted"):.2f}%'
+
     f'\nValidation Accuracy: {100 * accuracy_score(y_valid, y_pred_valid):.2f}%'
+    f'\nValidation F-1 Score: {100 * f1_score(y_valid, y_pred_valid, average="weighted"):.2f}%'
+
+    f'\nTest Accuracy: {100 * accuracy_score(y_test, y_pred_test):.2f}%'
+    f'\nTest F-1 Score: {100 * f1_score(y_test, y_pred_test, average="weighted"):.2f}%'
+
     f'\nTime Elapsed: {(time.time() - start)/60:.2f} minutes'
 )
 
@@ -63,11 +74,19 @@ xgb_model.fit(tfidf_train, y_train)
 
 y_pred_train = xgb_model.predict(tfidf_train)
 y_pred_valid = xgb_model.predict(tfidf_valid)
+y_pred_test = xgb_model.predict(tfidf_test)
 
 print(
     f'--XGBoost Results--'
     f'\nTrain Accuracy: {100 * accuracy_score(y_train, y_pred_train):.2f}%'
+    f'\nTrain F-1 Score: {100 * f1_score(y_train, y_pred_train, average="weighted"):.2f}%'
+
     f'\nValidation Accuracy: {100 * accuracy_score(y_valid, y_pred_valid):.2f}%'
+    f'\nValidation F-1 Score: {100 * f1_score(y_valid, y_pred_valid, average="weighted"):.2f}%'
+
+    f'\nTest Accuracy: {100 * accuracy_score(y_test, y_pred_test):.2f}%'
+    f'\nTest F-1 Score: {100 * f1_score(y_test, y_pred_test, average="weighted"):.2f}%'
+
     f'\nTime Elapsed: {(time.time() - start)/60:.2f} minutes'
 )
 

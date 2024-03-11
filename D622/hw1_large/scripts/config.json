@@ -1,21 +1,20 @@
 {
-    "CONSOLIDATE_LABELS": true, 
+    "CONSOLIDATE_LABELS": true,
     "CONSOLIDATE_OTHER": true,
-    "DATA_AUGMENTATION": 
-    {
+    "DATA_AUGMENTATION": {
         "PERCENTAGE": 0.2,
         "BACKTRANSLATION": true,
         "DELETION": true,
         "REPLACEMENT": true
     },
-    "TRAIN_SPLIT_PROP": 0.7, 
-    "PRETRAINED_LM": "bert-base-uncased", 
-    "LOGGING": true, 
-    "MAX_LENGTH": 64, 
-    "BATCH_SIZE": 32, 
-    "NUM_EPOCHS": 20, 
-    "LEARNING_RATE": 2e-5, 
-    "DROPOUT": 0.3, 
-    "BALANCE_FACTOR": 0.1, 
-    "PATIENCE": 2
+    "TRAIN_SPLIT_PROP": 0.7,
+    "PRETRAINED_LM": "bert-base-uncased",
+    "LOGGING": true,
+    "MAX_LENGTH": 128,
+    "BATCH_SIZE": 32,
+    "NUM_EPOCHS": 10,
+    "LEARNING_RATE": 2e-05,
+    "DROPOUT": 0.3,
+    "BALANCE_FACTOR": 0.3,
+    "PATIENCE": 3
 }

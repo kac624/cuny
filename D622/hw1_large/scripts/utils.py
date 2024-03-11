@@ -94,7 +94,7 @@ def get_bert_inputs(tokenizer, docs, MAX_LENGTH=128):
 """CATEGORIES"""
 
 consolidated_categories = {
-    'Diversity': ['BLACK VOICES', 'LATINO VOICES', 'QUEER VOICES', 'WOMEN'],
+    'Diversity': ['BLACK VOICES', 'LATINO VOICES', 'QUEER VOICES'],
     'Politics': ['POLITICS'],
     'Divorce': ['DIVORCE'],
     'Weddings': ['WEDDINGS'],
@@ -114,13 +114,14 @@ consolidated_categories = {
     'Education': ['EDUCATION', 'COLLEGE'],
     'Crime': ['CRIME'],
     'Environment and Science': ['ENVIRONMENT', 'GREEN', 'SCIENCE'],
-    'Religion': ['RELIGION']
+    'Religion': ['RELIGION'],
+    'Women': ['WOMEN']
 }
 
 performant_classes = [
-    'BLACK VOICES', 'LATINO VOICES', 'QUEER VOICES', 'WOMEN','POLITICS',
+    'BLACK VOICES', 'LATINO VOICES', 'QUEER VOICES', 'POLITICS',
     'DIVORCE', 'WEDDINGS', 'HOME & LIVING', 'TRAVEL', 'STYLE & BEAUTY', 'STYLE',
     'FOOD & DRINK', 'TASTE', 'SPORTS', 'ENTERTAINMENT', 'MEDIA', 'COMEDY',
     'WELLNESS', 'WORLD NEWS', 'U.S. NEWS', 'WORLDPOST', 'THE WORLDPOST',
     'PARENTING', 'PARENTS', 'ARTS', 'ARTS & CULTURE', 'CULTURE & ARTS'
-]
+] # 'WOMEN'
