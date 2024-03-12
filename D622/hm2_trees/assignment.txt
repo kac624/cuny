@@ -20,3 +20,4 @@ Exploratory Analysis using R or Python (submit code + errors + analysis as noteb
 
 POTENTIAL DATASETS:
 Loans - https://www.kaggle.com/datasets/bhavikjikadara/loan-status-prediction
+Fraud - https://www.kaggle.com/datasets/rupakroy/online-payments-fraud-detection-dataset
