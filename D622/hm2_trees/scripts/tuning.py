@@ -15,6 +15,14 @@ from utils import config, hyperparam_tuner
 import time
 from datetime import datetime
 
+# warnings
+import warnings
+from sklearn.exceptions import ConvergenceWarning
+warnings.filterwarnings("ignore", category=ConvergenceWarning)
+warnings.filterwarnings("ignore", message=".*l1_ratio.*")
+warnings.filterwarnings("ignore", message=".*'n_jobs' > 1.*")
+warnings.filterwarnings("ignore", message=".*number of iterations (max_iter).*")
+
 # time stamps
 start = time.time()
 log_stamp = datetime.now().strftime("%m.%d_%H.%M")
@@ -32,11 +40,11 @@ for k, v in config.items():
 
 """LOAD DATA"""
 
-X_train = np.load('data/X_train.npy')
-X_valid = np.load('data/X_valid.npy')
+X_train = np.load('data/processed/X_train.npy')
+X_valid = np.load('data/processed/X_valid.npy')
 
-y_train = np.load('data/y_train.npy')
-y_valid = np.load('data/y_valid.npy')
+y_train = np.load('data/processed/y_train.npy')
+y_valid = np.load('data/processed/y_valid.npy')
 
 
 
@@ -47,10 +55,10 @@ hyperparams = {
     'lr': {
         'C': [0.001, 0.01, 0.1, 1, 10, 100],
         'fit_intercept': [True, False],
-        'penalty': ['l1', 'l2', 'elasticnet', 'none'],
-        'solver': ['newton-cg', 'lbfgs', 'liblinear', 'sag', 'saga'],
+        'penalty': ['l2'], # 'l1', 'elasticnet'
+        'solver': ['lbfgs'], # 'newton-cg', 'sag', 'saga', 'liblinear
         'max_iter': [100, 200, 300],
-        'multi_class': ['auto', 'ovr', 'multinomial'],
+        'l1_ratio': [0.5],
         'random_state': [RANDOM_SEED],
         'n_jobs': [-1]
     },
@@ -97,26 +105,42 @@ for model_name, params in hyperparams.items():
 
 """TUNING LOOPS"""
 
+# Run tuning
 lr_results = hyperparam_tuner(LogisticRegression, 'lr', hp_combos, X_train, y_train, X_valid, y_valid)
+# Write results
+with pd.ExcelWriter(f'logs/tuning_results_{log_stamp}.xlsx') as writer:
+    lr_results.to_excel(writer, sheet_name='lr')
 print(f'Logistic Regression tuning complete - {(time.time()-start)/60:.2f} min')
 
+# Run tuning
 dt_results = hyperparam_tuner(DecisionTreeClassifier, 'dt', hp_combos, X_train, y_train, X_valid, y_valid)
+# Write results
+with pd.ExcelWriter(f'logs/tuning_results_{log_stamp}.xlsx', mode='a', if_sheet_exists='new') as writer:
+    dt_results.to_excel(writer, sheet_name='dt')
 print(f'Decision Tree tuning complete - {(time.time()-start)/60:.2f} min')
 
+# Run tuning
 rf_results = hyperparam_tuner(RandomForestClassifier, 'rf', hp_combos, X_train, y_train, X_valid, y_valid)
+# Write results
+with pd.ExcelWriter(f'logs/tuning_results_{log_stamp}.xlsx', mode='a', if_sheet_exists='new') as writer:
+    rf_results.to_excel(writer, sheet_name='rf')
 print(f'Random Forest tuning complete - {(time.time()-start)/60:.2f} min')
 
+# Run tuning
 xgb_results = hyperparam_tuner(XGBClassifier, 'xgb', hp_combos, X_train, y_train, X_valid, y_valid)
+# Write results
+with pd.ExcelWriter(f'logs/tuning_results_{log_stamp}.xlsx', mode='a', if_sheet_exists='new') as writer:
+    xgb_results.to_excel(writer, sheet_name='xgb')
 print(f'XGBoost tuning complete - {(time.time()-start)/60:.2f} min')
 
 
 
 """SAVE RESULTS"""
 
-with pd.ExcelWriter(f'logs/tuning_results_{log_stamp}.xlsx') as writer:
-    lr_results.to_excel(writer, sheet_name='lr')
-    dt_results.to_excel(writer, sheet_name='dt')
-    rf_results.to_excel(writer, sheet_name='rf')
-    xgb_results.to_excel(writer, sheet_name='xgb')
+# with pd.ExcelWriter(f'logs/tuning_results_{log_stamp}.xlsx') as writer:
+#     lr_results.to_excel(writer, sheet_name='lr')
+#     dt_results.to_excel(writer, sheet_name='dt')
+#     rf_results.to_excel(writer, sheet_name='rf')
+#     xgb_results.to_excel(writer, sheet_name='xgb')
 
 print(f'Tuning complete - {(time.time()-start)/60:.2f} min')

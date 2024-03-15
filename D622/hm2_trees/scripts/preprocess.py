@@ -129,12 +129,12 @@ print(
 
 """SAVE DATA"""
 
-np.save('data/X_train.npy', X_train)
-np.save('data/X_valid.npy', X_valid)
-np.save('data/X_test.npy', X_test)
+np.save('data/processed/X_train.npy', X_train)
+np.save('data/processed/X_valid.npy', X_valid)
+np.save('data/processed/X_test.npy', X_test)
 
-np.save('data/y_train.npy', y_train)
-np.save('data/y_valid.npy', y_valid)
-np.save('data/y_test.npy', y_test)
+np.save('data/processed/y_train.npy', y_train)
+np.save('data/processed/y_valid.npy', y_valid)
+np.save('data/processed/y_test.npy', y_test)
 
 print(f'Preprocessing Complete. Time Elapsed: {(time.time() - start) / 60:.2f} min')

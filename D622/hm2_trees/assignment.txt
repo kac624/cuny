@@ -21,3 +21,28 @@ Exploratory Analysis using R or Python (submit code + errors + analysis as noteb
 POTENTIAL DATASETS:
 Loans - https://www.kaggle.com/datasets/bhavikjikadara/loan-status-prediction
 Fraud - https://www.kaggle.com/datasets/rupakroy/online-payments-fraud-detection-dataset
+
+
+OLD CODE FOR LR TUNING
+
+# Dict to check for LR penality-solver combos
+valid_combinations = {
+    'newton-cg': ['l2', 'none'],
+    'lbfgs': ['l2', 'none'],
+    'liblinear': ['l1', 'l2'],
+    'sag': ['l2', 'none'],
+    'saga': ['l1', 'l2', 'elasticnet', 'none']
+}
+
+# Set up dict for full grid
+hp_combos = {}
+# Iterate through hyperparams and add to dict
+for model_name, params in hyperparams.items():
+    if model_name == 'lr':
+        param_grid = []
+        for combo in ParameterGrid(params):
+            if combo['penalty'] in valid_combinations[combo['solver']]:
+                param_grid.append(combo)
+    else:
+        param_grid = ParameterGrid(params)
+    hp_combos[model_name] = param_grid

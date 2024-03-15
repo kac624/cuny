@@ -33,11 +33,11 @@ for k, v in config.items():
 
 """LOAD DATA"""
 
-X_train = np.load('data/X_train.npy')
-X_valid = np.load('data/X_valid.npy')
+X_train = np.load('data/processed/X_train.npy')
+X_valid = np.load('data/processed/X_valid.npy')
 
-y_train = np.load('data/y_train.npy')
-y_valid = np.load('data/y_valid.npy')
+y_train = np.load('data/processed/y_train.npy')
+y_valid = np.load('data/processed/y_valid.npy')
 
 
 

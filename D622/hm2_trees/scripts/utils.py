@@ -1,4 +1,6 @@
 import pandas as pd
+import numpy as np
+import time
 
 from sklearn.preprocessing import StandardScaler, MinMaxScaler, RobustScaler
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, classification_report
@@ -28,7 +30,7 @@ hyperparams = {
     },
     'xgb': {
         'random_state': config['RANDOM_SEED'],
-        'n_jobs': -1
+        'n_jobs': -1 # ,'device': 'cuda'
     }
 }
 
@@ -37,9 +39,9 @@ def evaluate(model, X, y, print_results=True):
     y_pred = model.predict(X)
     # Get evaluation metrics
     accuracy = accuracy_score(y, y_pred)
-    precision = precision_score(y, y_pred)
-    recall = recall_score(y, y_pred)
-    f1 = f1_score(y, y_pred)
+    precision = precision_score(y, y_pred, zero_division=0)
+    recall = recall_score(y, y_pred, zero_division=0)
+    f1 = f1_score(y, y_pred, zero_division=0)
     # Print metrics
     if print_results:
         print(
@@ -53,6 +55,10 @@ def evaluate(model, X, y, print_results=True):
 
 
 def hyperparam_tuner(model_class, model_name, hp_combos, X_train, y_train, X_valid, y_valid):
+    start = time.time()
+    counter = 0
+    total = len(hp_combos[model_name])
+    print(f'--Total number of hyperparameter combinations for {model_name}: {total}')
     # Set up df to store results
     results = pd.DataFrame()
     # Loop through hyperparameter combos
@@ -81,5 +87,12 @@ def hyperparam_tuner(model_class, model_name, hp_combos, X_train, y_train, X_val
             result[key] = value
         # Add to results df
         results = pd.concat([results, result], ignore_index=True)
+
+        counter += 1
+        if counter % np.ceil(total / 10) == 0:
+            print(
+                f'Completed {counter} of {total} hyperparameter combinations '
+                f'Time in Loop: {(time.time() - start) / 60:.2f} min'
+            )
     
     return results
