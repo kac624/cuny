@@ -1,6 +1,5 @@
 import pandas as pd
 import numpy as np
-from scipy.sparse import save_npz
 
 import os
 from zipfile import ZipFile
@@ -10,8 +9,6 @@ from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OneHotEncoder
-# from imblearn.over_sampling import SMOTE
-# from imblearn.under_sampling import RandomUnderSampler
 
 from utils import config
 
@@ -117,6 +114,8 @@ X_test = preprocessor.transform(X_test)
 
 print(
     f'\n-- Scaling / Encoding --\n\n'
+    f'Features to encode: {FEATURES_TO_ENCODE}\n'
+    f'Features to scale: {FEATURES_TO_SCALE}\n\n'
     f'Train: {X_train.shape} - Valid: {X_valid.shape} - Test {X_test.shape}\n\n'
     f'Time Elapsed: {(time.time() - start) / 60:.2f} min\n'
 )
