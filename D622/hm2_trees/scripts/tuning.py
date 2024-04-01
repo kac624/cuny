@@ -52,16 +52,6 @@ y_valid = np.load('data/processed/y_valid.npy')
 
 # Dict of hyperparameter space
 hyperparams = {
-    'lr': {
-        'C': [0.001, 0.01, 0.1, 1, 10, 100],
-        'fit_intercept': [True, False],
-        'penalty': ['l2'], # 'l1', 'elasticnet'
-        'solver': ['lbfgs'], # 'newton-cg', 'sag', 'saga', 'liblinear
-        'max_iter': [100, 200, 300],
-        'l1_ratio': [0.5],
-        'random_state': [RANDOM_SEED],
-        'n_jobs': [-1]
-    },
     'dt': {
         'criterion': ['gini', 'entropy'],
         'splitter': ['best', 'random'],
@@ -75,8 +65,6 @@ hyperparams = {
         'n_estimators': [50, 100, 200],
         'criterion': ['gini', 'entropy'],
         'max_depth': [None, 10, 20, 30],
-        'min_samples_split': [2, 5, 10],
-        'min_samples_leaf': [1, 2, 4],
         'max_features': [1.0, 'sqrt', 'log2'],
         'random_state': [RANDOM_SEED],
         'n_jobs': [-1]
@@ -84,8 +72,6 @@ hyperparams = {
     'xgb': {
         'n_estimators': [50, 100, 200],
         'max_depth': [3, 6, 10],
-        'min_child_weight': [1, 3, 5],
-        'colsample_bytree': [0.6, 0.8, 1.0],
         'learning_rate': [0.01, 0.1, 0.2],
         'subsample': [0.6, 0.8, 1.0],
         'gamma': [0.1, 0.5, 1],
@@ -106,16 +92,9 @@ for model_name, params in hyperparams.items():
 """TUNING LOOPS"""
 
 # Run tuning
-lr_results = hyperparam_tuner(LogisticRegression, 'lr', hp_combos, X_train, y_train, X_valid, y_valid)
-# Write results
-with pd.ExcelWriter(f'logs/tuning_results_{log_stamp}.xlsx') as writer:
-    lr_results.to_excel(writer, sheet_name='lr')
-print(f'Logistic Regression tuning complete - {(time.time()-start)/60:.2f} min')
-
-# Run tuning
 dt_results = hyperparam_tuner(DecisionTreeClassifier, 'dt', hp_combos, X_train, y_train, X_valid, y_valid)
 # Write results
-with pd.ExcelWriter(f'logs/tuning_results_{log_stamp}.xlsx', mode='a', if_sheet_exists='new') as writer:
+with pd.ExcelWriter(f'logs/tuning_results_{log_stamp}.xlsx') as writer:
     dt_results.to_excel(writer, sheet_name='dt')
 print(f'Decision Tree tuning complete - {(time.time()-start)/60:.2f} min')
 
@@ -135,12 +114,6 @@ print(f'XGBoost tuning complete - {(time.time()-start)/60:.2f} min')
 
 
 
-"""SAVE RESULTS"""
-
-# with pd.ExcelWriter(f'logs/tuning_results_{log_stamp}.xlsx') as writer:
-#     lr_results.to_excel(writer, sheet_name='lr')
-#     dt_results.to_excel(writer, sheet_name='dt')
-#     rf_results.to_excel(writer, sheet_name='rf')
-#     xgb_results.to_excel(writer, sheet_name='xgb')
+"""END"""
 
 print(f'Tuning complete - {(time.time()-start)/60:.2f} min')

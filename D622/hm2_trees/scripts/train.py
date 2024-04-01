@@ -43,12 +43,11 @@ y_valid = np.load('data/processed/y_valid.npy')
 
 """TRAINING AND EVALUATION"""
 
-lr = LogisticRegression(**hyperparams['lr'])
 dt = DecisionTreeClassifier(**hyperparams['dt'])
 rf = RandomForestClassifier(**hyperparams['rf'])
 xgb = XGBClassifier(**hyperparams['xgb'])
 
-models = [lr, dt, rf, xgb]
+models = [dt, rf, xgb]
 summary = pd.DataFrame()
 
 for model in models:
@@ -77,7 +76,6 @@ for model in models:
 
 """SAVE MODEL"""
 
-joblib.dump(lr, 'models/lr.joblib')
 joblib.dump(dt, 'models/dt.joblib')
 joblib.dump(rf, 'models/rf.joblib')
 joblib.dump(xgb, 'models/xgb.joblib')

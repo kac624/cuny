@@ -7,7 +7,7 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_sc
 
 config = {
     'RANDOM_SEED': 42,
-    'TRAIN_SIZE': 0.7,
+    'TRAIN_SIZE': 0.8,
     'SHUFFLE': True,
     'STRATIFY': True,
     'FEATURES_TO_REMOVE': ['nameOrig', 'nameDest', 'isFlaggedFraud'],
@@ -58,7 +58,7 @@ def hyperparam_tuner(model_class, model_name, hp_combos, X_train, y_train, X_val
     start = time.time()
     counter = 0
     total = len(hp_combos[model_name])
-    print(f'--Total number of hyperparameter combinations for {model_name}: {total}')
+    print(f'\n--Total number of hyperparameter combinations for {model_name}: {total}')
     # Set up df to store results
     results = pd.DataFrame()
     # Loop through hyperparameter combos
