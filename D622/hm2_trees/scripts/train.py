@@ -55,7 +55,9 @@ for model in models:
     # Train model
     model.fit(X_train, y_train)
     # Get evaluation metrics
+    print('Performance on Training Subset')
     train_accuracy, train_precision, train_recall, train_f1 = evaluate(model, X_train, y_train)
+    print('Performance on Validation Subset')
     valid_accuracy, valid_precision, valid_recall, valid_f1 = evaluate(model, X_valid, y_valid)
     # Log results
     result = pd.DataFrame({

@@ -18,15 +18,30 @@ config = {
 
 hyperparams = {
     'dt': {
+        # 'criterion': 'entropy',
+        # 'splitter': 'best',
+        # 'max_depth': None,
+        # 'min_samples_split': 5,
+        # 'min_samples_leaf': 2,
+        # 'max_features': 1.0,
         'random_state': config['RANDOM_SEED']
     },
     'rf': {
+        # 'n_estimators': 100,
+        # 'criterion': 'entropy',
+        # 'max_depth': None,
+        # 'max_features': 1.0,
         'random_state': config['RANDOM_SEED'],
         'n_jobs': -1
     },
     'xgb': {
+        # 'n_estimators': 200,
+        # 'max_depth': 10,
+        # 'learning_rate': 0.2,
+        # 'subsample': 0.8,
+        # 'gamma': 0.5,
         'random_state': config['RANDOM_SEED'],
-        'n_jobs': -1 # ,'device': 'cuda'
+        'n_jobs': -1
     }
 }
 
@@ -41,10 +56,10 @@ def evaluate(model, X, y, print_results=True):
     # Print metrics
     if print_results:
         print(
-            f'Train Accuracy: {accuracy:.2f}\n'
-            f'Train Precision: {precision:.2f}\n'
-            f'Train Recall: {recall:.2f}\n'
-            f'Train F1: {f1:.2f}\n'
+            f'Accuracy: {accuracy:.2f}\n'
+            f'Precision: {precision:.2f}\n'
+            f'Recall: {recall:.2f}\n'
+            f'F1: {f1:.2f}\n'
         )
 
     return accuracy, precision, recall, f1
