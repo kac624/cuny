@@ -17,10 +17,6 @@ config = {
 }
 
 hyperparams = {
-    'lr': {
-        'random_state': config['RANDOM_SEED'],
-        'n_jobs': -1
-    },
     'dt': {
         'random_state': config['RANDOM_SEED']
     },
