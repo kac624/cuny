@@ -3,7 +3,7 @@ import time
 from datetime import datetime, timedelta
 
 interval = 60
-run_duration = timedelta(minutes=10)
+run_duration = timedelta(minutes=3)
 
 start_time = datetime.now()
 while datetime.now() - start_time < run_duration:
