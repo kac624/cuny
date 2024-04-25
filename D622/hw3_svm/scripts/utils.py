@@ -7,7 +7,7 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_sc
 
 config = {
     'RANDOM_SEED': 42,
-    'TRAIN_SIZE': 0.8,
+    'TRAIN_SIZE': 0.9,
     'SHUFFLE': True,
     'STRATIFY': True,
     'FEATURES_TO_REMOVE': ['nameOrig', 'nameDest', 'isFlaggedFraud'],
@@ -26,11 +26,11 @@ hyperparams = {
         'n_jobs': -1
     },
     'svm': {
-        # 'C': [0.1, 1, 10, 100],
-        # 'kernel': ['linear', 'poly', 'rbf', 'sigmoid'],  
-        # 'gamma': ['scale', 'auto', 0.01, 0.1, 1, 10],  # Kernel coefficient for 'rbf', 'poly' and 'sigmoid'.
-        # 'degree': [2, 3, 4],  # Only signiifiicant for 'poly'.
-        # 'coef0': [0, 0.5, 1],  # Only significant in 'poly' and 'sigmoid'.
+        'kernel': 'rbf',
+        'C': 100,
+        'gamma': 1,
+        'degree': None,
+        'coef0': None,
         'random_state': config['RANDOM_SEED'],
     }
 }
