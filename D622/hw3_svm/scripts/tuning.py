@@ -51,11 +51,12 @@ y_valid = np.load('data/processed/y_valid.npy')
 # Dict of hyperparameter space
 hyperparams = {
     'svm': {
-        'C': [0.1, 1, 10, 100],  
-        'kernel': ['linear', 'poly', 'rbf', 'sigmoid'], 
-        'gamma': ['scale', 'auto', 0.01, 0.1, 1, 10],  
-        'degree': [2, 3, 4],  
-        'coef0': [0, 0.5, 1]
+        'kernel': ['rbf'], 
+        'C': [100],  
+        'gamma': [1],  
+        # 'degree': [2, 3, 4],  
+        'coef0': [0, 0.5, 1],
+        'random_state': [RANDOM_SEED]
     }
 }
 
@@ -71,18 +72,11 @@ for model_name, params in hyperparams.items():
 """TUNING LOOPS"""
 
 # Run tuning
-rf_results = hyperparam_tuner(RandomForestClassifier, 'rf', hp_combos, X_train, y_train, X_valid, y_valid)
-# Write results
-with pd.ExcelWriter(f'logs/tuning_results_{log_stamp}.xlsx', mode='a', if_sheet_exists='new') as writer:
-    rf_results.to_excel(writer, sheet_name='rf')
-print(f'Random Forest tuning complete - {(time.time()-start)/60:.2f} min')
-
-# Run tuning
 svm_results = hyperparam_tuner(SVC, 'svm', hp_combos, X_train, y_train, X_valid, y_valid)
 # Write results
-with pd.ExcelWriter(f'logs/tuning_results_{log_stamp}.xlsx', mode='a', if_sheet_exists='new') as writer:
+with pd.ExcelWriter(f'logs/tuning_results_{log_stamp}.xlsx') as writer:
     svm_results.to_excel(writer, sheet_name='xgb')
-print(f'XGBoost tuning complete - {(time.time()-start)/60:.2f} min')
+print(f'SVM tuning complete - {(time.time()-start)/60:.2f} min')
 
 
 
