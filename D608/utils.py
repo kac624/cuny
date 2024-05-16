@@ -52,3 +52,118 @@ state_abbreviations = {
     'District of Columbia': 'DC',
     'Puerto Rico': 'PR'
 }
+
+
+
+# country_relationships = {
+#     # Friendly countries
+#     "Canada": "friendly", "United Kingdom": "friendly", "Australia": "friendly", 
+#     "Germany": "friendly", "Japan": "friendly", "South Korea": "friendly",
+#     "France": "friendly", "Italy": "friendly", "Spain": "friendly",
+#     "Norway": "friendly", "Sweden": "friendly", "Netherlands": "friendly",
+#     "Belgium": "friendly", "Poland": "friendly", "Brazil": "friendly",
+#     "India": "friendly", "Israel": "friendly", "Mexico": "friendly",
+    
+#     # Neutral countries
+#     "Switzerland": "neutral", "Singapore": "neutral", "New Zealand": "neutral",
+#     "Austria": "neutral", "Finland": "neutral", "Ireland": "neutral",
+#     "Portugal": "neutral", "Czech Republic": "neutral", "Greece": "neutral",
+#     "Hungary": "neutral", "Thailand": "neutral", "Vietnam": "neutral",
+#     "Indonesia": "neutral", "Philippines": "neutral", "South Africa": "neutral",
+    
+#     # Adversarial countries
+#     "Russia": "adversarial", "Iran": "adversarial", "North Korea": "adversarial",
+#     "Syria": "adversarial", "Venezuela": "adversarial", "Cuba": "adversarial",
+#     "Sudan": "adversarial", "Somalia": "adversarial"
+# }
+
+country_relationships = {
+    # Friendly countries
+    "Andorra": "friendly", 
+    "Antigua and Barbuda": "friendly", 
+    "Argentina": "friendly",
+    "Australia": "friendly", 
+    "Barbados": "friendly", 
+    "Belgium": "friendly",
+    "Bosnia Herzegovina": "friendly", 
+    "Botswana": "friendly", 
+    "Brazil": "friendly",
+    "Belize": "friendly", 
+    "Bulgaria": "friendly", 
+    "Canada": "friendly",
+    "Chile": "friendly", 
+    "Croatia": "friendly",
+    "Cyprus": "friendly", 
+    "Denmark": "friendly", 
+    "Estonia": "friendly",
+    "Finland": "friendly", 
+    "Germany": "friendly", 
+    "Greece": "friendly", 
+    "Guatemala": "friendly",
+    "Hungary": "friendly", 
+    "Iceland": "friendly", 
+    "Ireland": "friendly",
+    "Israel": "friendly", 
+    "Italy": "friendly", 
+    "Japan": "friendly",
+    "Latvia": "friendly", 
+    "Lithuania": "friendly", 
+    "Luxembourg": "friendly",
+    "Malta": "friendly", 
+    "Mexico": "friendly",
+    "Netherlands": "friendly",
+    "Aruba": "friendly", 
+    "New Zealand": "friendly", 
+    "Norway": "friendly", 
+    "Panama": "friendly",
+    "Philippines": "friendly", 
+    "Poland": "friendly",
+    "Portugal": "friendly", 
+    "Romania": "friendly", 
+    "Slovakia": "friendly", 
+    "Slovenia": "friendly", 
+    "Spain": "friendly", 
+    "Sweden": "friendly", 
+    "Switzerland": "friendly", 
+    "Ukraine": "friendly", 
+    "North Macedonia": "friendly", 
+    "United Kingdom": "friendly", 
+    "Uruguay": "friendly",
+
+    # Neutral countries
+    "Azerbaijan": "neutral", 
+    "Armenia": "neutral", 
+    "Benin": "neutral", 
+    "Georgia": "neutral",
+    "Sri Lanka": "neutral", 
+    "Ghana": "neutral",
+    "Guyana": "neutral", 
+    "Madagascar": "neutral", 
+    "Malaysia": "neutral", 
+    "Maldives": "neutral",
+    "Mauritius": "neutral", 
+    "Mozambique": "neutral", 
+    "Namibia": "neutral", 
+    "Nicaragua": "neutral",
+    "Nigeria": "neutral", 
+    "Paraguay": "neutral", 
+    "Serbia": "neutral",
+    "South Africa": "neutral", 
+    "Zimbabwe": "neutral", 
+    "Suriname": "neutral", 
+    "Togo": "neutral",
+    "Egypt": "neutral", 
+    "Burkina Faso": "neutral", 
+    "Zambia": "neutral",
+
+    # Adversarial or more complex relationships
+    "China": "adversarial",
+    "Russian Federation": "adversarial", 
+    "Iran": "adversarial", 
+    "Dem. People's Rep. of Korea": "adversarial",
+    "Syria": "adversarial", 
+    "Venezuela": "adversarial", 
+    "Cuba": "adversarial",
+    "Sudan": "adversarial", 
+    "Somalia": "adversarial"
+}
