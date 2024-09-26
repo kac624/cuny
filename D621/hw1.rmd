@@ -1,0 +1,112 @@
+---
+title: "D621_HW1"
+author: "Keith Colella"
+date: "2024-09-19"
+output: html_document
+---
+
+```{r, output=False}
+library(tidyverse)
+library(corrplot)
+library(MASS)
+library(glmnet)
+```
+
+## Data
+
+Read in data
+
+```{r}
+# Load the data
+data <- read.csv('data/moneyball-training-data.csv')
+data <- data %>% dplyr::select(-INDEX)
+
+# Inspect the data
+nrow(data)
+ncol(data)
+head(data)
+```
+
+Handle NAs
+
+```{r}
+# Impute NAs as median
+data <- data %>%
+  mutate(across(where(is.numeric), ~ ifelse(is.na(.), median(., na.rm = TRUE), .)))
+
+# Inspect the data
+nrow(data)
+ncol(data)
+head(data)
+```
+
+EDA
+
+```{r}
+ggplot(gather(data), aes(value)) + 
+    geom_histogram(bins = 10) + 
+    facet_wrap(~key, scales = 'free_x')
+```
+
+```{r}
+corrplot(cor(data))
+```
+
+# Features
+
+Generate transformed and polynomial features
+
+```{r}
+for (col in colnames(data)) {
+  # Don't apply to target variable
+  if (col == 'TARGET_WINS') next 
+  # Add columns for transformed values
+  data[paste(col, '_log', sep='')] <- log(data[col] + 1)
+  data[paste(col, '_sqrt', sep='')] <- sqrt(data[col])
+  data[paste(col, '_sqr', sep='')] <- data[col]^2
+  data[paste(col, '_cub', sep='')] <- data[col]^3
+}
+
+nrow(data)
+ncol(data)
+head(data)
+```
+
+Feature selection - stepwise
+
+```{r}
+full_model <- lm(TARGET_WINS ~ ., data = data)
+step_model <- stepAIC(full_model, direction = 'both', k = log(nrow(data)), trace = 0)
+
+kept_vars_step <- names(step_model$coefficients)
+kept_vars_step <- kept_vars_step[kept_vars_step != "(Intercept)"]
+kept_vars_step
+```
+
+Feature selection - lasso
+
+```{r}
+# Set features and target as matrix
+X <- model.matrix(TARGET_WINS ~ ., data = data)[,-1]
+y <- as.matrix(data['TARGET_WINS'])
+
+# Run LASSO and identify vars with non-zero coefficients
+lasso_model <- cv.glmnet(X, y, alpha = 1)
+best_lambda <- lasso_model$lambda.min
+lasso_coefficients <- coef(lasso_model, s = best_lambda)
+kept_vars_lasso <- rownames(lasso_coefficients)[lasso_coefficients[, 1] != 0]
+kept_vars_lasso <- kept_vars_lasso[kept_vars_lasso != "(Intercept)"]
+kept_vars_lasso
+
+# Train model with kept vars
+# model <- lm(TARGET_WINS ~ ., data[c(kept_variables, 'TARGET_WINS')])
+# summary(model)
+```
+
+Feature selection - ridge
+
+```{r}
+kept_vars_combo <- unique(c(kept_vars_step, kept_vars_lasso))
+kept_vars_combo
+```
+
