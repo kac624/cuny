@@ -1,0 +1,239 @@
+---
+title: "D621 HW5"
+author: "Keith Colella"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r}
+# Load required libraries
+library(tidyverse) 
+library(ggplot2) 
+library(corrplot)
+library(psych)
+library(naniar)
+library(cowplot)
+library(pscl)
+library(MASS)
+library(glmnet)
+```
+
+# Data Exploration
+
+```{r}
+# Load the data
+wine_data <- read.csv("wine-training-data.csv")
+
+# Glimpse
+glimpse(wine_data)
+```
+
+```{r}
+# Drop index
+wine_data <- wine_data %>%
+  dplyr::select(-INDEX)
+
+# Summary statistics for the dataset
+summary_stats <- describe(wine_data)
+print(summary_stats)
+```
+
+```{r}
+# Check for missing values
+missing_values <- colSums(is.na(wine_data))
+print(missing_values)
+```
+
+```{r}
+# Correlation matrix for numerical variables
+numerical_vars <- wine_data %>% select_if(is.numeric)
+
+# Compute the correlation matrix
+correlation_matrix <- cor(numerical_vars, use = "pairwise.complete.obs")
+
+# Plot the heatmap
+corrplot(correlation_matrix, method = "color", type = "lower")
+```
+
+```{r}
+# Histograms for numerical vars
+histograms <- lapply(names(dplyr::select(numerical_vars, -TARGET)), function(var) {
+  ggplot(wine_data, aes_string(x = var)) +
+    geom_histogram()
+})
+
+# Arrange histograms in a grid
+histogram_grid <- plot_grid(plotlist = histograms, ncol = 3)
+
+# Save or display the plot grid
+print(histogram_grid)
+```
+
+```{r}
+# Histogram for target variable
+ggplot(wine_data, aes(x = TARGET)) +
+  geom_histogram(binwidth = 1, fill = "blue", color = "white") +
+  labs(title = "Distribution of TARGET (Cases Purchased)", x = "TARGET", y = "Frequency")
+```
+
+```{r}
+# Missing value patterns
+naniar_plot <- gg_miss_var(wine_data, show_pct = TRUE) +
+  labs(title = "Missing Data Patterns", x = "Variables", y = "Number of Missing Values") +
+  theme_minimal()
+
+print(naniar_plot)
+
+# Create a heatmap of missing values
+gg_miss_upset(wine_data)
+```
+
+```{r}
+nrow(wine_data)
+nrow(na.omit(wine_data))
+
+wine_data <- na.omit(wine_data)
+```
+
+```{r}
+variables <- names(wine_data)[!names(wine_data) %in% c("TARGET")]
+
+plots <- lapply(variables, function(var) {
+  ggplot(wine_data, aes_string(x = var, y = "TARGET")) +
+    geom_point() 
+})
+
+# Arrange the plots in a grid (5 rows x 3 columns)
+grid_plot <- plot_grid(plotlist = plots, nrow = 5, ncol = 3, rel_heights = c(2,2,2,2,2))
+
+print(grid_plot)
+```
+
+```{r}
+variables <- names(wine_data)[!names(wine_data) %in% c("TARGET")]
+
+plots <- lapply(variables, function(var) {
+  ggplot(wine_data, aes_string(x = var, y = "TARGET")) +
+    geom_point() 
+})
+
+plots
+```
+
+
+# Modeling
+
+```{r}
+# Fit a Poisson GLM
+poisson_model <- glm(TARGET ~ ., family = poisson(link = "log"), data = wine_data)
+summary(poisson_model)
+```
+
+```{r}
+plot(poisson_model)
+```
+
+
+```{r}
+# Check for overdispersion
+# Calculate overdispersion statistic: residual deviance / degrees of freedom
+overdispersion_stat <- sum(residuals(poisson_model, type = "pearson")^2) / df.residual(poisson_model)
+print(paste("Overdispersion statistic:", overdispersion_stat))
+```
+
+```{r}
+# Fit a Negative Binomial regression
+nb_model <- glm.nb(TARGET ~ ., data = wine_data)
+summary(nb_model)
+```
+
+```{r}
+plot(nb_model)
+```
+
+
+```{r}
+# Compare models using AIC
+cat("AIC of Poisson model:", AIC(poisson_model), "\n")
+cat("AIC of Negative Binomial model:", AIC(nb_model), "\n")
+```
+
+```{r}
+zip_model <- zeroinfl(TARGET ~ . | 1, dist = "poisson", data = wine_data)
+summary(zip_model)
+```
+
+```{r}
+# plot(zip_model)
+```
+
+```{r}
+# Compare models using AIC
+cat("AIC of Poisson model:", AIC(poisson_model), "\n")
+cat("AIC of Zero-Inflated Poisson model:", AIC(zip_model), "\n")
+```
+
+```{r}
+# Stepwise feature selection using AIC
+stepwise_zip <- stepAIC(poisson_model, direction = "backward", trace = TRUE)
+summary(stepwise_zip)
+```
+
+```{r}
+x <- model.matrix(TARGET ~ ., data = wine_data)[, -1]  # Predictor matrix
+y <- wine_data$TARGET  # Response
+lasso_model <- glmnet(x, y, family = "poisson", alpha = 1)
+
+plot(lasso_model, xvar = "lambda", label = TRUE)
+```
+
+```{r}
+cv_model <- cv.glmnet(x, y, family = "poisson", alpha = 1)  # Cross-validation
+
+# Plot cross-validation results
+plot(cv_model)
+
+lambda_min <- cv_model$lambda.min    # Best lambda (minimizes CV error)
+
+# Coefficients for lambda.min
+coef(cv_model, s = "lambda.min")
+```
+
+```{r}
+# Stepwise elimination based on p-values
+p_threshold <- 0.10
+feature_selection_data <- wine_data
+
+for (i in 1:ncol(wine_data)-1) {
+  # Fit model
+  current_model <- glm(TARGET ~ ., family = poisson, data = feature_selection_data)
+  
+  # Get p-values for all predictors
+  p_vals <- summary(current_model)$coefficients[, 4]
+  
+  # Identify the predictor with the highest p-value
+  max_p <- max(p_vals[-1], na.rm = TRUE)  # Exclude intercept
+  
+  if (max_p < p_threshold) {
+    print("STOPPING POINT!")
+    break  # Stop if all predictors are significant
+  }
+  
+  # Find the predictor with the highest p-value
+  worst_predictor <- names(which.max(p_vals[-1]))
+  
+  # Remove the worst predictor
+  feature_selection_data <- dplyr::select(
+    feature_selection_data, -contains(worst_predictor)
+  )
+  print(paste("Removed ", worst_predictor))
+}
+
+# Final model
+summary(current_model)
+```
+
+```{r}
+plot(current_model)
+```
+

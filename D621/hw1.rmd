@@ -97,10 +97,6 @@ lasso_coefficients <- coef(lasso_model, s = best_lambda)
 kept_vars_lasso <- rownames(lasso_coefficients)[lasso_coefficients[, 1] != 0]
 kept_vars_lasso <- kept_vars_lasso[kept_vars_lasso != "(Intercept)"]
 kept_vars_lasso
-
-# Train model with kept vars
-# model <- lm(TARGET_WINS ~ ., data[c(kept_variables, 'TARGET_WINS')])
-# summary(model)
 ```
 
 Feature selection - ridge
