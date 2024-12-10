@@ -13,9 +13,10 @@ library(corrplot)
 library(psych)
 library(naniar)
 library(cowplot)
+library(mice)
 library(pscl)
 library(MASS)
-library(glmnet)
+library(VGAM)
 ```
 
 # Data Exploration
@@ -92,8 +93,15 @@ gg_miss_upset(wine_data)
 nrow(wine_data)
 nrow(na.omit(wine_data))
 
-wine_data <- na.omit(wine_data)
+wine_data_naomit <- na.omit(wine_data)
+# wine_data <- na.omit(wine_data)
 ```
+
+```{r}
+imputed_data <- mice(wine_data, m = 5, method = "pmm", seed = 123)
+wine_data <- complete(imputed_data, action = 1)
+```
+
 
 ```{r}
 variables <- names(wine_data)[!names(wine_data) %in% c("TARGET")]
@@ -122,6 +130,12 @@ plots
 
 
 # Modeling
+
+```{r}
+# Fit a Poisson GLM with NAs omitted, as baseline
+poisson_model_naomit <- glm(TARGET ~ ., family = poisson(link = "log"), data = wine_data_naomit)
+summary(poisson_model_naomit)
+```
 
 ```{r}
 # Fit a Poisson GLM
@@ -174,42 +188,16 @@ cat("AIC of Zero-Inflated Poisson model:", AIC(zip_model), "\n")
 ```
 
 ```{r}
-# Stepwise feature selection using AIC
-stepwise_zip <- stepAIC(poisson_model, direction = "backward", trace = TRUE)
-summary(stepwise_zip)
-```
-
-```{r}
-x <- model.matrix(TARGET ~ ., data = wine_data)[, -1]  # Predictor matrix
-y <- wine_data$TARGET  # Response
-lasso_model <- glmnet(x, y, family = "poisson", alpha = 1)
-
-plot(lasso_model, xvar = "lambda", label = TRUE)
-```
-
-```{r}
-cv_model <- cv.glmnet(x, y, family = "poisson", alpha = 1)  # Cross-validation
-
-# Plot cross-validation results
-plot(cv_model)
-
-lambda_min <- cv_model$lambda.min    # Best lambda (minimizes CV error)
-
-# Coefficients for lambda.min
-coef(cv_model, s = "lambda.min")
-```
-
-```{r}
 # Stepwise elimination based on p-values
 p_threshold <- 0.10
 feature_selection_data <- wine_data
 
 for (i in 1:ncol(wine_data)-1) {
   # Fit model
-  current_model <- glm(TARGET ~ ., family = poisson, data = feature_selection_data)
+  feature_selection_model <- glm(TARGET ~ ., family = poisson, data = feature_selection_data)
   
   # Get p-values for all predictors
-  p_vals <- summary(current_model)$coefficients[, 4]
+  p_vals <- summary(feature_selection_model)$coefficients[, 4]
   
   # Identify the predictor with the highest p-value
   max_p <- max(p_vals[-1], na.rm = TRUE)  # Exclude intercept
@@ -230,10 +218,110 @@ for (i in 1:ncol(wine_data)-1) {
 }
 
 # Final model
-summary(current_model)
+summary(feature_selection_model)
 ```
 
 ```{r}
-plot(current_model)
+plot(feature_selection_model)
 ```
+
+```{r}
+full_model <- glm(
+  TARGET ~ (VolatileAcidity + Alcohol + LabelAppeal + AcidIndex + STARS)^2 + 
+    I(VolatileAcidity^2) + I(Alcohol^2) + I(LabelAppeal^2) + I(AcidIndex^2) + I(STARS^2) +
+    I(VolatileAcidity^3) + I(Alcohol^3) + I(LabelAppeal^3) + I(AcidIndex^3) + I(STARS^3), 
+  family = poisson, data = wine_data
+)
+
+summary(full_model)
+```
+
+```{r}
+overdispersion_stat <- sum(residuals(full_model, type = "pearson")^2) / df.residual(full_model)
+print(paste("Overdispersion statistic:", overdispersion_stat))
+```
+
+
+```{r}
+p_threshold <- 0.10
+
+# Start with the full model
+feature_eng_model <- glm(
+  TARGET ~ (VolatileAcidity + Alcohol + LabelAppeal + AcidIndex + STARS)^2 + 
+    I(VolatileAcidity^2) + I(Alcohol^2) + I(LabelAppeal^2) + I(AcidIndex^2) + I(STARS^2) +
+    I(VolatileAcidity^3) + I(Alcohol^3) + I(LabelAppeal^3) + I(AcidIndex^3) + I(STARS^3), 
+  family = poisson, data = wine_data
+)
+
+for (i in 1:(ncol(wine_data)-1)) {
+  # Extract p-values of current model
+  p_vals <- summary(feature_eng_model)$coefficients[,4]
+  
+  # Identify the predictor with the highest p-value (excluding the intercept)
+  max_p <- max(p_vals[-1], na.rm = TRUE)
+  
+  # Check if we should stop (all predictors below threshold)
+  if (max_p < p_threshold) {
+    message("STOPPING POINT! All predictors are below the p-value threshold.")
+    break
+  }
+  
+  # Identify worst predictor by name
+  predictor_names <- names(p_vals)[-1]
+  worst_predictor <- predictor_names[which.max(p_vals[-1])]
+  
+  # Update the model by removing the worst predictor
+  # . ~ . - var modifies the existing formula by dropping that variable
+  feature_eng_model <- update(feature_eng_model, as.formula(paste(". ~ . -", worst_predictor)))
+  
+  message(paste("Removed:", worst_predictor))
+}
+
+# Final model summary
+summary(feature_eng_model)
+```
+
+```{r}
+plot(feature_eng_model)
+```
+
+```{r}
+overdispersion_stat <- sum(residuals(feature_eng_model, type = "pearson")^2) / df.residual(feature_eng_model)
+print(paste("Overdispersion statistic:", overdispersion_stat))
+```
+
+```{r}
+gp_model <- vglm(
+  TARGET ~ STARS + I(LabelAppeal^2) + I(AcidIndex^2) + I(STARS^2) + I(AcidIndex^3) + I(STARS^3) +
+    AcidIndex:VolatileAcidity + STARS:VolatileAcidity + STARS:Alcohol + STARS:AcidIndex,
+  family = genpoisson0(), data = wine_data
+)
+
+summary(gp_model)
+```
+
+```{r}
+plot(gp_model)
+```
+
+```{r}
+models <- list(
+  poisson_model_naomit, poisson_model, nb_model, zip_model, 
+  feature_selection_model, full_model, feature_eng_model, gp_model
+)
+maes <- c()
+
+for (model in models) {
+  predicted <- predict(model, type = "response")
+  actual <- wine_data$TARGET
+  if (length(predicted) < length(actual)) {
+    actual <- wine_data_naomit$TARGET
+  }
+  mae <- mean(abs(actual - predicted))
+  maes <- c(maes,mae)
+}
+
+maes
+```
+
 
