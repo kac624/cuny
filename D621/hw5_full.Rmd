@@ -5,7 +5,7 @@ date: "`r Sys.Date()`"
 output: html_document
 ---
 
-```{r}
+```{r, message=FALSE}
 # Load required libraries
 library(tidyverse) 
 library(ggplot2) 
@@ -16,18 +16,28 @@ library(cowplot)
 library(mice)
 library(pscl)
 library(MASS)
-library(VGAM)
+library(randomForest)
+library(knitr)
+library(kableExtra)
 ```
 
 # Data Exploration
 
 ```{r}
 # Load the data
-wine_data <- read.csv("wine-training-data.csv")
+wine_data <- read.csv("data/wine-training-data.csv")
 
 # Glimpse
 glimpse(wine_data)
 ```
+
+```{r}
+eval_data <- read.csv("data/wine-evaluation-data.csv") %>%
+  dplyr::select(-IN, -TARGET)
+glimpse(eval_data)
+```
+
+### Summary
 
 ```{r}
 # Drop index
@@ -39,6 +49,8 @@ summary_stats <- describe(wine_data)
 print(summary_stats)
 ```
 
+### NAs
+
 ```{r}
 # Check for missing values
 missing_values <- colSums(is.na(wine_data))
@@ -46,15 +58,34 @@ print(missing_values)
 ```
 
 ```{r}
+# Missing value patterns
+naniar_plot <- gg_miss_var(wine_data, show_pct = TRUE) +
+  labs(title = "Missing Data Patterns", x = "Variables", y = "Number of Missing Values") +
+  theme_minimal()
+
+print(naniar_plot)
+
+# Create a heatmap of missing values
+gg_miss_upset(wine_data)
+```
+
+### Correlation across features
+
+```{r}
 # Correlation matrix for numerical variables
 numerical_vars <- wine_data %>% select_if(is.numeric)
+correlation_matrix_1 <- cor(numerical_vars, use = "pairwise.complete.obs")
 
-# Compute the correlation matrix
-correlation_matrix <- cor(numerical_vars, use = "pairwise.complete.obs")
+# With log target
+numerical_vars$TARGET <- log(numerical_vars$TARGET+1)
+correlation_matrix_2 <- cor(numerical_vars, use = "pairwise.complete.obs")
 
 # Plot the heatmap
-corrplot(correlation_matrix, method = "color", type = "lower")
+corrplot(correlation_matrix_1, method = "color", type = "lower", title = "Untransformed Target", mar = c(1, 1, 2, 1))
+corrplot(correlation_matrix_2, method = "color", type = "lower", title = "Log-transformed Target", mar = c(1, 1, 2, 1))
 ```
+
+### Distributions
 
 ```{r}
 # Histograms for numerical vars
@@ -73,35 +104,9 @@ print(histogram_grid)
 ```{r}
 # Histogram for target variable
 ggplot(wine_data, aes(x = TARGET)) +
-  geom_histogram(binwidth = 1, fill = "blue", color = "white") +
+  geom_bar() +
   labs(title = "Distribution of TARGET (Cases Purchased)", x = "TARGET", y = "Frequency")
 ```
-
-```{r}
-# Missing value patterns
-naniar_plot <- gg_miss_var(wine_data, show_pct = TRUE) +
-  labs(title = "Missing Data Patterns", x = "Variables", y = "Number of Missing Values") +
-  theme_minimal()
-
-print(naniar_plot)
-
-# Create a heatmap of missing values
-gg_miss_upset(wine_data)
-```
-
-```{r}
-nrow(wine_data)
-nrow(na.omit(wine_data))
-
-wine_data_naomit <- na.omit(wine_data)
-# wine_data <- na.omit(wine_data)
-```
-
-```{r}
-imputed_data <- mice(wine_data, m = 5, method = "pmm", seed = 123)
-wine_data <- complete(imputed_data, action = 1)
-```
-
 
 ```{r}
 variables <- names(wine_data)[!names(wine_data) %in% c("TARGET")]
@@ -128,8 +133,94 @@ plots <- lapply(variables, function(var) {
 plots
 ```
 
+# Evaluation Data
+
+```{r}
+# Remove all rows with missing values from the original data
+complete_data <- na.omit(wine_data)
+
+# Determine the number of rows you want in the validation set
+set.seed(123) # for reproducibility
+validation_size <- floor(0.2 * nrow(complete_data)) # 20% as an example
+
+# Randomly select rows for the validation set
+validation_indices <- sample(seq_len(nrow(complete_data)), size = validation_size)
+
+# Create the validation subset with no NAs
+validation_data <- complete_data[validation_indices, ]
+
+# (Optional) Create a training subset from the remaining rows
+wine_data <- wine_data[-validation_indices, ]
+
+paste('Rows in Training Data', nrow(wine_data))
+paste('Rows in Validation Data', nrow(validation_data))
+```
 
 # Modeling
+
+```{r}
+# Initialize an empty results data frame
+results_df <- data.frame(
+  ModelName = character(),
+  RowsInTrain = numeric(),
+  AIC = numeric(),
+  MAE_Train = numeric(),
+  MAE_Val = numeric(),
+  Deviance = numeric(),
+  Dispersion = numeric(),
+  stringsAsFactors = FALSE
+)
+
+# Function for updating the df
+update_results <- function(results_df, model, training_data, validation_data, name) {
+  # Generate Predictions
+  predicted_train <- predict(model, type = "response")
+  actual_train <- training_data$TARGET
+  
+  predicted_val <- predict(model, newdata=validation_data, type = "response")
+  actual_val <- validation_data$TARGET
+  
+  # Assign variables
+  name <- name
+  mae_train <- mean(abs(actual_train - predicted_train), na.rm = TRUE)
+  mae_val <- mean(abs(actual_val - predicted_val), na.rm = TRUE)
+  deviance <- model$deviance
+  dispersion <- sum(residuals(model, type = "pearson")^2) / df.residual(model)
+  
+  # Error handling
+  if (is.null(deviance)) deviance <- NA
+  if (is.null(dispersion) || length(dispersion) == 0) dispersion <- NA
+  
+  aic <- tryCatch({
+    AIC(model)
+  }, error = function(e) {
+    NA
+  })
+  
+  # Add to df
+  results_df <- rbind(results_df, data.frame(
+    ModelName = name,
+    RowsInTrain = nrow(training_data),
+    AIC = aic,
+    MAE_Train = mae_train,
+    MAE_Val = mae_val,
+    Deviance = deviance,
+    Dispersion = dispersion,
+    stringsAsFactors = FALSE
+  ))
+  
+  return(results_df)
+}
+```
+
+### Baseline - with NAs removed
+
+```{r}
+nrow(wine_data)
+nrow(na.omit(wine_data))
+
+wine_data_naomit <- na.omit(wine_data)
+```
 
 ```{r}
 # Fit a Poisson GLM with NAs omitted, as baseline
@@ -138,26 +229,177 @@ summary(poisson_model_naomit)
 ```
 
 ```{r}
+plot(poisson_model_naomit)
+```
+
+```{r}
+results_df <- update_results(
+  results_df, poisson_model_naomit, wine_data_naomit, validation_data, 'baseline poisson - NAs removed'
+)
+results_df
+```
+
+### Convert to factors
+
+```{r}
+# Replace NAs with 0 in STARS
+wine_data[is.na(wine_data$STARS), 'STARS'] <- "Missing"
+
+# Convert to factor
+wine_data$STARS <- factor(wine_data$STARS)
+wine_data$LabelAppeal <- factor(wine_data$LabelAppeal)
+
+# Same for validation
+validation_data[is.na(validation_data$STARS), 'STARS'] <- "Missing"
+validation_data$STARS <- factor(validation_data$STARS, levels = levels(wine_data$STARS))
+validation_data$LabelAppeal <- factor(validation_data$LabelAppeal, levels = levels(wine_data$LabelAppeal))
+
+# Check number of rows with NAs
+nrow(na.omit(wine_data))
+```
+
+```{r}
 # Fit a Poisson GLM
-poisson_model <- glm(TARGET ~ ., family = poisson(link = "log"), data = wine_data)
-summary(poisson_model)
+poisson_model_factor <- glm(TARGET ~ . - 1, family = poisson(link = "log"), data = wine_data)
+summary(poisson_model_factor)
 ```
 
 ```{r}
-plot(poisson_model)
+plot(poisson_model_factor)
 ```
-
 
 ```{r}
-# Check for overdispersion
-# Calculate overdispersion statistic: residual deviance / degrees of freedom
-overdispersion_stat <- sum(residuals(poisson_model, type = "pearson")^2) / df.residual(poisson_model)
-print(paste("Overdispersion statistic:", overdispersion_stat))
+results_df <- update_results(
+  results_df, poisson_model_factor, na.omit(wine_data), validation_data, 'poisson - discrete vars as factors'
+)
+results_df
 ```
+
+### Impute Numeric vars
+
+```{r}
+wine_data_mean_imp <- wine_data
+
+# Identify numeric columns
+num_cols <- sapply(wine_data_mean_imp, is.numeric)
+
+# For each numeric column with NAs, fill them with the column mean
+for (col_name in names(wine_data_mean_imp)[num_cols]) {
+  missing_indices <- is.na(wine_data_mean_imp[[col_name]])
+  if (any(missing_indices)) {
+    col_mean <- mean(wine_data_mean_imp[[col_name]], na.rm = TRUE)
+    wine_data_mean_imp[[col_name]][missing_indices] <- col_mean
+  }
+}
+
+# Fit a Poisson GLM
+poisson_model_mean_impute <- glm(TARGET ~ . - 1, family = poisson(link = "log"), data = wine_data_mean_imp)
+summary(poisson_model_mean_impute)
+```
+
+```{r}
+results_df <- update_results(
+  results_df, poisson_model_mean_impute, wine_data_mean_imp, validation_data, 'poisson - mean imputed'
+)
+results_df
+```
+
+```{r}
+imputed_data <- mice(wine_data, m = 5, method = "pmm", seed = 123)
+wine_data_mice_imp <- complete(imputed_data, action = 1)
+
+poisson_model_mice_impute <- glm(TARGET ~ . - 1, family = poisson(link = "log"), data = wine_data_mice_imp)
+summary(poisson_model_mice_impute)
+```
+
+```{r}
+results_df <- update_results(
+  results_df, poisson_model_mice_impute, wine_data_mice_imp, validation_data, 'poisson - mice imputed'
+)
+results_df
+```
+
+```{r}
+wine_data <- wine_data_mice_imp
+```
+
+### Additional Features
+
+```{r}
+# Identify numeric columns
+num_cols <- sapply(wine_data, is.numeric)
+vars <- names(wine_data)[num_cols]
+vars <- setdiff(vars, "TARGET")
+
+# Create a formula with all numeric variables, their pairwise interactions (^2),
+# and squared polynomial terms (I(var^2))
+f <- as.formula(
+  paste("~ (", paste(vars, collapse=" + "), ")^2 +",
+        paste(sapply(vars, function(v) paste0("I(", v, "^2)")), collapse=" + "))
+)
+
+# Generate the model matrix from the formula (remove the intercept column)
+mm <- model.matrix(f, data = wine_data)[, -1]
+mm_new_features <- mm[, !colnames(mm) %in% vars]
+
+# Add the generated terms to the original data frame
+wine_data_genFeatures <- data.frame(cbind(wine_data['TARGET'], mm_new_features))
+names(wine_data_genFeatures) <- make.names(names(wine_data_genFeatures))
+wine_data_genFeatures
+
+# Same for validation data
+validation_mm <- model.matrix(f, data = validation_data)[, -1]
+validation_new_features <- validation_mm[, !colnames(validation_mm) %in% vars]
+validation_data_genFeatures <- data.frame(cbind(validation_data['TARGET'], validation_new_features))
+names(validation_new_features) <- make.names(names(validation_new_features))
+```
+
+```{r}
+# Stepwise elimination based on p-values
+p_threshold <- 0.05
+feature_selection_data <- wine_data_genFeatures
+
+for (i in 1:(ncol(feature_selection_data)-1)) {
+  # Fit model (no intercept)
+  feature_selection_model <- glm(TARGET ~ . - 1, family = poisson, data = feature_selection_data)
+  
+  # Get p-values for all predictors (no intercept to remove)
+  p_vals <- summary(feature_selection_model)$coefficients[, 4]
+  
+  # Identify the predictor with the highest p-value
+  max_p <- max(p_vals, na.rm = TRUE)  # No [-1] since no intercept
+  if (max_p < p_threshold) {
+    message("STOPPING POINT!")
+    break
+  }
+  
+  # Find the predictor with the highest p-value
+  worst_predictor <- names(p_vals)[which.max(p_vals)]
+  
+  # Remove the worst predictor by exact name, but only if not factor var
+  worst_predictor <- make.names(worst_predictor)
+  feature_selection_data <- dplyr::select(feature_selection_data, -all_of(worst_predictor))
+}
+
+summary(feature_selection_model)
+```
+
+```{r}
+# Filter out removed variables from val data
+selected_features <- colnames(feature_selection_data)
+validation_data_genFeatures <- validation_data_genFeatures[, selected_features, drop = FALSE]
+
+results_df <- update_results(
+  results_df, feature_selection_model, feature_selection_data, validation_data_genFeatures, 'poisson - generated features (num. only)'
+)
+results_df
+```
+
+### Negative Binomial
 
 ```{r}
 # Fit a Negative Binomial regression
-nb_model <- glm.nb(TARGET ~ ., data = wine_data)
+nb_model <- glm.nb(TARGET ~ ., data = feature_selection_data)
 summary(nb_model)
 ```
 
@@ -165,12 +407,35 @@ summary(nb_model)
 plot(nb_model)
 ```
 
+```{r}
+results_df <- update_results(
+  results_df, nb_model, feature_selection_data, validation_data_genFeatures, 'neg. binom. - generated features (num. only)'
+)
+results_df
+```
+
+### Add back factor variables
 
 ```{r}
-# Compare models using AIC
-cat("AIC of Poisson model:", AIC(poisson_model), "\n")
-cat("AIC of Negative Binomial model:", AIC(nb_model), "\n")
+wine_data_genFeatures <- cbind(feature_selection_data, dplyr::select(wine_data, STARS, LabelAppeal))
+poisson_model_genFeatures <- glm(TARGET ~ . - 1, family = poisson, data = wine_data_genFeatures)
+summary(poisson_model_genFeatures)
 ```
+
+```{r}
+plot(poisson_model_genFeatures)
+```
+
+```{r}
+validation_data_genFeatures <- cbind(validation_data_genFeatures, dplyr::select(validation_data, STARS, LabelAppeal))
+
+results_df <- update_results(
+  results_df, poisson_model_genFeatures, wine_data_genFeatures, validation_data_genFeatures, 'poisson - generated features (with factors)'
+)
+results_df
+```
+
+### Zero-Inflation
 
 ```{r}
 zip_model <- zeroinfl(TARGET ~ . | 1, dist = "poisson", data = wine_data)
@@ -178,150 +443,67 @@ summary(zip_model)
 ```
 
 ```{r}
-# plot(zip_model)
+results_df <- update_results(results_df, zip_model, wine_data, validation_data, 'zip model')
+results_df
 ```
 
-```{r}
-# Compare models using AIC
-cat("AIC of Poisson model:", AIC(poisson_model), "\n")
-cat("AIC of Zero-Inflated Poisson model:", AIC(zip_model), "\n")
-```
+### Random Forest
 
 ```{r}
-# Stepwise elimination based on p-values
-p_threshold <- 0.10
-feature_selection_data <- wine_data
-
-for (i in 1:ncol(wine_data)-1) {
-  # Fit model
-  feature_selection_model <- glm(TARGET ~ ., family = poisson, data = feature_selection_data)
-  
-  # Get p-values for all predictors
-  p_vals <- summary(feature_selection_model)$coefficients[, 4]
-  
-  # Identify the predictor with the highest p-value
-  max_p <- max(p_vals[-1], na.rm = TRUE)  # Exclude intercept
-  
-  if (max_p < p_threshold) {
-    print("STOPPING POINT!")
-    break  # Stop if all predictors are significant
-  }
-  
-  # Find the predictor with the highest p-value
-  worst_predictor <- names(which.max(p_vals[-1]))
-  
-  # Remove the worst predictor
-  feature_selection_data <- dplyr::select(
-    feature_selection_data, -contains(worst_predictor)
-  )
-  print(paste("Removed ", worst_predictor))
-}
-
-# Final model
-summary(feature_selection_model)
-```
-
-```{r}
-plot(feature_selection_model)
-```
-
-```{r}
-full_model <- glm(
-  TARGET ~ (VolatileAcidity + Alcohol + LabelAppeal + AcidIndex + STARS)^2 + 
-    I(VolatileAcidity^2) + I(Alcohol^2) + I(LabelAppeal^2) + I(AcidIndex^2) + I(STARS^2) +
-    I(VolatileAcidity^3) + I(Alcohol^3) + I(LabelAppeal^3) + I(AcidIndex^3) + I(STARS^3), 
-  family = poisson, data = wine_data
-)
-
-summary(full_model)
-```
-
-```{r}
-overdispersion_stat <- sum(residuals(full_model, type = "pearson")^2) / df.residual(full_model)
-print(paste("Overdispersion statistic:", overdispersion_stat))
+rf_model <- randomForest(TARGET ~ ., data = wine_data, ntree = 500)
+summary(rf_model)
 ```
 
 
 ```{r}
-p_threshold <- 0.10
+results_df <- update_results(results_df, rf_model, wine_data, validation_data, 'rf model')
+results_df
+```
 
-# Start with the full model
-feature_eng_model <- glm(
-  TARGET ~ (VolatileAcidity + Alcohol + LabelAppeal + AcidIndex + STARS)^2 + 
-    I(VolatileAcidity^2) + I(Alcohol^2) + I(LabelAppeal^2) + I(AcidIndex^2) + I(STARS^2) +
-    I(VolatileAcidity^3) + I(Alcohol^3) + I(LabelAppeal^3) + I(AcidIndex^3) + I(STARS^3), 
-  family = poisson, data = wine_data
-)
+### RF with Log TARGET
 
-for (i in 1:(ncol(wine_data)-1)) {
-  # Extract p-values of current model
-  p_vals <- summary(feature_eng_model)$coefficients[,4]
-  
-  # Identify the predictor with the highest p-value (excluding the intercept)
-  max_p <- max(p_vals[-1], na.rm = TRUE)
-  
-  # Check if we should stop (all predictors below threshold)
-  if (max_p < p_threshold) {
-    message("STOPPING POINT! All predictors are below the p-value threshold.")
-    break
-  }
-  
-  # Identify worst predictor by name
-  predictor_names <- names(p_vals)[-1]
-  worst_predictor <- predictor_names[which.max(p_vals[-1])]
-  
-  # Update the model by removing the worst predictor
-  # . ~ . - var modifies the existing formula by dropping that variable
-  feature_eng_model <- update(feature_eng_model, as.formula(paste(". ~ . -", worst_predictor)))
-  
-  message(paste("Removed:", worst_predictor))
-}
-
-# Final model summary
-summary(feature_eng_model)
+```{r}
+wine_data_log <- wine_data %>%
+  mutate(TARGET = log(TARGET+1))
+rf_model_log <- randomForest(TARGET ~ ., data = wine_data_log, ntree = 500)
+summary(rf_model_log)
 ```
 
 ```{r}
-plot(feature_eng_model)
+validation_data_log <- validation_data %>%
+  mutate(TARGET = log(TARGET+1))
+
+predicted_train <- predict(rf_model_log)
+predicted_lin_space_train <- exp(predicted_train) - 1
+mae_train <- mean(abs(wine_data$TARGET - predicted_lin_space_train))
+
+predicted_val <- predict(rf_model_log, newdata=validation_data_log)
+predicted_lin_space_val <- exp(predicted_val) - 1
+mae_val <- mean(abs(validation_data$TARGET - predicted_lin_space_val))
+
+results_df <- rbind(results_df, data.frame(
+  ModelName = 'rf log target',
+  RowsInTrain = nrow(wine_data_log),
+  AIC = NA,
+  MAE_Train = mae_train,
+  MAE_Val = mae_val,
+  Deviance = NA,
+  Dispersion = NA,
+  stringsAsFactors = FALSE
+))
+
+results_df
 ```
+
+# Summary Table
 
 ```{r}
-overdispersion_stat <- sum(residuals(feature_eng_model, type = "pearson")^2) / df.residual(feature_eng_model)
-print(paste("Overdispersion statistic:", overdispersion_stat))
+results_df %>%
+  kbl(
+    caption = "Summary of Model Performance",
+    col.names = c("Model Name", "No. Training Observations", "AIC", "MAE (Train)", "MAE (Validation)", "Deviance", "Dispersion"),
+    digits = 2
+  ) %>%
+  kable_classic(position = 'center')
 ```
-
-```{r}
-gp_model <- vglm(
-  TARGET ~ STARS + I(LabelAppeal^2) + I(AcidIndex^2) + I(STARS^2) + I(AcidIndex^3) + I(STARS^3) +
-    AcidIndex:VolatileAcidity + STARS:VolatileAcidity + STARS:Alcohol + STARS:AcidIndex,
-  family = genpoisson0(), data = wine_data
-)
-
-summary(gp_model)
-```
-
-```{r}
-plot(gp_model)
-```
-
-```{r}
-models <- list(
-  poisson_model_naomit, poisson_model, nb_model, zip_model, 
-  feature_selection_model, full_model, feature_eng_model, gp_model
-)
-maes <- c()
-
-for (model in models) {
-  predicted <- predict(model, type = "response")
-  actual <- wine_data$TARGET
-  if (length(predicted) < length(actual)) {
-    actual <- wine_data_naomit$TARGET
-  }
-  mae <- mean(abs(actual - predicted))
-  maes <- c(maes,mae)
-}
-
-maes
-```
-
 
