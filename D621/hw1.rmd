@@ -5,7 +5,7 @@ date: "2024-09-19"
 output: html_document
 ---
 
-```{r, output=False}
+```{r}
 library(tidyverse)
 library(corrplot)
 library(MASS)

@@ -1,8 +1,0 @@
-__pychache__/
-.ipynb_checkpoints/
-data/
-
-*.o
-*.pyc
-
-.DS_Store
