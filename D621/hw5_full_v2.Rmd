@@ -115,6 +115,30 @@ plots <- lapply(variables, function(var) {
 plots
 ```
 
+# Evaluation Data
+
+```{r}
+# Remove all rows with missing values from the original data
+complete_data <- na.omit(wine_data)
+
+# Determine the number of rows you want in the validation set
+set.seed(123) # for reproducibility
+validation_size <- floor(0.2 * nrow(complete_data)) # 20% as an example
+
+# Randomly select rows for the validation set
+validation_indices <- sample(seq_len(nrow(complete_data)), size = validation_size)
+
+# Create the validation subset with no NAs
+validation_data <- complete_data[validation_indices, ]
+
+# (Optional) Create a training subset from the remaining rows
+training_data <- wine_data[-validation_indices, ]
+
+paste('Rows in Training Data', nrow(training_data))
+paste('Rows in Validation Data', nrow(validation_data))
+```
+
+
 
 # Modeling
 
@@ -122,23 +146,32 @@ plots
 # Initialize an empty results data frame
 results_df <- data.frame(
   ModelName = character(),
-  N_Rows = numeric(),
+  RowsInTrain = numeric(),
   AIC = numeric(),
-  MAE = numeric(),
+  MAE_Train = numeric(),
+  MAE_Val = numeric(),
   Deviance = numeric(),
   Dispersion = numeric(),
   stringsAsFactors = FALSE
 )
 
 # Function for updating the df
-update_results <- function(results_df, model, data, name) {
-  predicted <- predict(model, type = "response")
-  actual <- data$TARGET
-    
+update_results <- function(results_df, model, training_data, validation_data, name) {
+  # Generate Predictions
+  predicted_train <- predict(model, type = "response")
+  actual_train <- training_data$TARGET
+  
+  predicted_val <- predict(model, newdata=validation_data, type = "response")
+  actual_val <- validation_data$TARGET
+  
+  # Assign variables
   name <- name
-  mae <- mean(abs(actual - predicted), na.rm = TRUE)
+  mae_train <- mean(abs(actual_train - predicted_train), na.rm = TRUE)
+  mae_val <- mean(abs(actual_val - predicted_val), na.rm = TRUE)
   deviance <- model$deviance
   dispersion <- sum(residuals(model, type = "pearson")^2) / df.residual(model)
+  
+  # Error handling
   if (is.null(deviance)) deviance <- NA
   if (is.null(dispersion) || length(dispersion) == 0) dispersion <- NA
   
@@ -147,12 +180,14 @@ update_results <- function(results_df, model, data, name) {
   }, error = function(e) {
     NA
   })
-
+  
+  # Add to df
   results_df <- rbind(results_df, data.frame(
     ModelName = name,
-    N_Rows = nrow(na.omit(data)),
+    RowsInTrain = nrow(training_data),
     AIC = aic,
-    MAE = mae,
+    MAE_Train = mae_train,
+    MAE_Val = mae_val,
     Deviance = deviance,
     Dispersion = dispersion,
     stringsAsFactors = FALSE
@@ -182,7 +217,9 @@ plot(poisson_model_naomit)
 ```
 
 ```{r}
-results_df <- update_results(results_df, poisson_model_naomit, wine_data_naomit, 'baseline - NAs removed')
+results_df <- update_results(
+  results_df, poisson_model_naomit, wine_data_naomit, validation_data, 'baseline - NAs removed'
+)
 results_df
 ```
 
@@ -195,6 +232,11 @@ wine_data[is.na(wine_data$STARS), 'STARS'] <- "Missing"
 # Convert to factor
 wine_data$STARS <- factor(wine_data$STARS)
 wine_data$LabelAppeal <- factor(wine_data$LabelAppeal)
+
+# Same for validation
+validation_data[is.na(validation_data$STARS), 'STARS'] <- "Missing"
+validation_data$STARS <- factor(validation_data$STARS, levels = levels(wine_data$STARS))
+validation_data$LabelAppeal <- factor(validation_data$LabelAppeal, levels = levels(wine_data$LabelAppeal))
 
 # Check number of rows with NAs
 nrow(na.omit(wine_data))
@@ -211,7 +253,9 @@ plot(poisson_model_factor)
 ```
 
 ```{r}
-results_df <- update_results(results_df, poisson_model_factor, wine_data, 'discrete vars as factors')
+results_df <- update_results(
+  results_df, poisson_model_factor, na.omit(wine_data), validation_data, 'discrete vars as factors'
+)
 results_df
 ```
 
@@ -238,20 +282,9 @@ summary(poisson_model_mean_impute)
 ```
 
 ```{r}
-results_df <- update_results(results_df, poisson_model_impute, wine_data_mean_imp, 'num vars mean imputed')
-results_df
-```
-
-```{r}
-imputed_result <- missForest(wine_data)
-wine_data_rf_imp <- imputed_result$ximp
-
-poisson_model_rf_impute <- glm(TARGET ~ . - 1, family = poisson(link = "log"), data = wine_data_rf_imp)
-summary(poisson_model_rf_impute)
-```
-
-```{r}
-results_df <- update_results(results_df, poisson_model_rf_impute, wine_data_rf_imp, 'num vars rf imputed')
+results_df <- update_results(
+  results_df, poisson_model_mean_impute, wine_data_mean_imp, validation_data, 'num vars mean imputed'
+)
 results_df
 ```
 
@@ -264,12 +297,14 @@ summary(poisson_model_mice_impute)
 ```
 
 ```{r}
-results_df <- update_results(results_df, poisson_model_mice_impute, wine_data_mice_imp, 'num vars mice imputed')
+results_df <- update_results(
+  results_df, poisson_model_mice_impute, wine_data_mice_imp, validation_data, 'num vars mice imputed'
+)
 results_df
 ```
 
 ```{r}
-wine_data <- 'TBD'
+wine_data <- wine_data_mice_imp
 ```
 
 # Additional Features
@@ -295,6 +330,12 @@ mm_new_features <- mm[, !colnames(mm) %in% vars]
 wine_data_genFeatures <- data.frame(cbind(wine_data['TARGET'], mm_new_features))
 names(wine_data_genFeatures) <- make.names(names(wine_data_genFeatures))
 wine_data_genFeatures
+
+# Same for validation data
+validation_mm <- model.matrix(f, data = validation_data)[, -1]
+validation_new_features <- validation_mm[, !colnames(validation_mm) %in% vars]
+validation_data_genFeatures <- data.frame(cbind(validation_data['TARGET'], validation_new_features))
+names(validation_new_features) <- make.names(names(validation_new_features))
 ```
 
 ```{r}
@@ -328,20 +369,30 @@ summary(feature_selection_model)
 ```
 
 ```{r}
-results_df <- update_results(results_df, feature_selection_model, feature_selection_data, 'numerical generated features')
+# Filter out removed variables from val data
+selected_features <- colnames(feature_selection_data)
+validation_data_genFeatures <- validation_data_genFeatures[, selected_features, drop = FALSE]
+
+results_df <- update_results(
+  results_df, feature_selection_model, feature_selection_data, validation_data_genFeatures, 'numerical generated features'
+)
 results_df
 ```
 
 
 
 ```{r}
-wine_data_genFeatures <- cbind(feature_selection_data, dplyr::select(wine_data, TARGET, STARS, LabelAppeal))
+wine_data_genFeatures <- cbind(feature_selection_data, dplyr::select(wine_data, STARS, LabelAppeal))
 poisson_model_genFeatures <- glm(TARGET ~ . - 1, family = poisson, data = wine_data_genFeatures)
 summary(poisson_model_genFeatures)
 ```
 
 ```{r}
-results_df <- update_results(results_df, poisson_model_genFeatures, wine_data_genFeatures, 'with generated features')
+validation_data_genFeatures <- cbind(validation_data_genFeatures, dplyr::select(validation_data, STARS, LabelAppeal))
+
+results_df <- update_results(
+  results_df, poisson_model_genFeatures, wine_data_genFeatures, validation_data_genFeatures, 'with generated features'
+)
 results_df
 ```
 
@@ -358,7 +409,9 @@ plot(nb_model)
 ```
 
 ```{r}
-results_df <- update_results(results_df, nb_model, feature_selection_data, 'neg. binom. numerical')
+results_df <- update_results(
+  results_df, nb_model, feature_selection_data, validation_data_genFeatures, 'neg. binom. numerical'
+)
 results_df
 ```
 
@@ -368,7 +421,7 @@ summary(zip_model)
 ```
 
 ```{r}
-results_df <- update_results(results_df, zip_model, wine_data, 'zip model')
+results_df <- update_results(results_df, zip_model, wine_data, validation_data, 'zip model')
 results_df
 ```
 
@@ -381,7 +434,7 @@ summary(rf_model)
 
 
 ```{r}
-results_df <- update_results(results_df, rf_model, wine_data, 'rf model')
+results_df <- update_results(results_df, rf_model, wine_data, validation_data, 'rf model')
 results_df
 ```
 
@@ -395,15 +448,23 @@ summary(rf_model_log)
 ```
 
 ```{r}
-predicted <- predict(rf_model_log)
-predicted_lin_space <- exp(predicted) - 1
-mae <- mean(abs(wine_data$TARGET - predicted_lin_space))
+validation_data_log <- validation_data %>%
+  mutate(TARGET = log(TARGET+1))
+
+predicted_train <- predict(rf_model_log)
+predicted_lin_space_train <- exp(predicted_train) - 1
+mae_train <- mean(abs(wine_data$TARGET - predicted_lin_space_train))
+
+predicted_val <- predict(rf_model_log, newdata=validation_data_log)
+predicted_lin_space_val <- exp(predicted) - 1
+mae_val <- mean(abs(validation_data$TARGET - predicted_lin_space))
 
 results_df <- rbind(results_df, data.frame(
   ModelName = 'rf log target',
-  N_Rows = nrow(wine_data_log),
+  RowsInTrain = nrow(wine_data_log),
   AIC = NA,
-  MAE = mae,
+  MAE_Train = mae_train,
+  MAE_Val = mae_val,
   Deviance = NA,
   Dispersion = NA,
   stringsAsFactors = FALSE
@@ -411,4 +472,5 @@ results_df <- rbind(results_df, data.frame(
 
 results_df
 ```
+
 
