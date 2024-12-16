@@ -323,6 +323,37 @@ results_df
 wine_data <- wine_data_mice_imp
 ```
 
+### Negative Binomial
+
+```{r}
+# Fit a Negative Binomial regression
+nb_model <- glm.nb(TARGET ~ .  - 1, data = wine_data)
+summary(nb_model)
+```
+
+```{r}
+plot(nb_model)
+```
+
+```{r}
+results_df <- update_results(
+  results_df, nb_model, wine_data, validation_data, 'neg. binom. - mice imputed'
+)
+results_df
+```
+
+### Zero-Inflation
+
+```{r}
+zip_model <- zeroinfl(TARGET ~ . | 1, dist = "poisson", data = wine_data)
+summary(zip_model)
+```
+
+```{r}
+results_df <- update_results(results_df, zip_model, wine_data, validation_data, 'zip model - mice imputed')
+results_df
+```
+
 ### Additional Features
 
 ```{r}
@@ -345,7 +376,6 @@ mm_new_features <- mm[, !colnames(mm) %in% vars]
 # Add the generated terms to the original data frame
 wine_data_genFeatures <- data.frame(cbind(wine_data['TARGET'], mm_new_features))
 names(wine_data_genFeatures) <- make.names(names(wine_data_genFeatures))
-wine_data_genFeatures
 
 # Same for validation data
 validation_mm <- model.matrix(f, data = validation_data)[, -1]
@@ -384,36 +414,6 @@ for (i in 1:(ncol(feature_selection_data)-1)) {
 summary(feature_selection_model)
 ```
 
-```{r}
-# Filter out removed variables from val data
-selected_features <- colnames(feature_selection_data)
-validation_data_genFeatures <- validation_data_genFeatures[, selected_features, drop = FALSE]
-
-results_df <- update_results(
-  results_df, feature_selection_model, feature_selection_data, validation_data_genFeatures, 'poisson - generated features (num. only)'
-)
-results_df
-```
-
-### Negative Binomial
-
-```{r}
-# Fit a Negative Binomial regression
-nb_model <- glm.nb(TARGET ~ ., data = feature_selection_data)
-summary(nb_model)
-```
-
-```{r}
-plot(nb_model)
-```
-
-```{r}
-results_df <- update_results(
-  results_df, nb_model, feature_selection_data, validation_data_genFeatures, 'neg. binom. - generated features (num. only)'
-)
-results_df
-```
-
 ### Add back factor variables
 
 ```{r}
@@ -435,15 +435,87 @@ results_df <- update_results(
 results_df
 ```
 
-### Zero-Inflation
+### Negative Binomial
 
 ```{r}
-zip_model <- zeroinfl(TARGET ~ . | 1, dist = "poisson", data = wine_data)
-summary(zip_model)
+# Fit a Negative Binomial regression
+nb_model_genFeatures <- glm.nb(TARGET ~ .  - 1, data = wine_data_genFeatures)
+summary(nb_model)
 ```
 
 ```{r}
-results_df <- update_results(results_df, zip_model, wine_data, validation_data, 'zip model')
+plot(nb_model_genFeatures)
+```
+
+```{r}
+results_df <- update_results(
+  results_df, nb_model_genFeatures, wine_data_genFeatures, validation_data_genFeatures, 'neg. binom. - generated features (with factors)'
+)
+results_df
+```
+
+### Zero-Inflation
+
+```{r}
+zip_model_genFeatures <- zeroinfl(TARGET ~ . | 1, dist = "poisson", data = wine_data_genFeatures)
+summary(zip_model_genFeatures)
+```
+
+```{r}
+results_df <- update_results(results_df, zip_model_genFeatures, wine_data_genFeatures, validation_data_genFeatures, 'zip model - generated features (with factors)')
+results_df
+```
+
+### Linear Regression
+
+```{r}
+lr_model <- lm(TARGET ~ . - 1, data = wine_data)
+summary(lr_model)
+```
+
+```{r}
+plot(lr_model)
+```
+
+```{r}
+results_df <- update_results(results_df, lr_model, wine_data, validation_data, 'linear regression - mice imputed')
+results_df
+```
+
+```{r}
+wine_data_log <- wine_data %>%
+  mutate(TARGET = log(TARGET+1))
+lr_model_log <- lm(TARGET ~ . - 1, data = wine_data_log)
+summary(lr_model_log)
+```
+
+```{r}
+plot(lr_model_log)
+```
+
+```{r}
+validation_data_log <- validation_data %>%
+  mutate(TARGET = log(TARGET+1))
+
+predicted_train <- predict(lr_model_log)
+predicted_lin_space_train <- exp(predicted_train) - 1
+mae_train <- mean(abs(wine_data$TARGET - predicted_lin_space_train))
+
+predicted_val <- predict(lr_model_log, newdata=validation_data_log)
+predicted_lin_space_val <- exp(predicted_val) - 1
+mae_val <- mean(abs(validation_data$TARGET - predicted_lin_space_val))
+
+results_df <- rbind(results_df, data.frame(
+  ModelName = 'linear regression - log target',
+  RowsInTrain = nrow(wine_data_log),
+  AIC = NA,
+  MAE_Train = mae_train,
+  MAE_Val = mae_val,
+  Deviance = NA,
+  Dispersion = NA,
+  stringsAsFactors = FALSE
+))
+
 results_df
 ```
 
@@ -456,15 +528,13 @@ summary(rf_model)
 
 
 ```{r}
-results_df <- update_results(results_df, rf_model, wine_data, validation_data, 'rf model')
+results_df <- update_results(results_df, rf_model, wine_data, validation_data, 'rf model - mice imputed')
 results_df
 ```
 
 ### RF with Log TARGET
 
 ```{r}
-wine_data_log <- wine_data %>%
-  mutate(TARGET = log(TARGET+1))
 rf_model_log <- randomForest(TARGET ~ ., data = wine_data_log, ntree = 500)
 summary(rf_model_log)
 ```
@@ -482,7 +552,7 @@ predicted_lin_space_val <- exp(predicted_val) - 1
 mae_val <- mean(abs(validation_data$TARGET - predicted_lin_space_val))
 
 results_df <- rbind(results_df, data.frame(
-  ModelName = 'rf log target',
+  ModelName = 'rf model - log target',
   RowsInTrain = nrow(wine_data_log),
   AIC = NA,
   MAE_Train = mae_train,

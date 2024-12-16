@@ -22,7 +22,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Introduction
 
-This assignment tasked us with predicting a discrete count variable: the number of cases of wine sold to distribution companies after sampling. The dataset contains variables detailing various chemical characteristics of the wine, as well as ratings from industry experts. The dataset is characterized by a large volume of missing observations, which introduced challenges in terms of model performance. Ultimately, we found that linear approaches struggled to capture the relationship between the predictors and sales, with average prediction errors around 1 box. Some non-linear approaches, however, showed promising results.
+This assignment tasked us with predicting a discrete count variable: the number of wine cases sold to distribution companies after tasting. The dataset contains variables detailing various chemical characteristics of the wine, as well as ratings from industry experts. The dataset is characterized by a large volume of missing observations, which introduced challenges in terms of model performance. Ultimately, we found that linear approaches struggled to capture the relationship between the predictors and sales, with average prediction errors around 1 box. Some non-linear approaches, however, showed promising results.
 
 # Data Exploration
 
@@ -55,7 +55,7 @@ We then took an iterative approach to generate multiple datasets for modeling. T
   • Next, we converted the `STARS` variable to a factor and adding a new level (`missing`) to denote when the rating was not available. Given the large volume of NAs (~2,500) under this predictor, we predicted that the missing values may actually serve as a sort of signal to the model. In this dataset, we also converted the other categorical variable, `LabelAppeal` from numerical to factor format. With the `STARS` NAs filled in, the dataset had 8675 total observations for training.  
   
   • We then created two datasets with imputed values for the remaining numerical variables. The first leveraged a simple mean imputation, and the second leveraged the MICE (Multiple Imputation by Chained Equations) method. This approach imputes missing data by iteratively modeling each variable with missing values as a function of the other variables, with the goal of minimizing the distortions that may come with simpler imputation methods. With all NAs imputed, this dataset returned to the original count of 11,508 observations for training.  
-  • Given the minimal correlation shown in our correlation matrices, we created another dataset with additional generated features. Specifically, we added polynomial terms for all 12 numerical variables. We also predicted that the interactions of chemical attributes may better explain consumer tastes and preferences, so we generated pairwise interactions terms, bringing the total number of features to 78. When then enacted backward stepwise feature elimination to remove insignificant variables, bring the feature set back down to 24 variables.
+  • Given the minimal correlation shown in our correlation matrices, we created another dataset with additional generated features. Specifically, we added polynomial terms ($x^2$) for all 12 numerical variables. We also predicted that the interactions of chemical attributes may better explain consumer tastes and preferences, so we generated pairwise interactions terms, bringing the total number of features to 78. When then enacted backward stepwise feature elimination to remove insignificant variables, bring the feature set back down to 24 variables.
   
 With all of these steps, we created a complete validation dataset, as well as a series of training datasets that accounted for missing values, categorical variables, potential interactions and non-linear relationships.
 
@@ -65,27 +65,37 @@ For all of the above training datasets, we fit Poisson regression models. As unc
 
 Regarding residuals, we analysed the scatterplot of Pearson residuals against fitted values (see `Figure 5`). We observed the "banding" pattern shown below, but we recognized this is common with Poisson count models (given the discrete nature of the response variable). Ideally, the residuals should exhibit constant spread, and while the plot appeared appropriate overall, we did observe a slight curve, particularly with the red trend line. This indicated some potential non-linearity in the relationship between predictors and response. Interestingly, the introduction of polynomial and interaction terms appeared to at least partially address this. The same residual plot for the model including factor variables, imputed numerical variables and generated features exhibited no such curve.
 
-![Residual versus Fitted Scatterplot for Baseline Poisson Model (excluding NAs)](plots/residuals.png)
+![Residual versus Fitted Scatterplot for Baseline and Enhanced Poisson Models](plots/residuals.png)
 
-Regarding dispersion, we wanted to ensure that we adhered to the primary assumption for Poisson modeling: that mean and variance are equal. Dispersion provide an assessment of that adherence, calculated as sum of squared Pearson residuals divided by the residual degrees of freedom. While our baseline model exhibited significant underdispersion (indicating the model may be too simple), most of the other models had dispersion metrics near 1, indicating a good fit. However, one model (the one based on generated numerical features) did exhibit overdispersion. We therefore fit this same data with a negative binomial model. While the updated model did show more appropriate dispersion (very close to 1), the overall model fit metrics did not improve.
+Regarding dispersion, we wanted to ensure that we adhered to the primary assumption for Poisson modeling: that mean and variance are equal. Dispersion provide an assessment of that adherence, calculated as sum of squared Pearson residuals divided by the residual degrees of freedom. While our baseline model exhibited significant underdispersion (indicating the model may be too simple), most of the other models had dispersion metrics near 1, indicating a good fit. Still, we fit two negative binomial models, one based on the original features (with imputation) and one based on the selected generated features.
 
 Finally, we also examined AIC, MAE (both across training and validation subsets) and deviance. These metrics provide an indication of model fit, prediction errors and comparison to a fully saturated model (i.e., a model that perfectly predicts the observed data under the Poisson distribution). In all cases, lower values indicate a better fit. The results are collected in `Figure 6`.
 
-  • Surprisingly, the baseline model shows some of the best performance, with low AIC and Deviance, and comparable out-of-sample errors. The second model (with categorical variables converted to factors and missing values added as another level) provideds comparable performance. Unfortunately, these models are unable to handle observations with missing values, making it unfit for purpose.  
+Surprisingly, the baseline model shows some of the best performance, with low AIC and Deviance, and comparable out-of-sample errors. The second model (with categorical variables converted to factors and missing values added as another level) provideds comparable performance. Unfortunately, these models are unable to handle observations with missing values, making it unfit for purpose. The remaining models (the models with all imputed values, the models with generated numerical features, and negative binomial and  zero-inflation variations) all exhibit comparable performance. 
   
-  • The models containing only numerical features all exhibit some of the worst performance, with very high AIC and Deviance, as well as high errors.  
-  
-  • The four remaining models (the two models with all imputed values, the model with the combination of generated numerical features and factors, and the zero-inflation Poisson model) all exhibit comparable performance. 
-  
-Ultimately, it seems that the various enhancements we pursued (i.e., imputation, feature generation, alternative frameworks like negative binomial and zero-inflation) did little to improve model performance. We suspect that the feature set does not provide sufficient information to accurately predict sales, and/or that the GLM framework fails to capture the relationships between predictors and response. 
+Ultimately, it seems that the various enhancements we pursued (i.e., imputation, feature generation, alternative frameworks like negative binomial and zero-inflation) did little to improve model performance. We suspect that the feature set does not provide sufficient information to accurately predict sales, and/or that the generalized linear model framework fails to capture the relationships between predictors and response. 
 
-For the sake of comparison, we also fit two models that do not rely on a linear framework. Specifically, we used the ensemble decision tree approach, random forest, which can better capture non-linear relationships. We fit two models, one that directly aimed to predict the target variable in discrete form, and another that captured the log-transformed target. Surprisingly, these `rf` models provided similar performance in sample, but its out-of-sample performance appeared much better. 
+For the sake of comparison, we also fit several non-count models. First, we fit two multiple linear regression models, using the original variables with imputation. Given the skewed distribution in the target variable, we fit one with the target variable log-transformed, and one without transformation.
+
+Second, we fit two models that do not rely on a linear framework. Specifically, we used the ensemble decision tree approach, random forest, which can better capture non-linear relationships. Again, we fit two models, one that directly aimed to predict the target variable in discrete form, and another that captured the log-transformed target. Surprisingly, these `rf` models provided similar performance as the count models on in-sample data, but its out-of-sample performance appeared much better. 
 
 ![Summary of Model Performance](plots/summary.png)
 
 # Model Selection
 
-TBD
+For final model selection, we considered fit, conceptual soundness and interpretibility. Regarding fit, there is not a huge difference across models. For the most part, in-sample average errors were just over 1, and out-of-sample errors were around 0.86. The random forest models were the only exception, as they showed considerably better performance out-of-sample, most likely due to the lack of observations with missing values out of sample.
+
+Regarding conceptual soundness, model diagnostics did not reveal any major issues that would highlight failed assumptions. The one exception was the zero-inflation poisson model with generated features (labeled `zip model - generated features (with factors)` in the summary table), which indicated errors of a lack of convergence. None of the count models exhibited material overdispersion, so the negative binomial may not provide the best fit. By contrast, the target variable does contain a significant number of zeros, which the zero-inflation models are best situated to handle.
+
+Regarding interpretibility, most models provide reasonably interpretible coefficients, with one exception: random forest. Interpreting the impact of individual variables on the response can be assisted with feature importance, but the exact relationship is difficult to explain.
+
+![Zero-Inflation Model Summary](plots/zipSummary.png)
+
+Based on these considerations, we chose the zero-inflation poisson model with original features (labeled `zip model - mice imputed` in the summary table) as the final model. It is equipped to handle response variables with many zeros, it provides comparable performance to the other models, and its highly interpretible. The model summary is shown in `Figure 7`.
+
+Several key insights emerge. Both of the categorical variables appear significant, and higher ratings appear to have a positive effect on the number of cases sold. That is, higher ratings on Label Appeal and the STARS scale may drive more sales. Interestingly, when the STARS rating is missing, there seems to be a significant negative impact on sales, indicating that distributors tend to avoid purchasing unrated wines. Looking to the chemical characteristics, the Acid Index and Volatile Acidity score both have significant negative effects on sales, indicating the distributors may avoid overly acidic wines. Finally, Alcohol Content has a significant and pronounced positive effect on sales, indicating that people like the strong stuff!
+
+Overall, these results provide several key insights. Among the wines offered, distributors seem to prefer rated wines with appealing labels, low acidity and higher alcohol content.
 
 \newpage
 
@@ -107,14 +117,20 @@ library(knitr)
 library(kableExtra)
 
 
-# Data Exploration
+### Data Exploration
 
 
 # Load the data
-wine_data <- read.csv("wine-training-data.csv")
+wine_data <- read.csv("data/wine-training-data.csv")
 
 # Glimpse
 glimpse(wine_data)
+
+
+
+eval_data <- read.csv("data/wine-evaluation-data.csv") %>%
+  dplyr::select(-IN, -TARGET)
+glimpse(eval_data)
 
 
 ### Summary
@@ -232,7 +248,7 @@ validation_data <- complete_data[validation_indices, ]
 # (Optional) Create a training subset from the remaining rows
 wine_data <- wine_data[-validation_indices, ]
 
-paste('Rows in Training Data', nrow(training_data))
+paste('Rows in Training Data', nrow(wine_data))
 paste('Rows in Validation Data', nrow(validation_data))
 
 
@@ -403,6 +419,37 @@ results_df
 wine_data <- wine_data_mice_imp
 
 
+### Negative Binomial
+
+
+# Fit a Negative Binomial regression
+nb_model <- glm.nb(TARGET ~ .  - 1, data = wine_data)
+summary(nb_model)
+
+
+
+plot(nb_model)
+
+
+
+results_df <- update_results(
+  results_df, nb_model, wine_data, validation_data, 'neg. binom. - mice imputed'
+)
+results_df
+
+
+### Zero-Inflation
+
+
+zip_model <- zeroinfl(TARGET ~ . | 1, dist = "poisson", data = wine_data)
+summary(zip_model)
+
+
+
+results_df <- update_results(results_df, zip_model, wine_data, validation_data, 'zip model - mice imputed')
+results_df
+
+
 ### Additional Features
 
 
@@ -464,36 +511,6 @@ for (i in 1:(ncol(feature_selection_data)-1)) {
 summary(feature_selection_model)
 
 
-
-# Filter out removed variables from val data
-selected_features <- colnames(feature_selection_data)
-validation_data_genFeatures <- validation_data_genFeatures[, selected_features, drop = FALSE]
-
-results_df <- update_results(
-  results_df, feature_selection_model, feature_selection_data, validation_data_genFeatures, 'poisson - generated features (num. only)'
-)
-results_df
-
-
-### Negative Binomial
-
-
-# Fit a Negative Binomial regression
-nb_model <- glm.nb(TARGET ~ ., data = feature_selection_data)
-summary(nb_model)
-
-
-
-plot(nb_model)
-
-
-
-results_df <- update_results(
-  results_df, nb_model, feature_selection_data, validation_data_genFeatures, 'neg. binom. - generated features (num. only)'
-)
-results_df
-
-
 ### Add back factor variables
 
 
@@ -515,15 +532,87 @@ results_df <- update_results(
 results_df
 
 
+### Negative Binomial
+
+
+# Fit a Negative Binomial regression
+nb_model_genFeatures <- glm.nb(TARGET ~ .  - 1, data = wine_data_genFeatures)
+summary(nb_model)
+
+
+
+plot(nb_model_genFeatures)
+
+
+
+results_df <- update_results(
+  results_df, nb_model_genFeatures, wine_data_genFeatures, validation_data_genFeatures, 'neg. binom. - generated features (with factors)'
+)
+results_df
+
+
 ### Zero-Inflation
 
 
-zip_model <- zeroinfl(TARGET ~ . | 1, dist = "poisson", data = wine_data)
-summary(zip_model)
+zip_model_genFeatures <- zeroinfl(TARGET ~ . | 1, dist = "poisson", data = wine_data_genFeatures)
+summary(zip_model_genFeatures)
 
 
 
-results_df <- update_results(results_df, zip_model, wine_data, validation_data, 'zip model')
+results_df <- update_results(results_df, zip_model_genFeatures, wine_data_genFeatures, validation_data_genFeatures, 'zip model - generated features (with factors)')
+results_df
+
+
+### Linear Regression
+
+
+lr_model <- lm(TARGET ~ . - 1, data = wine_data)
+summary(lr_model)
+
+
+
+plot(lr_model)
+
+
+
+results_df <- update_results(results_df, lr_model, wine_data, validation_data, 'linear regression - mice imputed')
+results_df
+
+
+
+wine_data_log <- wine_data %>%
+  mutate(TARGET = log(TARGET+1))
+lr_model_log <- lm(TARGET ~ . - 1, data = wine_data_log)
+summary(lr_model_log)
+
+
+
+plot(lr_model_log)
+
+
+
+validation_data_log <- validation_data %>%
+  mutate(TARGET = log(TARGET+1))
+
+predicted_train <- predict(lr_model_log)
+predicted_lin_space_train <- exp(predicted_train) - 1
+mae_train <- mean(abs(wine_data$TARGET - predicted_lin_space_train))
+
+predicted_val <- predict(lr_model_log, newdata=validation_data_log)
+predicted_lin_space_val <- exp(predicted_val) - 1
+mae_val <- mean(abs(validation_data$TARGET - predicted_lin_space_val))
+
+results_df <- rbind(results_df, data.frame(
+  ModelName = 'linear regression - log target',
+  RowsInTrain = nrow(wine_data_log),
+  AIC = NA,
+  MAE_Train = mae_train,
+  MAE_Val = mae_val,
+  Deviance = NA,
+  Dispersion = NA,
+  stringsAsFactors = FALSE
+))
+
 results_df
 
 
@@ -536,15 +625,13 @@ summary(rf_model)
 
 
 
-results_df <- update_results(results_df, rf_model, wine_data, validation_data, 'rf model')
+results_df <- update_results(results_df, rf_model, wine_data, validation_data, 'rf model - mice imputed')
 results_df
 
 
 ### RF with Log TARGET
 
 
-wine_data_log <- wine_data %>%
-  mutate(TARGET = log(TARGET+1))
 rf_model_log <- randomForest(TARGET ~ ., data = wine_data_log, ntree = 500)
 summary(rf_model_log)
 
@@ -562,7 +649,7 @@ predicted_lin_space_val <- exp(predicted_val) - 1
 mae_val <- mean(abs(validation_data$TARGET - predicted_lin_space_val))
 
 results_df <- rbind(results_df, data.frame(
-  ModelName = 'rf log target',
+  ModelName = 'rf model - log target',
   RowsInTrain = nrow(wine_data_log),
   AIC = NA,
   MAE_Train = mae_train,
@@ -586,19 +673,3 @@ results_df %>%
   ) %>%
   kable_classic(position = 'center')
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
