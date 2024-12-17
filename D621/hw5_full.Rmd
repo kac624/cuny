@@ -1,6 +1,6 @@
 ---
-title: "D621 HW5"
-author: "Keith Colella"
+title: 'Data 621 HW5: Wine Sales'
+author: "(Group 4) Mohamed Hassan-El Serafi, Chun Shing Leung, Keith Colella, Yina Qiao, Eddie Xu"
 date: "`r Sys.Date()`"
 output: html_document
 ---
@@ -305,8 +305,8 @@ results_df
 ```
 
 ```{r}
-imputed_data <- mice(wine_data, m = 5, method = "pmm", seed = 123)
-wine_data_mice_imp <- complete(imputed_data, action = 1)
+mice_imp_model <- mice(wine_data, m = 5, method = "pmm", seed = 123)
+wine_data_mice_imp <- complete(mice_imp_model, action = 1)
 
 poisson_model_mice_impute <- glm(TARGET ~ . - 1, family = poisson(link = "log"), data = wine_data_mice_imp)
 summary(poisson_model_mice_impute)
@@ -575,5 +575,38 @@ results_df %>%
     digits = 2
   ) %>%
   kable_classic(position = 'center')
+```
+
+# Final Predictions
+
+```{r}
+# Load in final data
+final_eval_data <- read.csv('data/wine-evaluation-data.csv')
+
+# Replace NAs with 0 in STARS
+final_eval_data[is.na(final_eval_data$STARS), 'STARS'] <- "Missing"
+
+# Convert to factor
+final_eval_data$STARS <- factor(final_eval_data$STARS)
+final_eval_data$LabelAppeal <- factor(final_eval_data$LabelAppeal)
+
+final_eval_data_imputed <- complete(mice(final_eval_data, m = 5, method = "pmm", seed = 123), 1) # complete(mice.mids(predict.mids(mice_imp_model, newdata = final_eval_data)), 1)
+
+final_predictions_raw <- predict(zip_model, newdata=final_eval_data_imputed)
+final_predictions_round <- floor(final_predictions_raw)
+
+predictions_df <- data.frame(cbind(final_predictions_raw, final_predictions_round))
+write.csv(predictions_df, file='hw5_predictions.csv', row.names=FALSE)
+```
+
+# Visualize predictions aross subsets.
+
+```{r}
+train_predictions <- predict(zip_model)
+val_predictions <- predict(zip_model, newdata=validation_data)
+
+hist(floor(train_predictions))
+hist(floor(val_predictions))
+hist(floor(final_predictions_raw))
 ```
 

@@ -1,7 +1,8 @@
 ---
 title: 'Data 621 HW5: Wine Sales'
-author: "(Group 4) Mohamed Hassan-El Serafi, Chun Shing Leung, Keith Colella, Yina
-  Qiao, Eddie Xu"
+author: |
+  (Group 4) Mohamed Hassan-El Serafi, Chun Shing Leung,  
+  Keith Colella, Yina Qiao, Eddie Xu
 date: "`r Sys.Date()`"
 output:
   pdf_document:
@@ -36,7 +37,7 @@ The predictor variables include mostly continuous chemical measurements, all of 
 
 ![Distributions of Predictor Variables](plots/feature_dists.png)
 
-To get a quick snapshot of relationships across all variables, we generated a correlation matrix (see `Figure 3`). It is important to recognize the limitations of this plot when dealing with count regression modeling. Specifically, these models typically use a log link function, and the target variables typically exhibit skewness, and the such models typically use a log link function. So, Pearson's correlation may not be the best indicator of relevant relationships. Still, these plots can identify multicollinearity. Moreover, a correlation matrix with the target variable log-transformed (also included below) can provide a better view of potential predictors. Unfortunately, the plot indicated relatively weak relationships across all variables. The exceptions were `AcidIndex`, `LabelAppeal` and `STARS`, which appeared weakly correlated with the target in both raw and log-transformed states.
+To get a quick snapshot of relationships across all variables, we generated a correlation matrix (see `Figure 3`). It is important to recognize the limitations of this plot when dealing with count regression modeling. Specifically, these models typically use a log link function, and the target variables typically exhibit skewness, and such models typically use a log link function. So, Pearson's correlation may not be the best indicator of relevant relationships. Still, these plots can identify multicollinearity. Moreover, a correlation matrix with the target variable log-transformed (also included below) can provide a better view of potential predictors. Unfortunately, the plot indicated relatively weak relationships across all variables. The exceptions were `AcidIndex`, `LabelAppeal` and `STARS`, which appeared weakly correlated with the target in both raw and log-transformed states.
 
 ![Pairwise Correlation Matrix Across All Variables](plots/corr_matrix.png)
 
@@ -61,17 +62,17 @@ With all of these steps, we created a complete validation dataset, as well as a 
 
 # Build Models
 
-For all of the above training datasets, we fit Poisson regression models. As uncovered during data exploration, the target variable consistents of positive counts and exhibits a slight right skew. Both of these conditions indicate a good fit for Poisson modeling. For all models, we assessed the residuals, dispersion, deviance, mean absolute error (MAE) and Akaike information criterion (AIC). We cover each of these below, with results summarized in the table at the end of this section (see `Figure 6`).
+For all of the above training datasets, we fit Poisson regression models. As uncovered during data exploration, the target variable consists of positive counts and exhibits a slight right skew. Both of these conditions indicate a good fit for Poisson modeling. For all models, we assessed the residuals, dispersion, deviance, mean absolute error (MAE) and Akaike information criterion (AIC). We cover each of these below, with results summarized in the table at the end of this section (see `Figure 6`).
 
-Regarding residuals, we analysed the scatterplot of Pearson residuals against fitted values (see `Figure 5`). We observed the "banding" pattern shown below, but we recognized this is common with Poisson count models (given the discrete nature of the response variable). Ideally, the residuals should exhibit constant spread, and while the plot appeared appropriate overall, we did observe a slight curve, particularly with the red trend line. This indicated some potential non-linearity in the relationship between predictors and response. Interestingly, the introduction of polynomial and interaction terms appeared to at least partially address this. The same residual plot for the model including factor variables, imputed numerical variables and generated features exhibited no such curve.
+Regarding residuals, we analyzed the scatterplot of Pearson residuals against fitted values (see `Figure 5`). We observed the "banding" pattern shown below, but we recognized this is common with Poisson count models (given the discrete nature of the response variable). Ideally, the residuals should exhibit constant spread, and while the plot appeared appropriate overall, we did observe a slight curve, particularly with the red trend line. This indicated some potential non-linearity in the relationship between predictors and response. Interestingly, the introduction of polynomial and interaction terms appeared to at least partially address this. The same residual plot for the model including factor variables, imputed numerical variables and generated features exhibited no such curve.
 
 ![Residual versus Fitted Scatterplot for Baseline and Enhanced Poisson Models](plots/residuals.png)
 
-Regarding dispersion, we wanted to ensure that we adhered to the primary assumption for Poisson modeling: that mean and variance are equal. Dispersion provide an assessment of that adherence, calculated as sum of squared Pearson residuals divided by the residual degrees of freedom. While our baseline model exhibited significant underdispersion (indicating the model may be too simple), most of the other models had dispersion metrics near 1, indicating a good fit. Still, we fit two negative binomial models, one based on the original features (with imputation) and one based on the selected generated features.
+Regarding dispersion, we wanted to ensure that we adhered to the primary assumption for Poisson modeling: that mean and variance are equal. Dispersion provides an assessment of that adherence, calculated as sum of squared Pearson residuals divided by the residual degrees of freedom. While our baseline model exhibited significant underdispersion (indicating the model may be too simple), most of the other models had dispersion metrics near 1, indicating a good fit. Still, we fit two negative binomial models, one based on the original features (with imputation) and one based on the selected generated features.
 
 Finally, we also examined AIC, MAE (both across training and validation subsets) and deviance. These metrics provide an indication of model fit, prediction errors and comparison to a fully saturated model (i.e., a model that perfectly predicts the observed data under the Poisson distribution). In all cases, lower values indicate a better fit. The results are collected in `Figure 6`.
 
-Surprisingly, the baseline model shows some of the best performance, with low AIC and Deviance, and comparable out-of-sample errors. The second model (with categorical variables converted to factors and missing values added as another level) provideds comparable performance. Unfortunately, these models are unable to handle observations with missing values, making it unfit for purpose. The remaining models (the models with all imputed values, the models with generated numerical features, and negative binomial and  zero-inflation variations) all exhibit comparable performance. 
+Surprisingly, the baseline model shows some of the best performance, with low AIC and Deviance, and comparable out-of-sample errors. The second model (with categorical variables converted to factors and missing values added as another level) provided comparable performance. Unfortunately, these models are unable to handle observations with missing values, making it unfit for purpose. The remaining models (the models with all imputed values, the models with generated numerical features, and negative binomial and  zero-inflation variations) all exhibit comparable performance. 
   
 Ultimately, it seems that the various enhancements we pursued (i.e., imputation, feature generation, alternative frameworks like negative binomial and zero-inflation) did little to improve model performance. We suspect that the feature set does not provide sufficient information to accurately predict sales, and/or that the generalized linear model framework fails to capture the relationships between predictors and response. 
 
@@ -83,15 +84,15 @@ Second, we fit two models that do not rely on a linear framework. Specifically, 
 
 # Model Selection
 
-For final model selection, we considered fit, conceptual soundness and interpretibility. Regarding fit, there is not a huge difference across models. For the most part, in-sample average errors were just over 1, and out-of-sample errors were around 0.86. The random forest models were the only exception, as they showed considerably better performance out-of-sample, most likely due to the lack of observations with missing values out of sample.
+For final model selection, we considered fit, conceptual soundness and interpretability. Regarding fit, there is not a huge difference across models. For the most part, in-sample MAE was just over 1, and out-of-sample MAE was around 0.86. AIC was also comparable across eligible models (i.e., models that could handle NAs). The random forest models were the only exception, as they showed considerably better performance out-of-sample, most likely due to the lack of observations with missing values out of sample.
 
 Regarding conceptual soundness, model diagnostics did not reveal any major issues that would highlight failed assumptions. The one exception was the zero-inflation poisson model with generated features (labeled `zip model - generated features (with factors)` in the summary table), which indicated errors of a lack of convergence. None of the count models exhibited material overdispersion, so the negative binomial may not provide the best fit. By contrast, the target variable does contain a significant number of zeros, which the zero-inflation models are best situated to handle.
 
-Regarding interpretibility, most models provide reasonably interpretible coefficients, with one exception: random forest. Interpreting the impact of individual variables on the response can be assisted with feature importance, but the exact relationship is difficult to explain.
+Regarding interpretability, most models provide reasonably interpretable coefficients, with one exception: random forest. Interpreting the impact of individual variables on the response can be assisted with feature importance, but the exact relationship is difficult to explain.
 
 ![Zero-Inflation Model Summary](plots/zipSummary.png)
 
-Based on these considerations, we chose the zero-inflation poisson model with original features (labeled `zip model - mice imputed` in the summary table) as the final model. It is equipped to handle response variables with many zeros, it provides comparable performance to the other models, and its highly interpretible. The model summary is shown in `Figure 7`.
+Based on these considerations, we chose the zero-inflation poisson model with original features (labeled `zip model - mice imputed` in the summary table) as the final model. It is equipped to handle response variables with many zeros, it provides comparable performance to the other models, and its highly interpretable. The model summary is shown in `Figure 7`.
 
 Several key insights emerge. Both of the categorical variables appear significant, and higher ratings appear to have a positive effect on the number of cases sold. That is, higher ratings on Label Appeal and the STARS scale may drive more sales. Interestingly, when the STARS rating is missing, there seems to be a significant negative impact on sales, indicating that distributors tend to avoid purchasing unrated wines. Looking to the chemical characteristics, the Acid Index and Volatile Acidity score both have significant negative effects on sales, indicating the distributors may avoid overly acidic wines. Finally, Alcohol Content has a significant and pronounced positive effect on sales, indicating that people like the strong stuff!
 
@@ -662,8 +663,7 @@ results_df <- rbind(results_df, data.frame(
 results_df
 
 
-# Summary Table
-
+### Summary Table
 
 results_df %>%
   kbl(
@@ -672,4 +672,20 @@ results_df %>%
     digits = 2
   ) %>%
   kable_classic(position = 'center')
+
+
+### Final Predictions
+
+final_eval_data <- read.csv('data/wine-evaluation-data.csv')
+final_eval_data[is.na(final_eval_data$STARS), 'STARS'] <- "Missing"
+final_eval_data$STARS <- factor(final_eval_data$STARS)
+final_eval_data$LabelAppeal <- factor(final_eval_data$LabelAppeal)
+
+final_eval_data_imputed <- complete(mice(final_eval_data, m = 5, method = "pmm", seed = 123), 1) # complete(mice.mids(predict.mids(mice_imp_model, newdata = final_eval_data)), 1)
+
+final_predictions_raw <- predict(zip_model, newdata=final_eval_data_imputed)
+final_predictions_round <- floor(final_predictions_raw)
+
+predictions_df <- data.frame(cbind(final_predictions_raw, final_predictions_round))
+write.csv(predictions_df, file='hw5_predictions.csv', row.names=FALSE)
 ```
