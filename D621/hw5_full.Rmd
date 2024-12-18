@@ -5,7 +5,7 @@ date: "`r Sys.Date()`"
 output: html_document
 ---
 
-```{r, message=FALSE}
+```{r, message=FALSE, warning=FALSE}
 # Load required libraries
 library(tidyverse) 
 library(ggplot2) 
@@ -168,8 +168,14 @@ results_df <- data.frame(
   MAE_Val = numeric(),
   Deviance = numeric(),
   Dispersion = numeric(),
+  R2 = numeric(),
   stringsAsFactors = FALSE
 )
+
+# Function for pseudo R2
+glm_pseudo_r2 <- function(model) {
+  1 - (model$deviance / model$null.deviance)
+}
 
 # Function for updating the df
 update_results <- function(results_df, model, training_data, validation_data, name) {
@@ -208,6 +214,60 @@ update_results <- function(results_df, model, training_data, validation_data, na
     Dispersion = dispersion,
     stringsAsFactors = FALSE
   ))
+  
+  return(results_df)
+}
+
+update_results <- function(results_df, model, training_data, validation_data, name) {
+  # For deviance and dispersion
+  if(inherits(model, "zeroinfl")) {
+    deviance <- NA
+    dispersion <- NA
+    r2 <- NA
+  } else {
+    deviance <- model$deviance
+    dispersion <- sum(residuals(model, type = "pearson")^2) / df.residual(model)
+    r2 <- if(inherits(model, "glm")) {
+      glm_pseudo_r2(model)
+    } else if(inherits(model, "lm")) {
+      summary(model)$r.squared
+    } else {
+      NA
+    }
+  }
+  
+  # Rest of function remains the same
+  predicted_train <- predict(model, type = "response")
+  actual_train <- training_data$TARGET
+  predicted_val <- predict(model, newdata=validation_data, type = "response")
+  actual_val <- validation_data$TARGET
+  
+  mae_train <- mean(abs(actual_train - predicted_train), na.rm = TRUE)
+  mae_val <- mean(abs(actual_val - predicted_val), na.rm = TRUE)
+  
+  aic <- tryCatch(AIC(model), error = function(e) NA)
+  
+  # Convert any NULL values to NA
+  if (is.null(deviance)) deviance <- NA
+  if (is.null(residuals(model, type = "pearson"))) dispersion <- NA
+  if (is.null(r2)) r2 <- NA
+  if (is.null(aic)) aic <- NA
+  
+  # Create new row
+  new_row <- data.frame(
+    ModelName = name,
+    RowsInTrain = nrow(training_data),
+    AIC = aic,
+    MAE_Train = mae_train,
+    MAE_Val = mae_val,
+    Deviance = deviance,
+    Dispersion = dispersion,
+    R2 = r2,
+    stringsAsFactors = FALSE
+  )
+  
+  # Bind to df
+  results_df <- rbind(results_df, new_row)
   
   return(results_df)
 }
@@ -382,7 +442,10 @@ validation_mm <- model.matrix(f, data = validation_data)[, -1]
 validation_new_features <- validation_mm[, !colnames(validation_mm) %in% vars]
 validation_data_genFeatures <- data.frame(cbind(validation_data['TARGET'], validation_new_features))
 names(validation_new_features) <- make.names(names(validation_new_features))
+nrow(wine_data_genFeatures)
+ncol(wine_data_genFeatures)
 ```
+
 
 ```{r}
 # Stepwise elimination based on p-values
@@ -512,7 +575,8 @@ results_df <- rbind(results_df, data.frame(
   MAE_Train = mae_train,
   MAE_Val = mae_val,
   Deviance = NA,
-  Dispersion = NA,
+  Dispersion = sum(residuals(lr_model_log, type = "pearson")^2) / df.residual(lr_model_log),
+  R2 = summary(lr_model_log)$r.squared,
   stringsAsFactors = FALSE
 ))
 
@@ -559,6 +623,7 @@ results_df <- rbind(results_df, data.frame(
   MAE_Val = mae_val,
   Deviance = NA,
   Dispersion = NA,
+  R2 = NA,
   stringsAsFactors = FALSE
 ))
 
@@ -571,10 +636,13 @@ results_df
 results_df %>%
   kbl(
     caption = "Summary of Model Performance",
-    col.names = c("Model Name", "No. Training Observations", "AIC", "MAE (Train)", "MAE (Validation)", "Deviance", "Dispersion"),
-    digits = 2
+    col.names = c("Model Name", "No. Training Observations", "AIC", "MAE (Train)", "MAE (Validation)", "Deviance", "Dispersion", "R2"),
+    digits = 2,
+    align = 'l'  # This sets all columns to left alignment
   ) %>%
-  kable_classic(position = 'center')
+  kable_classic(position = 'center') %>%
+  column_spec(1, width = "12in") %>%  # Sets width for Model Name column
+  column_spec(2:8, width = "1.5in")
 ```
 
 # Final Predictions

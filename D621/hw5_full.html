@@ -583,20 +583,15 @@ Keith Colella, Yina Qiao, Eddie Xu</h4>
 
 
 <pre class="r"><code># Load required libraries
-library(tidyverse) </code></pre>
-<pre><code>## Warning: package &#39;ggplot2&#39; was built under R version 4.3.3</code></pre>
-<pre class="r"><code>library(ggplot2) 
-library(corrplot)</code></pre>
-<pre><code>## Warning: package &#39;corrplot&#39; was built under R version 4.3.3</code></pre>
-<pre class="r"><code>library(psych)</code></pre>
-<pre><code>## Warning: package &#39;psych&#39; was built under R version 4.3.3</code></pre>
-<pre class="r"><code>library(naniar)</code></pre>
-<pre><code>## Warning: package &#39;naniar&#39; was built under R version 4.3.3</code></pre>
-<pre class="r"><code>library(cowplot)
+library(tidyverse) 
+library(ggplot2) 
+library(corrplot)
+library(psych)
+library(naniar)
+library(cowplot)
 library(mice)
-library(pscl)</code></pre>
-<pre><code>## Warning: package &#39;pscl&#39; was built under R version 4.3.3</code></pre>
-<pre class="r"><code>library(MASS)
+library(pscl)
+library(MASS)
 library(randomForest)
 library(knitr)
 library(kableExtra)</code></pre>
@@ -907,8 +902,14 @@ results_df &lt;- data.frame(
   MAE_Val = numeric(),
   Deviance = numeric(),
   Dispersion = numeric(),
+  R2 = numeric(),
   stringsAsFactors = FALSE
 )
+
+# Function for pseudo R2
+glm_pseudo_r2 &lt;- function(model) {
+  1 - (model$deviance / model$null.deviance)
+}
 
 # Function for updating the df
 update_results &lt;- function(results_df, model, training_data, validation_data, name) {
@@ -947,6 +948,60 @@ update_results &lt;- function(results_df, model, training_data, validation_data,
     Dispersion = dispersion,
     stringsAsFactors = FALSE
   ))
+  
+  return(results_df)
+}
+
+update_results &lt;- function(results_df, model, training_data, validation_data, name) {
+  # For deviance and dispersion
+  if(inherits(model, &quot;zeroinfl&quot;)) {
+    deviance &lt;- NA
+    dispersion &lt;- NA
+    r2 &lt;- NA
+  } else {
+    deviance &lt;- model$deviance
+    dispersion &lt;- sum(residuals(model, type = &quot;pearson&quot;)^2) / df.residual(model)
+    r2 &lt;- if(inherits(model, &quot;glm&quot;)) {
+      glm_pseudo_r2(model)
+    } else if(inherits(model, &quot;lm&quot;)) {
+      summary(model)$r.squared
+    } else {
+      NA
+    }
+  }
+  
+  # Rest of function remains the same
+  predicted_train &lt;- predict(model, type = &quot;response&quot;)
+  actual_train &lt;- training_data$TARGET
+  predicted_val &lt;- predict(model, newdata=validation_data, type = &quot;response&quot;)
+  actual_val &lt;- validation_data$TARGET
+  
+  mae_train &lt;- mean(abs(actual_train - predicted_train), na.rm = TRUE)
+  mae_val &lt;- mean(abs(actual_val - predicted_val), na.rm = TRUE)
+  
+  aic &lt;- tryCatch(AIC(model), error = function(e) NA)
+  
+  # Convert any NULL values to NA
+  if (is.null(deviance)) deviance &lt;- NA
+  if (is.null(residuals(model, type = &quot;pearson&quot;))) dispersion &lt;- NA
+  if (is.null(r2)) r2 &lt;- NA
+  if (is.null(aic)) aic &lt;- NA
+  
+  # Create new row
+  new_row &lt;- data.frame(
+    ModelName = name,
+    RowsInTrain = nrow(training_data),
+    AIC = aic,
+    MAE_Train = mae_train,
+    MAE_Val = mae_val,
+    Deviance = deviance,
+    Dispersion = dispersion,
+    R2 = r2,
+    stringsAsFactors = FALSE
+  )
+  
+  # Bind to df
+  results_df &lt;- rbind(results_df, new_row)
   
   return(results_df)
 }</code></pre>
@@ -999,8 +1054,8 @@ summary(poisson_model_naomit)</code></pre>
 results_df</code></pre>
 <pre><code>##                        ModelName RowsInTrain      AIC MAE_Train   MAE_Val
 ## 1 baseline poisson - NAs removed        5781 20799.05 0.8682703 0.8664851
-##   Deviance Dispersion
-## 1 3598.362  0.4247094</code></pre>
+##   Deviance Dispersion        R2
+## 1 3598.362  0.4247094 0.3155748</code></pre>
 </div>
 <div id="convert-to-factors" class="section level3">
 <h3>Convert to factors</h3>
@@ -1070,9 +1125,9 @@ results_df</code></pre>
 <pre><code>##                            ModelName RowsInTrain      AIC MAE_Train   MAE_Val
 ## 1     baseline poisson - NAs removed        5781 20799.05 0.8682703 0.8664851
 ## 2 poisson - discrete vars as factors        7814 27921.17 1.0288515 0.8716763
-##   Deviance Dispersion
-## 1 3598.362  0.4247094
-## 2 8380.950  0.8910509</code></pre>
+##   Deviance Dispersion        R2
+## 1 3598.362  0.4247094 0.3155748
+## 2 8380.950  0.8910509 0.7569853</code></pre>
 </div>
 <div id="impute-numeric-vars" class="section level3">
 <h3>Impute Numeric vars</h3>
@@ -1139,10 +1194,10 @@ results_df</code></pre>
 ## 1     baseline poisson - NAs removed        5781 20799.05 0.8682703 0.8664851
 ## 2 poisson - discrete vars as factors        7814 27921.17 1.0288515 0.8716763
 ## 3             poisson - mean imputed       11508 41040.74 1.0264366 0.8693237
-##    Deviance Dispersion
-## 1  3598.362  0.4247094
-## 2  8380.950  0.8910509
-## 3 12331.561  0.8891217</code></pre>
+##    Deviance Dispersion        R2
+## 1  3598.362  0.4247094 0.3155748
+## 2  8380.950  0.8910509 0.7569853
+## 3 12331.561  0.8891217 0.7579833</code></pre>
 <pre class="r"><code>mice_imp_model &lt;- mice(wine_data, m = 5, method = &quot;pmm&quot;, seed = 123)</code></pre>
 <pre><code>## 
 ##  iter imp variable
@@ -1222,11 +1277,11 @@ results_df</code></pre>
 ## 2 poisson - discrete vars as factors        7814 27921.17 1.0288515 0.8716763
 ## 3             poisson - mean imputed       11508 41040.74 1.0264366 0.8693237
 ## 4             poisson - mice imputed       11508 41040.70 1.0263772 0.8686627
-##    Deviance Dispersion
-## 1  3598.362  0.4247094
-## 2  8380.950  0.8910509
-## 3 12331.561  0.8891217
-## 4 12331.520  0.8890948</code></pre>
+##    Deviance Dispersion        R2
+## 1  3598.362  0.4247094 0.3155748
+## 2  8380.950  0.8910509 0.7569853
+## 3 12331.561  0.8891217 0.7579833
+## 4 12331.520  0.8890948 0.7579841</code></pre>
 <pre class="r"><code>wine_data &lt;- wine_data_mice_imp</code></pre>
 </div>
 <div id="negative-binomial" class="section level3">
@@ -1296,12 +1351,12 @@ results_df</code></pre>
 ## 3             poisson - mean imputed       11508 41040.74 1.0264366 0.8693237
 ## 4             poisson - mice imputed       11508 41040.70 1.0263772 0.8686627
 ## 5         neg. binom. - mice imputed       11508 41043.08 1.0263790 0.8686656
-##    Deviance Dispersion
-## 1  3598.362  0.4247094
-## 2  8380.950  0.8910509
-## 3 12331.561  0.8891217
-## 4 12331.520  0.8890948
-## 5 12331.036  0.8890532</code></pre>
+##    Deviance Dispersion        R2
+## 1  3598.362  0.4247094 0.3155748
+## 2  8380.950  0.8910509 0.7569853
+## 3 12331.561  0.8891217 0.7579833
+## 4 12331.520  0.8890948 0.7579841
+## 5 12331.036  0.8890532 0.7579831</code></pre>
 </div>
 <div id="zero-inflation" class="section level3">
 <h3>Zero-Inflation</h3>
@@ -1356,13 +1411,13 @@ results_df</code></pre>
 ## 4             poisson - mice imputed       11508 41040.70 1.0263772 0.8686627
 ## 5         neg. binom. - mice imputed       11508 41043.08 1.0263790 0.8686656
 ## 6           zip model - mice imputed       11508 40722.90 1.0352425 0.8675411
-##    Deviance Dispersion
-## 1  3598.362  0.4247094
-## 2  8380.950  0.8910509
-## 3 12331.561  0.8891217
-## 4 12331.520  0.8890948
-## 5 12331.036  0.8890532
-## 6        NA  0.7282858</code></pre>
+##    Deviance Dispersion        R2
+## 1  3598.362  0.4247094 0.3155748
+## 2  8380.950  0.8910509 0.7569853
+## 3 12331.561  0.8891217 0.7579833
+## 4 12331.520  0.8890948 0.7579841
+## 5 12331.036  0.8890532 0.7579831
+## 6        NA         NA        NA</code></pre>
 </div>
 <div id="additional-features" class="section level3">
 <h3>Additional Features</h3>
@@ -1390,7 +1445,11 @@ names(wine_data_genFeatures) &lt;- make.names(names(wine_data_genFeatures))
 validation_mm &lt;- model.matrix(f, data = validation_data)[, -1]
 validation_new_features &lt;- validation_mm[, !colnames(validation_mm) %in% vars]
 validation_data_genFeatures &lt;- data.frame(cbind(validation_data[&#39;TARGET&#39;], validation_new_features))
-names(validation_new_features) &lt;- make.names(names(validation_new_features))</code></pre>
+names(validation_new_features) &lt;- make.names(names(validation_new_features))
+nrow(wine_data_genFeatures)</code></pre>
+<pre><code>## [1] 11508</code></pre>
+<pre class="r"><code>ncol(wine_data_genFeatures)</code></pre>
+<pre><code>## [1] 79</code></pre>
 <pre class="r"><code># Stepwise elimination based on p-values
 p_threshold &lt;- 0.05
 feature_selection_data &lt;- wine_data_genFeatures
@@ -1525,14 +1584,14 @@ results_df</code></pre>
 ## 5                  neg. binom. - mice imputed       11508 41043.08 1.0263790
 ## 6                    zip model - mice imputed       11508 40722.90 1.0352425
 ## 7 poisson - generated features (with factors)       11508 41005.78 1.0197503
-##     MAE_Val  Deviance Dispersion
-## 1 0.8664851  3598.362  0.4247094
-## 2 0.8716763  8380.950  0.8910509
-## 3 0.8693237 12331.561  0.8891217
-## 4 0.8686627 12331.520  0.8890948
-## 5 0.8686656 12331.036  0.8890532
-## 6 0.8675411        NA  0.7282858
-## 7 0.8608280 12276.595  0.8876795</code></pre>
+##     MAE_Val  Deviance Dispersion        R2
+## 1 0.8664851  3598.362  0.4247094 0.3155748
+## 2 0.8716763  8380.950  0.8910509 0.7569853
+## 3 0.8693237 12331.561  0.8891217 0.7579833
+## 4 0.8686627 12331.520  0.8890948 0.7579841
+## 5 0.8686656 12331.036  0.8890532 0.7579831
+## 6 0.8675411        NA         NA        NA
+## 7 0.8608280 12276.595  0.8876795 0.7590621</code></pre>
 </div>
 <div id="negative-binomial-1" class="section level3">
 <h3>Negative Binomial</h3>
@@ -1604,15 +1663,15 @@ results_df</code></pre>
 ## 6                        zip model - mice imputed       11508 40722.90
 ## 7     poisson - generated features (with factors)       11508 41005.78
 ## 8 neg. binom. - generated features (with factors)       11508 41008.16
-##   MAE_Train   MAE_Val  Deviance Dispersion
-## 1 0.8682703 0.8664851  3598.362  0.4247094
-## 2 1.0288515 0.8716763  8380.950  0.8910509
-## 3 1.0264366 0.8693237 12331.561  0.8891217
-## 4 1.0263772 0.8686627 12331.520  0.8890948
-## 5 1.0263790 0.8686656 12331.036  0.8890532
-## 6 1.0352425 0.8675411        NA  0.7282858
-## 7 1.0197503 0.8608280 12276.595  0.8876795
-## 8 1.0197516 0.8608302 12276.111  0.8876381</code></pre>
+##   MAE_Train   MAE_Val  Deviance Dispersion        R2
+## 1 0.8682703 0.8664851  3598.362  0.4247094 0.3155748
+## 2 1.0288515 0.8716763  8380.950  0.8910509 0.7569853
+## 3 1.0264366 0.8693237 12331.561  0.8891217 0.7579833
+## 4 1.0263772 0.8686627 12331.520  0.8890948 0.7579841
+## 5 1.0263790 0.8686656 12331.036  0.8890532 0.7579831
+## 6 1.0352425 0.8675411        NA         NA        NA
+## 7 1.0197503 0.8608280 12276.595  0.8876795 0.7590621
+## 8 1.0197516 0.8608302 12276.111  0.8876381 0.7590610</code></pre>
 </div>
 <div id="zero-inflation-1" class="section level3">
 <h3>Zero-Inflation</h3>
@@ -1680,16 +1739,16 @@ results_df</code></pre>
 ## 7     poisson - generated features (with factors)       11508 41005.78
 ## 8 neg. binom. - generated features (with factors)       11508 41008.16
 ## 9   zip model - generated features (with factors)       11508 40693.35
-##   MAE_Train   MAE_Val  Deviance Dispersion
-## 1 0.8682703 0.8664851  3598.362  0.4247094
-## 2 1.0288515 0.8716763  8380.950  0.8910509
-## 3 1.0264366 0.8693237 12331.561  0.8891217
-## 4 1.0263772 0.8686627 12331.520  0.8890948
-## 5 1.0263790 0.8686656 12331.036  0.8890532
-## 6 1.0352425 0.8675411        NA  0.7282858
-## 7 1.0197503 0.8608280 12276.595  0.8876795
-## 8 1.0197516 0.8608302 12276.111  0.8876381
-## 9 1.0283474 0.8575965        NA  0.7307725</code></pre>
+##   MAE_Train   MAE_Val  Deviance Dispersion        R2
+## 1 0.8682703 0.8664851  3598.362  0.4247094 0.3155748
+## 2 1.0288515 0.8716763  8380.950  0.8910509 0.7569853
+## 3 1.0264366 0.8693237 12331.561  0.8891217 0.7579833
+## 4 1.0263772 0.8686627 12331.520  0.8890948 0.7579841
+## 5 1.0263790 0.8686656 12331.036  0.8890532 0.7579831
+## 6 1.0352425 0.8675411        NA         NA        NA
+## 7 1.0197503 0.8608280 12276.595  0.8876795 0.7590621
+## 8 1.0197516 0.8608302 12276.111  0.8876381 0.7590610
+## 9 1.0283474 0.8575965        NA         NA        NA</code></pre>
 </div>
 <div id="linear-regression" class="section level3">
 <h3>Linear Regression</h3>
@@ -1747,17 +1806,17 @@ results_df</code></pre>
 ## 8  neg. binom. - generated features (with factors)       11508 41008.16
 ## 9    zip model - generated features (with factors)       11508 40693.35
 ## 10                linear regression - mice imputed       11508 38878.18
-##    MAE_Train   MAE_Val  Deviance Dispersion
-## 1  0.8682703 0.8664851  3598.362  0.4247094
-## 2  1.0288515 0.8716763  8380.950  0.8910509
-## 3  1.0264366 0.8693237 12331.561  0.8891217
-## 4  1.0263772 0.8686627 12331.520  0.8890948
-## 5  1.0263790 0.8686656 12331.036  0.8890532
-## 6  1.0352425 0.8675411        NA  0.7282858
-## 7  1.0197503 0.8608280 12276.595  0.8876795
-## 8  1.0197516 0.8608302 12276.111  0.8876381
-## 9  1.0283474 0.8575965        NA  0.7307725
-## 10 1.0265151 0.8596684        NA  1.7134123</code></pre>
+##    MAE_Train   MAE_Val  Deviance Dispersion        R2
+## 1  0.8682703 0.8664851  3598.362  0.4247094 0.3155748
+## 2  1.0288515 0.8716763  8380.950  0.8910509 0.7569853
+## 3  1.0264366 0.8693237 12331.561  0.8891217 0.7579833
+## 4  1.0263772 0.8686627 12331.520  0.8890948 0.7579841
+## 5  1.0263790 0.8686656 12331.036  0.8890532 0.7579831
+## 6  1.0352425 0.8675411        NA         NA        NA
+## 7  1.0197503 0.8608280 12276.595  0.8876795 0.7590621
+## 8  1.0197516 0.8608302 12276.111  0.8876381 0.7590610
+## 9  1.0283474 0.8575965        NA         NA        NA
+## 10 1.0265151 0.8596684        NA  1.7134123 0.8667211</code></pre>
 <pre class="r"><code>wine_data_log &lt;- wine_data %&gt;%
   mutate(TARGET = log(TARGET+1))
 lr_model_log &lt;- lm(TARGET ~ . - 1, data = wine_data_log)
@@ -1819,7 +1878,8 @@ results_df &lt;- rbind(results_df, data.frame(
   MAE_Train = mae_train,
   MAE_Val = mae_val,
   Deviance = NA,
-  Dispersion = NA,
+  Dispersion = sum(residuals(lr_model_log, type = &quot;pearson&quot;)^2) / df.residual(lr_model_log),
+  R2 = summary(lr_model_log)$r.squared,
   stringsAsFactors = FALSE
 ))
 
@@ -1836,18 +1896,18 @@ results_df</code></pre>
 ## 9    zip model - generated features (with factors)       11508 40693.35
 ## 10                linear regression - mice imputed       11508 38878.18
 ## 11                  linear regression - log target       11508       NA
-##    MAE_Train   MAE_Val  Deviance Dispersion
-## 1  0.8682703 0.8664851  3598.362  0.4247094
-## 2  1.0288515 0.8716763  8380.950  0.8910509
-## 3  1.0264366 0.8693237 12331.561  0.8891217
-## 4  1.0263772 0.8686627 12331.520  0.8890948
-## 5  1.0263790 0.8686656 12331.036  0.8890532
-## 6  1.0352425 0.8675411        NA  0.7282858
-## 7  1.0197503 0.8608280 12276.595  0.8876795
-## 8  1.0197516 0.8608302 12276.111  0.8876381
-## 9  1.0283474 0.8575965        NA  0.7307725
-## 10 1.0265151 0.8596684        NA  1.7134123
-## 11 1.0781161 0.9773878        NA         NA</code></pre>
+##    MAE_Train   MAE_Val  Deviance Dispersion        R2
+## 1  0.8682703 0.8664851  3598.362  0.4247094 0.3155748
+## 2  1.0288515 0.8716763  8380.950  0.8910509 0.7569853
+## 3  1.0264366 0.8693237 12331.561  0.8891217 0.7579833
+## 4  1.0263772 0.8686627 12331.520  0.8890948 0.7579841
+## 5  1.0263790 0.8686656 12331.036  0.8890532 0.7579831
+## 6  1.0352425 0.8675411        NA         NA        NA
+## 7  1.0197503 0.8608280 12276.595  0.8876795 0.7590621
+## 8  1.0197516 0.8608302 12276.111  0.8876381 0.7590610
+## 9  1.0283474 0.8575965        NA         NA        NA
+## 10 1.0265151 0.8596684        NA  1.7134123 0.8667211
+## 11 1.0781161 0.9773878        NA  0.2343244 0.8786528</code></pre>
 </div>
 <div id="random-forest" class="section level3">
 <h3>Random Forest</h3>
@@ -1887,19 +1947,19 @@ results_df</code></pre>
 ## 10                linear regression - mice imputed       11508 38878.18
 ## 11                  linear regression - log target       11508       NA
 ## 12                         rf model - mice imputed       11508       NA
-##    MAE_Train   MAE_Val  Deviance Dispersion
-## 1  0.8682703 0.8664851  3598.362  0.4247094
-## 2  1.0288515 0.8716763  8380.950  0.8910509
-## 3  1.0264366 0.8693237 12331.561  0.8891217
-## 4  1.0263772 0.8686627 12331.520  0.8890948
-## 5  1.0263790 0.8686656 12331.036  0.8890532
-## 6  1.0352425 0.8675411        NA  0.7282858
-## 7  1.0197503 0.8608280 12276.595  0.8876795
-## 8  1.0197516 0.8608302 12276.111  0.8876381
-## 9  1.0283474 0.8575965        NA  0.7307725
-## 10 1.0265151 0.8596684        NA  1.7134123
-## 11 1.0781161 0.9773878        NA         NA
-## 12 0.9586646 0.3885386        NA         NA</code></pre>
+##    MAE_Train   MAE_Val  Deviance Dispersion        R2
+## 1  0.8682703 0.8664851  3598.362  0.4247094 0.3155748
+## 2  1.0288515 0.8716763  8380.950  0.8910509 0.7569853
+## 3  1.0264366 0.8693237 12331.561  0.8891217 0.7579833
+## 4  1.0263772 0.8686627 12331.520  0.8890948 0.7579841
+## 5  1.0263790 0.8686656 12331.036  0.8890532 0.7579831
+## 6  1.0352425 0.8675411        NA         NA        NA
+## 7  1.0197503 0.8608280 12276.595  0.8876795 0.7590621
+## 8  1.0197516 0.8608302 12276.111  0.8876381 0.7590610
+## 9  1.0283474 0.8575965        NA         NA        NA
+## 10 1.0265151 0.8596684        NA  1.7134123 0.8667211
+## 11 1.0781161 0.9773878        NA  0.2343244 0.8786528
+## 12 0.9586646 0.3885386        NA         NA        NA</code></pre>
 </div>
 <div id="rf-with-log-target" class="section level3">
 <h3>RF with Log TARGET</h3>
@@ -1943,6 +2003,7 @@ results_df &lt;- rbind(results_df, data.frame(
   MAE_Val = mae_val,
   Deviance = NA,
   Dispersion = NA,
+  R2 = NA,
   stringsAsFactors = FALSE
 ))
 
@@ -1961,20 +2022,20 @@ results_df</code></pre>
 ## 11                  linear regression - log target       11508       NA
 ## 12                         rf model - mice imputed       11508       NA
 ## 13                           rf model - log target       11508       NA
-##    MAE_Train   MAE_Val  Deviance Dispersion
-## 1  0.8682703 0.8664851  3598.362  0.4247094
-## 2  1.0288515 0.8716763  8380.950  0.8910509
-## 3  1.0264366 0.8693237 12331.561  0.8891217
-## 4  1.0263772 0.8686627 12331.520  0.8890948
-## 5  1.0263790 0.8686656 12331.036  0.8890532
-## 6  1.0352425 0.8675411        NA  0.7282858
-## 7  1.0197503 0.8608280 12276.595  0.8876795
-## 8  1.0197516 0.8608302 12276.111  0.8876381
-## 9  1.0283474 0.8575965        NA  0.7307725
-## 10 1.0265151 0.8596684        NA  1.7134123
-## 11 1.0781161 0.9773878        NA         NA
-## 12 0.9586646 0.3885386        NA         NA
-## 13 0.9807191 0.4254409        NA         NA</code></pre>
+##    MAE_Train   MAE_Val  Deviance Dispersion        R2
+## 1  0.8682703 0.8664851  3598.362  0.4247094 0.3155748
+## 2  1.0288515 0.8716763  8380.950  0.8910509 0.7569853
+## 3  1.0264366 0.8693237 12331.561  0.8891217 0.7579833
+## 4  1.0263772 0.8686627 12331.520  0.8890948 0.7579841
+## 5  1.0263790 0.8686656 12331.036  0.8890532 0.7579831
+## 6  1.0352425 0.8675411        NA         NA        NA
+## 7  1.0197503 0.8608280 12276.595  0.8876795 0.7590621
+## 8  1.0197516 0.8608302 12276.111  0.8876381 0.7590610
+## 9  1.0283474 0.8575965        NA         NA        NA
+## 10 1.0265151 0.8596684        NA  1.7134123 0.8667211
+## 11 1.0781161 0.9773878        NA  0.2343244 0.8786528
+## 12 0.9586646 0.3885386        NA         NA        NA
+## 13 0.9807191 0.4254409        NA         NA        NA</code></pre>
 </div>
 </div>
 <div id="summary-table" class="section level1">
@@ -1982,10 +2043,13 @@ results_df</code></pre>
 <pre class="r"><code>results_df %&gt;%
   kbl(
     caption = &quot;Summary of Model Performance&quot;,
-    col.names = c(&quot;Model Name&quot;, &quot;No. Training Observations&quot;, &quot;AIC&quot;, &quot;MAE (Train)&quot;, &quot;MAE (Validation)&quot;, &quot;Deviance&quot;, &quot;Dispersion&quot;),
-    digits = 2
+    col.names = c(&quot;Model Name&quot;, &quot;No. Training Observations&quot;, &quot;AIC&quot;, &quot;MAE (Train)&quot;, &quot;MAE (Validation)&quot;, &quot;Deviance&quot;, &quot;Dispersion&quot;, &quot;R2&quot;),
+    digits = 2,
+    align = &#39;l&#39;  # This sets all columns to left alignment
   ) %&gt;%
-  kable_classic(position = &#39;center&#39;)</code></pre>
+  kable_classic(position = &#39;center&#39;) %&gt;%
+  column_spec(1, width = &quot;12in&quot;) %&gt;%  # Sets width for Model Name column
+  column_spec(2:8, width = &quot;1.5in&quot;)</code></pre>
 <table class=" lightable-classic" style="font-family: &quot;Arial Narrow&quot;, &quot;Source Sans Pro&quot;, sans-serif; margin-left: auto; margin-right: auto;">
 <caption>
 Summary of Model Performance
@@ -1995,323 +2059,365 @@ Summary of Model Performance
 <th style="text-align:left;">
 Model Name
 </th>
-<th style="text-align:right;">
+<th style="text-align:left;">
 No. Training Observations
 </th>
-<th style="text-align:right;">
+<th style="text-align:left;">
 AIC
 </th>
-<th style="text-align:right;">
+<th style="text-align:left;">
 MAE (Train)
 </th>
-<th style="text-align:right;">
+<th style="text-align:left;">
 MAE (Validation)
 </th>
-<th style="text-align:right;">
+<th style="text-align:left;">
 Deviance
 </th>
-<th style="text-align:right;">
+<th style="text-align:left;">
 Dispersion
+</th>
+<th style="text-align:left;">
+R2
 </th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td style="text-align:left;">
+<td style="text-align:left;width: 12in; ">
 baseline poisson - NAs removed
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;width: 1.5in; ">
 5781
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;width: 1.5in; ">
 20799.05
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;width: 1.5in; ">
 0.87
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;width: 1.5in; ">
 0.87
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;width: 1.5in; ">
 3598.36
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;width: 1.5in; ">
 0.42
 </td>
+<td style="text-align:left;width: 1.5in; ">
+0.32
+</td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td style="text-align:left;width: 12in; ">
 poisson - discrete vars as factors
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;width: 1.5in; ">
 7814
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;width: 1.5in; ">
 27921.17
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;width: 1.5in; ">
 1.03
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;width: 1.5in; ">
 0.87
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;width: 1.5in; ">
 8380.95
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;width: 1.5in; ">
 0.89
+</td>
+<td style="text-align:left;width: 1.5in; ">
+0.76
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td style="text-align:left;width: 12in; ">
 poisson - mean imputed
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;width: 1.5in; ">
 11508
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;width: 1.5in; ">
 41040.74
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;width: 1.5in; ">
 1.03
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;width: 1.5in; ">
 0.87
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;width: 1.5in; ">
 12331.56
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;width: 1.5in; ">
 0.89
+</td>
+<td style="text-align:left;width: 1.5in; ">
+0.76
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td style="text-align:left;width: 12in; ">
 poisson - mice imputed
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;width: 1.5in; ">
 11508
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;width: 1.5in; ">
 41040.70
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;width: 1.5in; ">
 1.03
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;width: 1.5in; ">
 0.87
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;width: 1.5in; ">
 12331.52
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;width: 1.5in; ">
 0.89
+</td>
+<td style="text-align:left;width: 1.5in; ">
+0.76
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td style="text-align:left;width: 12in; ">
 neg. binom. - mice imputed
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;width: 1.5in; ">
 11508
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;width: 1.5in; ">
 41043.08
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;width: 1.5in; ">
 1.03
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;width: 1.5in; ">
 0.87
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;width: 1.5in; ">
 12331.04
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;width: 1.5in; ">
 0.89
+</td>
+<td style="text-align:left;width: 1.5in; ">
+0.76
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td style="text-align:left;width: 12in; ">
 zip model - mice imputed
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;width: 1.5in; ">
 11508
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;width: 1.5in; ">
 40722.90
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;width: 1.5in; ">
 1.04
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;width: 1.5in; ">
 0.87
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;width: 1.5in; ">
 NA
 </td>
-<td style="text-align:right;">
-0.73
+<td style="text-align:left;width: 1.5in; ">
+NA
+</td>
+<td style="text-align:left;width: 1.5in; ">
+NA
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td style="text-align:left;width: 12in; ">
 poisson - generated features (with factors)
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;width: 1.5in; ">
 11508
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;width: 1.5in; ">
 41005.78
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;width: 1.5in; ">
 1.02
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;width: 1.5in; ">
 0.86
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;width: 1.5in; ">
 12276.59
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;width: 1.5in; ">
 0.89
+</td>
+<td style="text-align:left;width: 1.5in; ">
+0.76
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td style="text-align:left;width: 12in; ">
 neg. binom. - generated features (with factors)
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;width: 1.5in; ">
 11508
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;width: 1.5in; ">
 41008.16
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;width: 1.5in; ">
 1.02
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;width: 1.5in; ">
 0.86
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;width: 1.5in; ">
 12276.11
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;width: 1.5in; ">
 0.89
 </td>
+<td style="text-align:left;width: 1.5in; ">
+0.76
+</td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td style="text-align:left;width: 12in; ">
 zip model - generated features (with factors)
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;width: 1.5in; ">
 11508
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;width: 1.5in; ">
 40693.35
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;width: 1.5in; ">
 1.03
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;width: 1.5in; ">
 0.86
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;width: 1.5in; ">
 NA
 </td>
-<td style="text-align:right;">
-0.73
+<td style="text-align:left;width: 1.5in; ">
+NA
+</td>
+<td style="text-align:left;width: 1.5in; ">
+NA
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td style="text-align:left;width: 12in; ">
 linear regression - mice imputed
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;width: 1.5in; ">
 11508
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;width: 1.5in; ">
 38878.18
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;width: 1.5in; ">
 1.03
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;width: 1.5in; ">
 0.86
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;width: 1.5in; ">
 NA
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;width: 1.5in; ">
 1.71
 </td>
+<td style="text-align:left;width: 1.5in; ">
+0.87
+</td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td style="text-align:left;width: 12in; ">
 linear regression - log target
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;width: 1.5in; ">
 11508
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;width: 1.5in; ">
 NA
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;width: 1.5in; ">
 1.08
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;width: 1.5in; ">
 0.98
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;width: 1.5in; ">
 NA
 </td>
-<td style="text-align:right;">
-NA
+<td style="text-align:left;width: 1.5in; ">
+0.23
+</td>
+<td style="text-align:left;width: 1.5in; ">
+0.88
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td style="text-align:left;width: 12in; ">
 rf model - mice imputed
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;width: 1.5in; ">
 11508
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;width: 1.5in; ">
 NA
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;width: 1.5in; ">
 0.96
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;width: 1.5in; ">
 0.39
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;width: 1.5in; ">
 NA
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;width: 1.5in; ">
+NA
+</td>
+<td style="text-align:left;width: 1.5in; ">
 NA
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
+<td style="text-align:left;width: 12in; ">
 rf model - log target
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;width: 1.5in; ">
 11508
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;width: 1.5in; ">
 NA
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;width: 1.5in; ">
 0.98
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;width: 1.5in; ">
 0.43
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;width: 1.5in; ">
 NA
 </td>
-<td style="text-align:right;">
+<td style="text-align:left;width: 1.5in; ">
+NA
+</td>
+<td style="text-align:left;width: 1.5in; ">
 NA
 </td>
 </tr>
